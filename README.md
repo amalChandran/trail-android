@@ -8,3 +8,10 @@ Contributing
 ============
 This was a quick implementation. So much scope for reaching 60fps. Any suggestions are welcome.
 
+Whats next
+============
+
+ * Achieve 60fps on polyline animation.
+ * Map layer to add Android views as markers on google map.
+ * Opengl layer on top of map.
+
