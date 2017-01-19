@@ -72,7 +72,6 @@ public class MapAnimator {
         if (foregroundPolyline != null) foregroundPolyline.remove();
         if (backgroundPolyline != null) backgroundPolyline.remove();
 
-        this.googleMap = googleMap;
 
         PolylineOptions optionsBackground = new PolylineOptions().add(bangaloreRoute.get(0)).color(GREY).width(5);
         backgroundPolyline = googleMap.addPolyline(optionsBackground);
