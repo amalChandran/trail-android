@@ -6,6 +6,9 @@
 <p align="center">
   <img src="extras/trail_prerelease.gif" width="30%" />
 </p>
+<p align="center">
+  Video <a href="https://youtu.be/tMGiGwLuk24">here</a>
+</p>
 
 ## Usage
 Replace SupportMapFragment with TrailSupportMapFragment.
