@@ -1,17 +1,33 @@
-Googlemap-animation
-============
-Some quirky animation implementation like in the Uber's iOs app. Animating a route on google map. This is a simple example implementing an animating route on map using android's value and object animators.
 
-![ezgif com-video-to-gif](https://cloud.githubusercontent.com/assets/4386056/21483832/f80979cc-cbae-11e6-9ce0-2b96be0ea9ec.gif)
+<p align="center"><img src="extras/ic_app.png" width="15%" /></p>
+<h1 align="center">Trail</h1>
+<p align="center">Smooth route animation on google map. Uses projection from google map to draw route on canvas. Supports map pan and zoom.</p>
+<p align="center">
+  <a href="https://travis-ci.org/cesarferreira/purrge"><img src="https://travis-ci.org/cesarferreira/purrge.svg?branch=master" alt="Build Status"></a>
+  <a href="https://www.npmjs.com/package/purrge"><img src="https://img.shields.io/npm/dt/purrge.svg" alt="npm"></a>
+  <a href="https://www.npmjs.com/package/purrge"><img src="https://img.shields.io/npm/v/purrge.svg" alt="npm"></a>
+  <a href="https://github.com/cesarferreira/purrge/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+</p>
 
-Contributing
-============
-This was a quick implementation. So much scope for reaching 60fps. Any suggestions are welcome.
+<p align="center">
+  <img src="extras/trail_prerelease.gif" width="30%" />
+</p>
 
-Whats next
-============
+## Usage
+Replace SupportMapFragment with TrailSupportMapFragment.
 
- * Achieve 60fps on polyline animation.
- * Map layer to add Android views as markers on google map.
- * Opengl layer on top of map.
+```
+Usage
+   trailSupportMapFragment.setUpPath(routeLatLng, mMapInstance);
+```
+
+## Created by
+Amal Chandran
+
+## License
+MIT © Amal Chandran
+
+
+## Logo
+by <a href="https://dribbble.com/jibinscribbles">Jibin</a>
 
