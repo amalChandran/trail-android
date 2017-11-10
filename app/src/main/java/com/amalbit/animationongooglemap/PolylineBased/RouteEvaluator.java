@@ -1,4 +1,4 @@
-package com.amalbit.animationongooglemap;
+package com.amalbit.animationongooglemap.PolylineBased;
 
 import android.animation.TypeEvaluator;
 

@@ -1,4 +1,4 @@
-package com.amalbit.animationongooglemap;
+package com.amalbit.animationongooglemap.PolylineBased;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -6,7 +6,6 @@ import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;

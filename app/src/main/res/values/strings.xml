@@ -1,6 +1,8 @@
 <resources>
-    <string name="app_name">AnimationOnGoogleMap</string>
-    <string name="title_activity_maps">Map</string>
+  <string name="app_name">AnimationOnGoogleMap</string>
+  <string name="title_activity_maps">Polyline based</string>
 
-    <string name="reset_anim">Reset</string>
+  <string name="title_activity_projection">Projection based</string>
+
+  <string name="reset_anim">Reset</string>
 </resources>

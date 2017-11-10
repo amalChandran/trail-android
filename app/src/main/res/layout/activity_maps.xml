@@ -8,7 +8,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.amalbit.animationongooglemap.MapsActivity"/>
+        tools:context="com.amalbit.animationongooglemap.PolylineBased.MapsActivity"/>
     <Button
         android:id="@+id/btn_resetAnimation"
         android:layout_width="wrap_content"
