@@ -1,8 +1,11 @@
 package com.amalbit.animationongooglemap.ProjectionBased;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Window;
+import android.view.WindowManager;
 import com.amalbit.animationongooglemap.R;
 import com.amalbit.animationongooglemap.data.Data;
 import com.amalbit.trail.TrailSupportMapFragment;
@@ -29,6 +32,12 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_projection_route);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window w = getWindow();
+            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (TrailSupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);

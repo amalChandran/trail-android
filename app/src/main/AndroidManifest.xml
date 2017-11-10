@@ -20,6 +20,7 @@
         android:label="@string/title_activity_maps"/>
     <activity
         android:name="com.amalbit.animationongooglemap.ProjectionBased.OverlayRouteActivity"
+        android:theme="@style/OverlayActivityTheme"
         android:label="@string/title_activity_projection"/>
     <activity android:name=".HomeActivity">
       <intent-filter>
