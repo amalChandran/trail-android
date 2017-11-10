@@ -46,5 +46,4 @@ public class TrailSupportMapFragment extends SupportMapFragment {
   public void setUpPath(List<LatLng> route, GoogleMap map) {
     mRouteOverlayView.setUpPath(route, map);
   }
-
 }

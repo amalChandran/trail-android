@@ -4,12 +4,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import com.amalbit.animationongooglemap.R;
 import com.amalbit.animationongooglemap.data.Data;
 import com.amalbit.trail.TrailSupportMapFragment;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -26,7 +26,7 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
 
     private List<LatLng> route;
 
-    TrailSupportMapFragment mapFragment;
+    private TrailSupportMapFragment mapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,37 +38,40 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
             w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (TrailSupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         route = Data.getRoute();
-        //mRouteOverlayView = findViewById(R.id.linechart);
 
         mapStyle = MapStyleOptions.loadRawResourceStyle(getApplicationContext(), R.raw.mapstyle);
+    }
 
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_bengaluru:
+                route = Data.getRoute();
+                break;
+            case R.id.btn_tokyo:
+                route = Data.getTokyoRoute();
+                break;
+            case R.id.btn_newyork:
+                route = Data.getNewYorkRoute();
+                break;
+        }
+        zoomRoute(route);
+        mapFragment.setUpPath(route, mMap);
     }
 
     @Override
-    public void onMapReady(GoogleMap map) {
+    public void onMapReady(final GoogleMap map) {
         mMap = map;
-
         mMap.setMapStyle(mapStyle);
-
         mMap.getUiSettings().setRotateGesturesEnabled(true);
+        mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.setMaxZoomPreference(18);
 
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override public void onMapLoaded() {
-
-                LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                builder.include(Data.POINT_A);
-                builder.include(Data.POINT_B);
-                LatLngBounds bounds = builder.build();
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 200);
-
-                mMap.moveCamera(cu);
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
-
+                zoomRoute(route);
                 mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
                     @Override public void onCameraMove() {
                         mapFragment.onCameraMove(mMap);
@@ -80,9 +83,23 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
                     @Override public void run() {
                         mapFragment.setUpPath(route, mMap);
                     }
-                }, 3000);
+                }, 1000);
             }
         });
+    }
+
+    public void zoomRoute(List<LatLng> lstLatLngRoute) {
+
+        if (mMap == null || lstLatLngRoute == null || lstLatLngRoute.isEmpty()) return;
+
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        for (LatLng latLngPoint : lstLatLngRoute)
+            boundsBuilder.include(latLngPoint);
+
+        int routePadding = 100;
+        LatLngBounds latLngBounds = boundsBuilder.build();
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, routePadding));
     }
 
 }
