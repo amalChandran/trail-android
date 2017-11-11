@@ -2,6 +2,9 @@
 <p align="center"><img src="extras/ic_app.png" width="15%" /></p>
 <h1 align="center">Trail</h1>
 <p align="center">Smooth route animation on google map. Uses projection from google map to draw route on canvas. Supports pan, zoom and rotation of maps.</p>
+<p align="center">
+  <a href="https://travis-ci.org/amalChandran/trail-android/"><img src="https://travis-ci.org/amalChandran/trail-android.svg?branch=master" alt="Build Status"></a>
+</p>
 
 <p align="center">
   <img src="extras/trail_prerelease.gif" width="30%" />
