@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">AnimationOnGoogleMap</string>
+  <string name="app_name">Trail</string>
   <string name="title_activity_maps">Polyline based</string>
 
   <string name="title_activity_projection">Projection based</string>
