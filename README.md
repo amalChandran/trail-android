@@ -4,6 +4,7 @@
 <p align="center">Smooth route animation on google map. Uses projection from google map to draw route on canvas. Supports pan, zoom and rotation of maps.</p>
 <p align="center">
   <a href="https://travis-ci.org/amalChandran/trail-android/"><img src="https://travis-ci.org/amalChandran/trail-android.svg?branch=master" alt="Build Status"></a>
+  <a href="https://android-arsenal.com/details/1/6435"> <img src="https://img.shields.io/badge/Android%20Arsenal-amal%20chandran-green.svg?style=flat" alt="Android Arsenal"></a>
   <a href="https://github.com/angular/angular.js/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-lightgrey.svg" alt="License: MIT"></a>
 </p>
 
