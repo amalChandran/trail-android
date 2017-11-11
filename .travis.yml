@@ -7,5 +7,11 @@ android:
     - build-tools-26.0.2
     - android-26
 
+    # Support library
+    - extra-android-support
+    - extra-android-m2repository
+
 script:
-   - ./gradlew build connectedCheck
+    - chmod +x ./gradlew
+#    - ./gradlew build connectedCheck
+
