@@ -12,7 +12,7 @@
   <img src="extras/trail_prerelease.gif" width="30%" />
 </p>
 <p align="center">
-  Video <a href="https://youtu.be/tMGiGwLuk24">here</a>
+  <a href="https://www.youtube.com/watch?v=tMGiGwLuk24&feature=youtu.be"><img src="extras/youtube_grab.png" width="50%" /></a>
 </p>
 
 <p align="center">
