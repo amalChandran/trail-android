@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  (Gif running @ 10fps. Check the video on youtube.)
+</p>
+
+<p align="center">
   <img src="extras/trail_prerelease.gif" width="30%" />
 </p>
 <p align="center">
