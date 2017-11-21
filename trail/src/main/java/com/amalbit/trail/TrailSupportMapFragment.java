@@ -1,6 +1,7 @@
 package com.amalbit.trail;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +44,21 @@ public class TrailSupportMapFragment extends SupportMapFragment {
     mRouteOverlayView.onCameraMove(map);
   }
 
-  public void setUpPath(List<LatLng> route, GoogleMap map) {
-    mRouteOverlayView.setUpPath(route, map);
+  public void setUpPath(final List<LatLng> route, final GoogleMap map, RouteOverlayView.AnimType animType) {
+    //setUpLoadPath(route.get(0), route.get(route.size()-1), map);
+    //new Handler().postDelayed(new Runnable() {
+    //  @Override public void run() {
+        mRouteOverlayView.setUpPath(route, map, animType);
+    //  }
+    //}, 5000);
+
+  }
+
+  private void setUpLoadPath(LatLng fromLatlng, LatLng toLatlng, GoogleMap map) {
+    mRouteOverlayView.loadPath(fromLatlng, toLatlng, map);
+  }
+
+  public RouteOverlayView getOverlayView() {
+    return mRouteOverlayView;
   }
 }

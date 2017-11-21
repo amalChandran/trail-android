@@ -5,4 +5,11 @@
   <string name="title_activity_projection">Projection based</string>
 
   <string name="reset_anim">Reset</string>
+
+  <string-array name="array_place">
+    <item>Bangalore</item>
+    <item>Tokyo</item>
+    <item>New York</item>
+  </string-array>
+
 </resources>

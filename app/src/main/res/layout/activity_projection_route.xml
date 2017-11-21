@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
   <fragment
       android:id="@+id/map"
       android:name="com.amalbit.trail.TrailSupportMapFragment"
@@ -10,36 +11,7 @@
       android:layout_height="match_parent"
       tools:context="com.amalbit.animationongooglemap.PolylineBased.MapsActivity"/>
 
-  <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_gravity="bottom"
-      android:orientation="horizontal"
-      android:paddingBottom="56dp">
-    <Button
-        android:id="@+id/btn_bengaluru"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:onClick="onClick"
-        android:text="Bengaluru"/>
-
-    <Button
-        android:id="@+id/btn_tokyo"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:onClick="onClick"
-        android:text="Tokyo"/>
-
-    <Button
-        android:id="@+id/btn_newyork"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:onClick="onClick"
-        android:text="New York"/>
-  </LinearLayout>
+  <include layout="@layout/layout_bottom_sheet" />
 
 </FrameLayout>
 
