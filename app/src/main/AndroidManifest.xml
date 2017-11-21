@@ -22,14 +22,13 @@
         android:name="com.amalbit.animationongooglemap.ProjectionBased.OverlayRouteActivity"
         android:theme="@style/OverlayActivityTheme"
         android:label="@string/title_activity_projection">
+    </activity>
+    <activity android:name=".HomeActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
-    </activity>
-    <activity android:name=".HomeActivity">
-
     </activity>
   </application>
 
