@@ -2,7 +2,6 @@ package com.amalbit.trail;
 
 import android.graphics.Point;
 import android.util.Log;
-import android.widget.FrameLayout;
 import at.wirecube.additiveanimations.additive_animator.AdditiveAnimator;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
@@ -66,7 +65,6 @@ class ProjectionHelper {
         mRouteOverlayView.zoom(mCameraPosition.zoom);
       }
 
-      //FrameLayout frameLayout = (FrameLayout) mRouteOverlayView.getParent();
       AdditiveAnimator.animate(mRouteOverlayView).rotation(-mCameraPosition.bearing).setDuration(2).start();
       AdditiveAnimator.animate(mRouteOverlayView).translationXBy(-x).translationYBy(-y).setDuration(2).start();
     }

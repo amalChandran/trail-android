@@ -175,7 +175,6 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
   }
 
   @Override public void stop(AnimationCallback callback) {
-    //mRouteOverlayView.clearAnimation();
     if(animatorRouteSet != null) {
       animatorRouteSet.end();
       animatorRouteSet.cancel();

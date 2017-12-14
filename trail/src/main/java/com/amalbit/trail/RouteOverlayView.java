@@ -133,7 +133,6 @@ public class RouteOverlayView extends View {
       setVisibility(GONE);
     } else {
       setVisibility(VISIBLE);
-      //startAnimating();
     }
 
     float zoomValue = (float) Math.pow(2f, (zoom - zoomAnchor));
@@ -184,7 +183,6 @@ public class RouteOverlayView extends View {
   }
 
   public void setUpPath(List<LatLng> latLngs, GoogleMap map, AnimType animType) {
-    //stopAnimating();
     Projection projection = map.getProjection();
     this.zoomAnchor = map.getCameraPosition().zoom;
 
@@ -292,11 +290,6 @@ public class RouteOverlayView extends View {
     }
     return i;
   }
-
-  //private void initAnimObjects() {
-  //  mAnimationRouteHelper.init();
-  //  mAnimationArcHelper.init();
-  //}
 
   public void startAnimating() {
     mAnimationRouteHelper.play();

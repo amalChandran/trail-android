@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import com.amalbit.animationongooglemap.R;
+import com.amalbit.animationongooglemap.common.BaseCompatActivity;
 import com.amalbit.animationongooglemap.data.Data;
 import com.amalbit.trail.RouteOverlayView;
 import com.amalbit.trail.TrailSupportMapFragment;
@@ -28,7 +29,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import java.util.List;
 
-public class OverlayRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
+public class OverlayRouteActivity extends BaseCompatActivity implements OnMapReadyCallback,
     AdapterView.OnItemSelectedListener {
 
     private GoogleMap mMap;
@@ -48,23 +49,14 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_projection_route);
 
-        View view = new FrameLayout(this);
-
         mSpinner = findViewById(R.id.spinner_location);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
             R.array.array_place, android.R.layout.simple_spinner_item);
-        // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
         mSpinner.setAdapter(adapter);
         mSpinner.setOnItemSelectedListener(this);
 
         mSwitchCompat = findViewById(R.id.switch_btn);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window w = getWindow();
-            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        }
 
         mapFragment = (TrailSupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -72,27 +64,6 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
 
         mapStyle = MapStyleOptions.loadRawResourceStyle(getApplicationContext(), R.raw.mapstyle);
     }
-
-    //public void onClick(View view) {
-    //    switch (view.getId()) {
-    //        case R.id.btn_bengaluru:
-    //            route = Data.getRoute();
-    //            zoomRoute(route);
-    //            mapFragment.setUpPath(route, mMap, getCurrentAnimType());
-    //            break;
-    //        case R.id.btn_tokyo:
-    //            //mapFragment.getOverlayView().stopAnimating();
-    //            zoomRoute(route);
-    //            mapFragment.setUpPath(route, mMap, getCurrentAnimType());
-    //            //route = Data.getTokyoRoute();
-    //            break;
-    //        case R.id.btn_newyork:
-    //            //route = Data.getNewYorkRoute();
-    //            mapFragment.getOverlayView().stopAnimating();
-    //            break;
-    //    }
-    //
-    //}
 
     @Override
     public void onMapReady(final GoogleMap map) {

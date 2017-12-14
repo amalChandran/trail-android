@@ -10,8 +10,6 @@ import android.graphics.DashPathEffect;
 import android.graphics.PathEffect;
 import android.view.animation.DecelerateInterpolator;
 import com.amalbit.trail.contract.AnimationCallback;
-import javax.security.auth.callback.Callback;
-
 /**
  * Created by amal.chandran on 15/11/17.
  */
@@ -26,8 +24,6 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
 
   private AnimatorSet animatorArcSet;
   private AnimatorSet animatorRepeatArcSet;
-
-  //private ValueAnimator hideArcAnimation;
 
   boolean isFirstTimeDrawing;
 
@@ -68,13 +64,8 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
         isFirstTimeDrawing = false;
       }
 
-      @Override public void onAnimationCancel(Animator animator) {
-
-      }
-
-      @Override public void onAnimationRepeat(Animator animator) {
-
-      }
+      @Override public void onAnimationCancel(Animator animator) {}
+      @Override public void onAnimationRepeat(Animator animator) {}
     });
 
     if(secondTimeArcAnimator == null) {
@@ -118,36 +109,6 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
       }
     });
 
-    //hideArcAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), mRouteOverlayView.routeShadwoColor, mRouteOverlayView.routeMainColor);
-    //hideArcAnimation.setDuration(300); // milliseconds
-    //hideArcAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-    //  @Override
-    //  public void onAnimationUpdate(ValueAnimator animator) {
-    //    mRouteOverlayView.paintBottomArc.setColor((int)animator.getAnimatedValue());
-    //    mRouteOverlayView.invalidate();
-    //  }
-    //});
-    //hideArcAnimation.addListener(new Animator.AnimatorListener() {
-    //  @Override public void onAnimationStart(Animator animator) {
-    //
-    //  }
-    //
-    //  @Override public void onAnimationEnd(Animator animator) {
-    //    PathEffect effect = new DashPathEffect(new float[] { length, length }, length);
-    //    mRouteOverlayView.paintTopArc.setPathEffect(effect);
-    //    mRouteOverlayView.paintBottomArc.setColor(mRouteOverlayView.routeShadwoColor);
-    //    mRouteOverlayView.invalidate();
-    //  }
-    //
-    //  @Override public void onAnimationCancel(Animator animator) {
-    //
-    //  }
-    //
-    //  @Override public void onAnimationRepeat(Animator animator) {
-    //
-    //  }
-    //});
-
     animatorRepeatArcSet = new AnimatorSet();
     animatorArcSet = new AnimatorSet();
 
@@ -176,8 +137,6 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
       }
 
     });
-
-
 
     animatorArcSet.playSequentially(firstTimeArcAnimator, animatorRepeatArcSet);
     animatorArcSet.addListener(new AnimatorListenerAdapter() {
@@ -210,14 +169,6 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
 
     isAnimating = true;
   }
-  //if(isAnimating) {
-  //  stop(null);
-  //}
-  //
-  //init();
-  //  animatorRouteSet.start();
-  //
-  //isAnimating = true;
 
   @Override public void stop(AnimationCallback callback) {
 
