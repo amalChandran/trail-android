@@ -55,10 +55,13 @@ android {
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-  def playServicesVersion = '11.4.2'
+  def playServicesVersion = '11.8.0'
   def additiveAnimVersion = '1.3.1'
-  compile "com.google.android.gms:play-services-maps:$playServicesVersion"
-  compile "at.wirecube:additive_animations:$additiveAnimVersion"
+  implementation("com.google.android.gms:play-services-maps:$playServicesVersion")
+  implementation ("at.wirecube:additive_animations:$additiveAnimVersion") {
+    exclude group: "com.android.support" // let play services handle the support library
+    exclude group: "com.google.android.gms"
+  }
 
   testImplementation 'junit:junit:4.12'
   androidTestImplementation 'com.android.support.test:runner:1.0.1'
