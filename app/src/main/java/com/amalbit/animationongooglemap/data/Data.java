@@ -9,7 +9,12 @@ import java.util.List;
  */
 
 public class Data {
-  
+
+  public static LatLng LATLNG_MUMBAI = new LatLng(19.0821978, 72.7410994);
+  public static LatLng LATLNG_CHENNAI = new LatLng(13.0474878, 80.0689246);
+  public static LatLng LATLNG_BENGALURU = new LatLng(12.95396, 77.4908523);
+  public static LatLng LATLNG_KOLKATA = new LatLng(22.6757521, 88.0495361);
+
   public static List<LatLng> getRoute() {
     List<LatLng> mFinalRoute = new ArrayList<>();
     mFinalRoute.add(new LatLng(12.94695, 77.64058));
