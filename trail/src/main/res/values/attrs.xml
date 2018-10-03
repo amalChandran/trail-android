@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="MapOverlayView">
+    <attr format="reference" name="routeStartMarkerImg"/>
+    <attr format="reference" name="routeEndMarkerImg"/>
+    <attr name="markerGravity">
+      <flag name="center" value="1"/>
+      <flag name="bottom" value="2"/>
+    </attr>
+    <attr format="color" name="routePrimaryColor"/>
+    <attr format="color" name="routeSecondaryColor"/>
+    <attr format="color" name="routeShadowColor"/>
+  </declare-styleable>
+</resources>
