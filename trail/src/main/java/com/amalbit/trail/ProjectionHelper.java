@@ -70,26 +70,26 @@ class ProjectionHelper {
       isZooming = true;
     }
     previousZoomLevel = mCameraPosition.zoom;
-//    mProjection = mMap.getProjection();
-//    android.graphics.Point point;
-//    if (mLineChartCenterLatLng == null) {
-//      point = new Point(mMapOverlayView.getWidth() / 2,
-//          mMapOverlayView.getHeight() / 2);
-//    } else {
-//      point = mProjection.toScreenLocation(mLineChartCenterLatLng);
-//    }
+    mProjection = mMap.getProjection();
+    android.graphics.Point point;
+    if (mLineChartCenterLatLng == null) {
+      point = new Point(mMapOverlayView.getWidth() / 2,
+          mMapOverlayView.getHeight() / 2);
+    } else {
+      point = mProjection.toScreenLocation(mLineChartCenterLatLng);
+    }
 
-//    if (previousPoint != null) {
-//      x = previousPoint.x - point.x;
-//      y = previousPoint.y - point.y;
-//    }
+    if (previousPoint != null) {
+      x = previousPoint.x - point.x;
+      y = previousPoint.y - point.y;
+    }
 
     if (isRouteSet) {
       if (isZooming) {
         mMapOverlayView.zoom(mCameraPosition.zoom);
       }
       AdditiveAnimator.animate(mMapOverlayView).rotation(-mCameraPosition.bearing).start();
-//      AdditiveAnimator.animate(mMapOverlayView).translationXBy(-x).translationYBy(-y).start();
+      AdditiveAnimator.animate(mMapOverlayView).translationXBy(-x).translationYBy(-y).start();
     }
 //    previousPoint = point;
   }
