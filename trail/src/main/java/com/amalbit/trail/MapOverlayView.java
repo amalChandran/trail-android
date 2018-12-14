@@ -188,11 +188,18 @@ public class MapOverlayView extends View {
     paintShadow.setColor(routeShadowColor);
   }
 
-  public void onCameraMove(GoogleMap map) {
+  public void onCameraMove(float x, float y) {
     if (mProjectionHelper.mLineChartCenterLatLng == null) {
       return;
     }
-    mProjectionHelper.onCameraMove(map, this);
+    mProjectionHelper.onCameraMove(x, y, this);
+  }
+
+  public void onCameraZoom(GoogleMap map) {
+    if (mProjectionHelper.mLineChartCenterLatLng == null) {
+      return;
+    }
+    mProjectionHelper.onCameraZoom(map, this);
   }
 
   protected void zoom(float zoom) {
@@ -245,7 +252,8 @@ public class MapOverlayView extends View {
 
     mProjectionHelper.setCenterLatLng(projection
         .fromScreenLocation(new Point(getWidth() / 2, getHeight() / 2)));
-    onCameraMove(map);
+//    onCameraMove(map); TODO
+    onCameraZoom(map);
 
     clearAnimation();
     mRoutePath = new Path();

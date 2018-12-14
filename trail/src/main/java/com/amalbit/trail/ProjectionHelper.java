@@ -34,34 +34,64 @@ class ProjectionHelper {
     isRouteSet = true;
   }
 
-  public void onCameraMove(GoogleMap mMap, MapOverlayView mMapOverlayView) {
+  public void onCameraMove(float x, float y, MapOverlayView mMapOverlayView) {
+//    mCameraPosition = mMap.getCameraPosition();
+//    if (previousZoomLevel != mCameraPosition.zoom) {
+//      isZooming = true;
+//    }
+//    previousZoomLevel = mCameraPosition.zoom;
+//    mProjection = mMap.getProjection();
+//    android.graphics.Point point;
+//    if (mLineChartCenterLatLng == null) {
+//      point = new Point(mMapOverlayView.getWidth() / 2,
+//          mMapOverlayView.getHeight() / 2);
+//    } else {
+//      point = mProjection.toScreenLocation(mLineChartCenterLatLng);
+//    }
+//
+//    if (previousPoint != null) {
+//      x = previousPoint.x - point.x;
+//      y = previousPoint.y - point.y;
+//    }
+
+    if (isRouteSet) {
+//      if (isZooming) {
+//        mMapOverlayView.zoom(mCameraPosition.zoom);
+//      }
+      AdditiveAnimator.animate(mMapOverlayView).rotation(-mCameraPosition.bearing).start();
+      AdditiveAnimator.animate(mMapOverlayView).translationXBy(-x).translationYBy(-y).start();
+    }
+//    previousPoint = point;
+  }
+
+  public void onCameraZoom(GoogleMap mMap, MapOverlayView mMapOverlayView) {
     mCameraPosition = mMap.getCameraPosition();
     if (previousZoomLevel != mCameraPosition.zoom) {
       isZooming = true;
     }
     previousZoomLevel = mCameraPosition.zoom;
-    mProjection = mMap.getProjection();
-    android.graphics.Point point;
-    if (mLineChartCenterLatLng == null) {
-      point = new Point(mMapOverlayView.getWidth() / 2,
-          mMapOverlayView.getHeight() / 2);
-    } else {
-      point = mProjection.toScreenLocation(mLineChartCenterLatLng);
-    }
+//    mProjection = mMap.getProjection();
+//    android.graphics.Point point;
+//    if (mLineChartCenterLatLng == null) {
+//      point = new Point(mMapOverlayView.getWidth() / 2,
+//          mMapOverlayView.getHeight() / 2);
+//    } else {
+//      point = mProjection.toScreenLocation(mLineChartCenterLatLng);
+//    }
 
-    if (previousPoint != null) {
-      x = previousPoint.x - point.x;
-      y = previousPoint.y - point.y;
-    }
+//    if (previousPoint != null) {
+//      x = previousPoint.x - point.x;
+//      y = previousPoint.y - point.y;
+//    }
 
     if (isRouteSet) {
       if (isZooming) {
         mMapOverlayView.zoom(mCameraPosition.zoom);
       }
-      AdditiveAnimator.animate(mMapOverlayView).rotation(-mCameraPosition.bearing).setDuration(2).start();
-      AdditiveAnimator.animate(mMapOverlayView).translationXBy(-x).translationYBy(-y).setDuration(2).start();
+      AdditiveAnimator.animate(mMapOverlayView).rotation(-mCameraPosition.bearing).start();
+//      AdditiveAnimator.animate(mMapOverlayView).translationXBy(-x).translationYBy(-y).start();
     }
-    previousPoint = point;
+//    previousPoint = point;
   }
 
   public Projection getProjection() {

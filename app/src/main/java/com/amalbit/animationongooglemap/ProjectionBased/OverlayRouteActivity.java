@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -14,21 +17,21 @@ import android.widget.Spinner;
 import com.amalbit.animationongooglemap.R;
 import com.amalbit.animationongooglemap.data.Data;
 import com.amalbit.trail.MapOverlayView;
+import com.amalbit.trail.TouchViewGroup;
+import com.amalbit.trail.TouchViewGroup.OnInterceptTouchListener;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import java.util.List;
 
 public class OverlayRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
     AdapterView.OnItemSelectedListener {
 
   private GoogleMap mMap;
-
-  private MapStyleOptions mMapStyle;
 
   private List<LatLng> mRoute;
 
@@ -38,12 +41,16 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
 
   private SwitchCompat mSwitchCompat;
 
+  private TouchViewGroup viewForTouchFeedback;
+
+  private SupportMapFragment mapFragment;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_projection_route);
     initUI();
-    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+    mapFragment = (SupportMapFragment) getSupportFragmentManager()
         .findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
     mRoute = Data.getRoute();
@@ -59,6 +66,42 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
     mSpinner.setOnItemSelectedListener(this);
 
     mSwitchCompat = findViewById(R.id.switch_btn);
+    viewForTouchFeedback = findViewById(R.id.tempViewForOnSwipe);
+    viewForTouchFeedback.setMotionEventListner(new OnInterceptTouchListener() {
+      private float dX, dY;
+      private float movementX, movementY;
+      @Override
+      public void onTouchEvent(MotionEvent event) {
+        //Pass the touch to overlay
+        switch (event.getAction()) {
+          case MotionEvent.ACTION_DOWN:
+            movementX = dX = mMapOverlayView.getX() - event.getRawX();
+            movementY = dY = mMapOverlayView.getY() - event.getRawY();
+            float centreX = viewForTouchFeedback.getX() + viewForTouchFeedback.getWidth()  / 2;
+            float centreY = viewForTouchFeedback.getY() + viewForTouchFeedback.getHeight() / 2;
+//            movementX = centreX - event.getRawX();
+//            movementY = centreY - event.getRawY();
+            break;
+          case MotionEvent.ACTION_MOVE:
+            float currentPositionX = event.getRawX() + dX;
+            float currentPositionY = event.getRawY() + dY;
+            mMapOverlayView.setX(currentPositionX);
+            mMapOverlayView.setY(currentPositionY);
+//            Log.i("OnMove", "movement (x, y) : " + (event.getRawX() + dX) + ", " + (event.getRawY() + dY));
+
+
+            Log.i("OnMove", "movement (x, y) : " + (movementX - currentPositionX) + ", " + (movementY - currentPositionY));
+            //Move the map based on the touch feedback
+            CameraUpdate update = CameraUpdateFactory.scrollBy(movementX - currentPositionX , movementY - currentPositionY);
+            mMap.moveCamera(update);
+            movementX = currentPositionX;
+            movementY = currentPositionY;
+            break;
+        }
+
+
+      }
+    });
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       Window w = getWindow();
@@ -69,24 +112,20 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
   @Override
   public void onMapReady(final GoogleMap map) {
     mMap = map;
-    mMap.setMapStyle(mMapStyle);
     mMap.getUiSettings().setRotateGesturesEnabled(true);
     mMap.getUiSettings().setTiltGesturesEnabled(false);
     mMap.setMaxZoomPreference(18);
 
-    mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-      @Override
-      public void onMapLoaded() {
-        zoomRoute(mRoute);
-        mMap.setOnCameraMoveListener(() -> mMapOverlayView.onCameraMove(mMap));
+    mMap.setOnMapLoadedCallback(() -> {
+      zoomRoute(mRoute);
+      mMap.setOnCameraMoveListener(() -> mMapOverlayView.onCameraZoom(mMap));
 
-        Handler handler = new Handler();
-        handler.postDelayed(() -> {
-          mSwitchCompat.setOnCheckedChangeListener((compoundButton, b) -> {
-            drawRoute();
-          });
-        }, 1000);
-      }
+      Handler handler = new Handler();
+      handler.postDelayed(() -> {
+        mSwitchCompat.setOnCheckedChangeListener((compoundButton, b) -> {
+          drawRoute();
+        });
+      }, 1000);
     });
   }
 
