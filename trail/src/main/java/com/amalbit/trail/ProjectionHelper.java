@@ -90,8 +90,9 @@ class ProjectionHelper {
       }
       AdditiveAnimator.animate(mMapOverlayView).rotation(-mCameraPosition.bearing).start();
       AdditiveAnimator.animate(mMapOverlayView).translationXBy(-x).translationYBy(-y).start();
+
     }
-//    previousPoint = point;
+    previousPoint = point;
   }
 
   public Projection getProjection() {

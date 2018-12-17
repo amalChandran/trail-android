@@ -4,10 +4,14 @@ import android.graphics.PointF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.animation.DynamicAnimation;
+import android.support.animation.FlingAnimation;
+import android.support.v4.view.VelocityTrackerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
@@ -55,6 +59,8 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
 
   private PointF mOriginalTouchPosition = new PointF();
 
+  private VelocityTracker mVelocityTracker = null;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -82,6 +88,12 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
       private float dX, dY;
       @Override
       public void onTouchEvent(MotionEvent event) {
+        int index = event.getActionIndex();
+        int action = event.getActionMasked();
+        int pointerId = event.getPointerId(index);
+
+        FlingAnimation flingX = new FlingAnimation(mMapOverlayView, DynamicAnimation.SCROLL_X);
+
         //Pass the touch to overlay
         switch (event.getAction()) {
           case MotionEvent.ACTION_DOWN:
@@ -89,6 +101,18 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
             dX = mMapOverlayView.getX() - event.getRawX();
             dY = mMapOverlayView.getY() - event.getRawY();
             mOriginalTouchPosition.set(event.getRawX(), event.getRawY());
+
+            if (mVelocityTracker == null) {
+              // Retrieve a new VelocityTracker object to watch the velocity of a motion.
+              mVelocityTracker = VelocityTracker.obtain();
+            } else {
+              // Reset the velocity tracker back to its initial state.
+              mVelocityTracker.clear();
+            }
+
+            // Add a user's movement to the tracker.
+            mVelocityTracker.addMovement(event);
+
             break;
           case MotionEvent.ACTION_MOVE:
             float dragDeltaX = event.getRawX() - mOriginalTouchPosition.x;
@@ -108,13 +132,41 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
               }
             }
 
+            //Velocity code
+            mVelocityTracker.addMovement(event);
+            // When you want to determine the velocity, call
+            // computeCurrentVelocity(). Then call getXVelocity()
+            // and getYVelocity() to retrieve the velocity for each pointer ID.
+            mVelocityTracker.computeCurrentVelocity(1000);
+
             break;
           case MotionEvent.ACTION_UP:
             if (!mIsDragging) {
               Log.d(TAG, "ACTION_UP: Tap.");
             } else {
               Log.d(TAG, "ACTION_UP: Released from dragging.");
+
+              Log.d(TAG, "Velocity tracker: " + VelocityTrackerCompat.getXVelocity(mVelocityTracker,
+                  pointerId));
+              flingX.setStartVelocity(-VelocityTrackerCompat.getXVelocity(mVelocityTracker,
+                  pointerId))
+                  .setMinValue(0)
+                  .setMaxValue(1000)
+                  .setFriction(1.5f)
+                  .start();
+//              FlingAnimation flingY = new FlingAnimation(mMapOverlayView, DynamicAnimation.SCROLL_Y);
+//              flingY.setStartVelocity(-VelocityTrackerCompat.getYVelocity(mVelocityTracker,
+//                  pointerId))
+//                  .setMinValue(0)
+//                  .setMaxValue(1000)
+//                  .setFriction(1.1f)
+//                  .start();
             }
+            mIsDragging = false;
+            break;
+          case MotionEvent.ACTION_CANCEL:
+            // Return a VelocityTracker object back to be re-used by others.
+            mVelocityTracker.recycle();
             break;
         }
 
@@ -145,8 +197,9 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
     mMap.setOnMapLoadedCallback(() -> {
       zoomRoute(mRoute);
       mMap.setOnCameraMoveListener(() -> {
-//          mMapOverlayView.onCameraMove(mMap);
+//        if (!mIsDragging) {
 //          mMapOverlayView.onCameraZoom(mMap);
+//        }
       });
 
       Handler handler = new Handler();
