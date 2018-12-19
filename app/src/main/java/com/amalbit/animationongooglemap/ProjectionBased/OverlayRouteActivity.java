@@ -1,5 +1,6 @@
 package com.amalbit.animationongooglemap.ProjectionBased;
 
+import android.graphics.PointF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,7 +9,7 @@ import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -26,12 +27,21 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class OverlayRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
     AdapterView.OnItemSelectedListener {
 
+  private static String TAG = "OverlayRouteActivity";
+
   private GoogleMap mMap;
+
+  private MapStyleOptions mapStyle;
 
   private List<LatLng> mRoute;
 
@@ -45,6 +55,14 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
 
   private SupportMapFragment mapFragment;
 
+  private int mTapTouchSlop;
+
+  private boolean mIsDragging;
+
+  private PointF mOriginalTouchPosition = new PointF();
+
+  Observable<MotionEvent> motionEventObservable;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -54,6 +72,9 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
         .findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
     mRoute = Data.getRoute();
+    mTapTouchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+
+    mapStyle = MapStyleOptions.loadRawResourceStyle(getApplicationContext(), R.raw.ub__map_style);
   }
 
   private void initUI() {
@@ -69,37 +90,88 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
     viewForTouchFeedback = findViewById(R.id.tempViewForOnSwipe);
     viewForTouchFeedback.setMotionEventListner(new OnInterceptTouchListener() {
       private float dX, dY;
-      private float movementX, movementY;
+      private float overlayDx, overlayDy;
+      private long touchStartTime;
+
       @Override
       public void onTouchEvent(MotionEvent event) {
         //Pass the touch to overlay
         switch (event.getAction()) {
           case MotionEvent.ACTION_DOWN:
-            movementX = dX = mMapOverlayView.getX() - event.getRawX();
-            movementY = dY = mMapOverlayView.getY() - event.getRawY();
-            float centreX = viewForTouchFeedback.getX() + viewForTouchFeedback.getWidth()  / 2;
-            float centreY = viewForTouchFeedback.getY() + viewForTouchFeedback.getHeight() / 2;
-//            movementX = centreX - event.getRawX();
-//            movementY = centreY - event.getRawY();
+            mIsDragging = false;
+            dX = mMapOverlayView.getX() - event.getRawX();
+            dY = mMapOverlayView.getY() - event.getRawY();
+
+            mOriginalTouchPosition.set(event.getRawX(), event.getRawY());
+
+            touchStartTime = System.currentTimeMillis();
             break;
           case MotionEvent.ACTION_MOVE:
-            float currentPositionX = event.getRawX() + dX;
-            float currentPositionY = event.getRawY() + dY;
-            mMapOverlayView.setX(currentPositionX);
-            mMapOverlayView.setY(currentPositionY);
-//            Log.i("OnMove", "movement (x, y) : " + (event.getRawX() + dX) + ", " + (event.getRawY() + dY));
+            float dragDeltaX = event.getRawX() - mOriginalTouchPosition.x;
+            float dragDeltaY = event.getRawY() - mOriginalTouchPosition.y;
 
+            if (mIsDragging || !isTouchWithinSlopOfOriginalTouch(dragDeltaX, dragDeltaY)) {
+              if (!mIsDragging) {
+                // Dragging just started
+                mIsDragging = true;
+              } else {
 
-            Log.i("OnMove", "movement (x, y) : " + (movementX - currentPositionX) + ", " + (movementY - currentPositionY));
-            //Move the map based on the touch feedback
-            CameraUpdate update = CameraUpdateFactory.scrollBy(movementX - currentPositionX , movementY - currentPositionY);
-            mMap.moveCamera(update);
-            movementX = currentPositionX;
-            movementY = currentPositionY;
+                float currentOverlayPositionX = event.getRawX() + dX;//530 413  = 117
+                float currentOverlayPositionY = event.getRawY() + dY;
+                PointF currentPoint = new PointF(currentOverlayPositionX, currentOverlayPositionY);
+
+                Observable
+                    .just(currentPoint)
+                    .delay(60, TimeUnit.MILLISECONDS)
+                    .subscribe(new Observer<PointF>() {
+                      @Override
+                      public void onSubscribe(Disposable d) {
+
+                      }
+
+                      @Override
+                      public void onNext(PointF pointF) {
+                        mMapOverlayView.setX(pointF.x);
+                        mMapOverlayView.setY(pointF.y);
+                      }
+
+                      @Override
+                      public void onError(Throwable e) {
+
+                      }
+
+                      @Override
+                      public void onComplete() {
+
+                      }
+                    });
+
+                    overlayDx = overlayDx - currentPoint.x;
+                    overlayDy = overlayDy - currentPoint.y;
+
+                    CameraUpdate update = CameraUpdateFactory.scrollBy(overlayDx , overlayDy);
+                    long currentTime = System.currentTimeMillis();
+                    Log.i("CameraUpdate", "Throttled : " + (currentTime - touchStartTime));
+                    touchStartTime = currentTime;
+                    mMap.moveCamera(update);
+
+                    overlayDx = currentPoint.x;
+                    overlayDy = currentPoint.y;
+              }
+            }
+
             break;
+          case MotionEvent.ACTION_UP:
+            if (!mIsDragging) {
+//              Log.d(TAG, "ACTION_UP: Tap.");
+            } else {
+//              Log.d(TAG, "ACTION_UP: Released from dragging.");
+            }
+            mIsDragging = false;
+            break;
+
+
         }
-
-
       }
     });
 
@@ -112,6 +184,7 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
   @Override
   public void onMapReady(final GoogleMap map) {
     mMap = map;
+    mMap.setMapStyle(mapStyle);
     mMap.getUiSettings().setRotateGesturesEnabled(true);
     mMap.getUiSettings().setTiltGesturesEnabled(false);
     mMap.setMaxZoomPreference(18);
@@ -167,10 +240,16 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
   }
 
   private void drawRoute() {
-    if (mSwitchCompat.isChecked()) {
+    if (!mSwitchCompat.isChecked()) {
       mMapOverlayView.drawPath(mRoute, mMap);
     } else {
       mMapOverlayView.drawArc(mRoute.get(0), mRoute.get(mRoute.size() - 1), mMap);
     }
   }
+
+  private boolean isTouchWithinSlopOfOriginalTouch(float dx, float dy) {
+    double distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    return distance < mTapTouchSlop;
+  }
+
 }

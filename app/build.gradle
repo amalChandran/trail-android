@@ -35,4 +35,8 @@ dependencies {
   compile 'com.android.support.constraint:constraint-layout:1.0.2'
   testCompile 'junit:junit:4.12'
   implementation project(':trail')
+
+    // RxJava2 Dependencies
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
 }
