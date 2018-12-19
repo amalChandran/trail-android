@@ -28,7 +28,7 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
 
   private GoogleMap mMap;
 
-  private MapStyleOptions mMapStyle;
+  private MapStyleOptions mapStyle;
 
   private List<LatLng> mRoute;
 
@@ -37,6 +37,8 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
   private Spinner mSpinner;
 
   private SwitchCompat mSwitchCompat;
+
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,10 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
         .findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
     mRoute = Data.getRoute();
+
+    mapStyle = MapStyleOptions.loadRawResourceStyle(getApplicationContext(), R.raw.ub__map_style);
+
+
   }
 
   private void initUI() {
@@ -69,7 +75,7 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
   @Override
   public void onMapReady(final GoogleMap map) {
     mMap = map;
-    mMap.setMapStyle(mMapStyle);
+    mMap.setMapStyle(mapStyle);
     mMap.getUiSettings().setRotateGesturesEnabled(true);
     mMap.getUiSettings().setTiltGesturesEnabled(false);
     mMap.setMaxZoomPreference(18);
