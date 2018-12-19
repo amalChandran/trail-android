@@ -4,8 +4,6 @@ import android.graphics.PointF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.animation.DynamicAnimation;
-import android.support.animation.FlingAnimation;
 import android.support.v4.view.VelocityTrackerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
@@ -32,6 +30,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import java.util.List;
 
 public class OverlayRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -40,6 +39,8 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
   private static final String TAG = "OverlayRouteActivity";
 
   private GoogleMap mMap;
+
+  private MapStyleOptions mapStyle;
 
   private List<LatLng> mRoute;
 
@@ -71,6 +72,7 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
     mapFragment.getMapAsync(this);
     mRoute = Data.getRoute();
     mTapTouchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+    mapStyle = MapStyleOptions.loadRawResourceStyle(getApplicationContext(), R.raw.ub__map_style);
   }
 
   private void initUI() {
@@ -92,7 +94,6 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
         int action = event.getActionMasked();
         int pointerId = event.getPointerId(index);
 
-        FlingAnimation flingX = new FlingAnimation(mMapOverlayView, DynamicAnimation.SCROLL_X);
 
         //Pass the touch to overlay
         switch (event.getAction()) {
@@ -148,12 +149,12 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
 
               Log.d(TAG, "Velocity tracker: " + VelocityTrackerCompat.getXVelocity(mVelocityTracker,
                   pointerId));
-              flingX.setStartVelocity(-VelocityTrackerCompat.getXVelocity(mVelocityTracker,
-                  pointerId))
-                  .setMinValue(0)
-                  .setMaxValue(1000)
-                  .setFriction(1.5f)
-                  .start();
+//              flingX.setStartVelocity(-VelocityTrackerCompat.getXVelocity(mVelocityTracker,
+//                  pointerId))
+//                  .setMinValue(0)
+//                  .setMaxValue(1000)
+//                  .setFriction(1.5f)
+//                  .start();
 //              FlingAnimation flingY = new FlingAnimation(mMapOverlayView, DynamicAnimation.SCROLL_Y);
 //              flingY.setStartVelocity(-VelocityTrackerCompat.getYVelocity(mVelocityTracker,
 //                  pointerId))
@@ -190,6 +191,7 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
   @Override
   public void onMapReady(final GoogleMap map) {
     mMap = map;
+    mMap.setMapStyle(mapStyle);
     mMap.getUiSettings().setRotateGesturesEnabled(true);
     mMap.getUiSettings().setTiltGesturesEnabled(false);
     mMap.setMaxZoomPreference(18);
