@@ -26,14 +26,27 @@ import com.amalbit.trail.TouchViewGroup.OnInterceptTouchListener;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraIdleListener;
+import com.google.android.gms.maps.GoogleMap.OnCameraMoveCanceledListener;
+import com.google.android.gms.maps.GoogleMap.OnCameraMoveListener;
+import com.google.android.gms.maps.GoogleMap.OnCameraMoveStartedListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-public class OverlayRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
+public class OverlayRouteActivity extends AppCompatActivity implements
+    OnMapReadyCallback,
+    OnCameraMoveStartedListener,
+    OnCameraMoveListener,
+    OnCameraMoveCanceledListener,
+    OnCameraIdleListener,
     AdapterView.OnItemSelectedListener {
 
   private static final String TAG = "OverlayRouteActivity";
@@ -60,7 +73,6 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
 
   private PointF mOriginalTouchPosition = new PointF();
 
-  private VelocityTracker mVelocityTracker = null;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -103,24 +115,11 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
             dY = mMapOverlayView.getY() - event.getRawY();
             mOriginalTouchPosition.set(event.getRawX(), event.getRawY());
 
-            if (mVelocityTracker == null) {
-              // Retrieve a new VelocityTracker object to watch the velocity of a motion.
-              mVelocityTracker = VelocityTracker.obtain();
-            } else {
-              // Reset the velocity tracker back to its initial state.
-              mVelocityTracker.clear();
-            }
-
-            // Add a user's movement to the tracker.
-            mVelocityTracker.addMovement(event);
 
             break;
           case MotionEvent.ACTION_MOVE:
             float dragDeltaX = event.getRawX() - mOriginalTouchPosition.x;
             float dragDeltaY = event.getRawY() - mOriginalTouchPosition.y;
-
-            float currentPositionX = event.getRawX() + dX;
-            float currentPositionY = event.getRawY() + dY;
 
             if (mIsDragging || !isTouchWithinSlopOfOriginalTouch(dragDeltaX, dragDeltaY)) {
               if (!mIsDragging) {
@@ -128,17 +127,40 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
                 Log.d(TAG, "MOVE Start Drag.");
                 mIsDragging = true;
               } else {
-                mMapOverlayView.setX(currentPositionX);
-                mMapOverlayView.setY(currentPositionY);
+
+                float currentOverlayPositionX = event.getRawX() + dX;
+                float currentOverlayPositionY = event.getRawY() + dY;
+                PointF currentPoint = new PointF(currentOverlayPositionX, currentOverlayPositionY);
+
+                Observable
+                    .just(currentPoint)
+                    .delay(16, TimeUnit.MILLISECONDS)
+                    .subscribe(new Observer<PointF>() {
+                      @Override
+                      public void onSubscribe(Disposable d) {
+
+                      }
+
+                      @Override
+                      public void onNext(PointF pointF) {
+                        mMapOverlayView.setX(pointF.x);
+                        mMapOverlayView.setY(pointF.y);
+                      }
+
+                      @Override
+                      public void onError(Throwable e) {
+
+                      }
+
+                      @Override
+                      public void onComplete() {
+
+                      }
+                    });
+
               }
             }
 
-            //Velocity code
-            mVelocityTracker.addMovement(event);
-            // When you want to determine the velocity, call
-            // computeCurrentVelocity(). Then call getXVelocity()
-            // and getYVelocity() to retrieve the velocity for each pointer ID.
-            mVelocityTracker.computeCurrentVelocity(1000);
 
             break;
           case MotionEvent.ACTION_UP:
@@ -147,27 +169,12 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
             } else {
               Log.d(TAG, "ACTION_UP: Released from dragging.");
 
-              Log.d(TAG, "Velocity tracker: " + VelocityTrackerCompat.getXVelocity(mVelocityTracker,
-                  pointerId));
-//              flingX.setStartVelocity(-VelocityTrackerCompat.getXVelocity(mVelocityTracker,
-//                  pointerId))
-//                  .setMinValue(0)
-//                  .setMaxValue(1000)
-//                  .setFriction(1.5f)
-//                  .start();
-//              FlingAnimation flingY = new FlingAnimation(mMapOverlayView, DynamicAnimation.SCROLL_Y);
-//              flingY.setStartVelocity(-VelocityTrackerCompat.getYVelocity(mVelocityTracker,
-//                  pointerId))
-//                  .setMinValue(0)
-//                  .setMaxValue(1000)
-//                  .setFriction(1.1f)
-//                  .start();
+
             }
             mIsDragging = false;
             break;
           case MotionEvent.ACTION_CANCEL:
             // Return a VelocityTracker object back to be re-used by others.
-            mVelocityTracker.recycle();
             break;
         }
 
@@ -213,6 +220,11 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
     });
   }
 
+  @Override
+  public void onCameraMoveStarted(int reason) {
+
+  }
+
   public void zoomRoute(List<LatLng> lstLatLngRoute) {
 
     if (mMap == null || lstLatLngRoute == null || lstLatLngRoute.isEmpty()) {
@@ -256,5 +268,25 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
     } else {
       mMapOverlayView.drawArc(mRoute.get(0), mRoute.get(mRoute.size() - 1), mMap);
     }
+  }
+
+  @Override
+  public void onCameraIdle() {
+
+  }
+
+  @Override
+  public void onCameraMoveCanceled() {
+
+  }
+
+  @Override
+  public void onCameraMove() {
+
+  }
+
+  @Override
+  public void onPointerCaptureChanged(boolean hasCapture) {
+
   }
 }
