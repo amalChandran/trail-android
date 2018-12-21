@@ -84,7 +84,9 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
       @Override
       public void onMapLoaded() {
         zoomRoute(mRoute);
-        mMap.setOnCameraMoveListener(() -> mMapOverlayView.onCameraMove(mMap));
+        mMap.setOnCameraMoveListener(() -> {
+          mMapOverlayView.onCameraMove(mMap);
+        });
 
         Handler handler = new Handler();
         handler.postDelayed(() -> {
