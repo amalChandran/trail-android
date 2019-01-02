@@ -1,6 +1,7 @@
 package com.amalbit.trail;
 
 import android.graphics.Point;
+import android.widget.FrameLayout;
 import at.wirecube.additiveanimations.additive_animator.AdditiveAnimator;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
@@ -70,19 +71,19 @@ class ProjectionHelper {
       isZooming = true;
     }
     previousZoomLevel = mCameraPosition.zoom;
-//    mProjection = mMap.getProjection();
-//    android.graphics.Point point;
-//    if (mLineChartCenterLatLng == null) {
-//      point = new Point(mMapOverlayView.getWidth() / 2,
-//          mMapOverlayView.getHeight() / 2);
-//    } else {
-//      point = mProjection.toScreenLocation(mLineChartCenterLatLng);
-//    }
+    mProjection = mMap.getProjection();
+    android.graphics.Point point;
+    if (mLineChartCenterLatLng == null) {
+      point = new Point(mMapOverlayView.getWidth() / 2,
+          mMapOverlayView.getHeight() / 2);
+    } else {
+      point = mProjection.toScreenLocation(mLineChartCenterLatLng);
+    }
 
-//    if (previousPoint != null) {
-//      x = previousPoint.x - point.x;
-//      y = previousPoint.y - point.y;
-//    }
+    if (previousPoint != null) {
+      x = previousPoint.x - point.x;
+      y = previousPoint.y - point.y;
+    }
 
     if (isRouteSet) {
       if (isZooming) {
@@ -90,8 +91,12 @@ class ProjectionHelper {
       }
       AdditiveAnimator.animate(mMapOverlayView).rotation(-mCameraPosition.bearing).start();
 //      AdditiveAnimator.animate(mMapOverlayView).translationXBy(-x).translationYBy(-y).start();
+      FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mMapOverlayView.getLayoutParams();
+      params.topMargin += -y;
+      params.leftMargin += -x;
+      mMapOverlayView.setLayoutParams(params);
     }
-//    previousPoint = point;
+    previousPoint = point;
   }
 
   public Projection getProjection() {
