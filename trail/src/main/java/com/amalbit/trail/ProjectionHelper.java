@@ -70,52 +70,52 @@ class ProjectionHelper {
       }
       AdditiveAnimator.animate(mMapOverlayView).rotation(-mCameraPosition.bearing).setDuration(2).start();
 //      AdditiveAnimator.animate(mMapOverlayView).translationXBy(-x).translationYBy(-y).setDuration(2).start();
-//      mMapOverlayView.setTranslationX(mMapOverlayView.getTranslationX()-x);
-//      mMapOverlayView.setTranslationY(mMapOverlayView.getTranslationY()-y);
+      mMapOverlayView.setTranslationX(mMapOverlayView.getTranslationX()-x);
+      mMapOverlayView.setTranslationY(mMapOverlayView.getTranslationY()-y);
 
-      logTime();
-      FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mMapOverlayView.getLayoutParams();
-      params.topMargin += -y;
-      params.leftMargin +=  -x;
-      mMapOverlayView.setLayoutParams(params);
+//      logTime();
+//      FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mMapOverlayView.getLayoutParams();
+//      params.topMargin += -y;
+//      params.leftMargin +=  -x;
+//      mMapOverlayView.setLayoutParams(params);
 
-      Observable
-          .just(new PointF(x,y))
-//          .delay(0, TimeUnit.MILLISECONDS)
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribeOn(AndroidSchedulers.mainThread())
-          .subscribe(new Observer<PointF>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
-
-            @Override
-            public void onNext(PointF pointF) {
-              try {
-                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mMapOverlayView.getLayoutParams();
-                params.topMargin += -pointF.y;
-                params.leftMargin +=  -pointF.x;
-                mMapOverlayView.setLayoutParams(params);
-                Tlog.log("x,y = " + pointF.x + "," + pointF.x);
-              } catch (Exception e) {
-                Tlog.log("Exception : " + e.getMessage());
-                Tlog.log("Exception : " + e.getLocalizedMessage());
-                Tlog.log("Exception : " + e.getCause());
-              }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-          });
-
+//      Observable
+//          .just(new PointF(x,y))
+////          .delay(0, TimeUnit.MILLISECONDS)
+//          .observeOn(AndroidSchedulers.mainThread())
+//          .subscribeOn(AndroidSchedulers.mainThread())
+//          .subscribe(new Observer<PointF>() {
+//            @Override
+//            public void onSubscribe(Disposable d) {
+//
+//            }
+//
+//            @Override
+//            public void onNext(PointF pointF) {
+//              try {
+//                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mMapOverlayView.getLayoutParams();
+//                params.topMargin += -pointF.y;
+//                params.leftMargin +=  -pointF.x;
+//                mMapOverlayView.setLayoutParams(params);
+//                Tlog.log("x,y = " + pointF.x + "," + pointF.x);
+//              } catch (Exception e) {
+//                Tlog.log("Exception : " + e.getMessage());
+//                Tlog.log("Exception : " + e.getLocalizedMessage());
+//                Tlog.log("Exception : " + e.getCause());
+//              }
+//            }
+//
+//            @Override
+//            public void onError(Throwable e) {
+//
+//            }
+//
+//            @Override
+//            public void onComplete() {
+//
+//            }
+//          });
+//
     }
     previousPoint = point;
   }
