@@ -28,8 +28,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +41,8 @@ import org.reactivestreams.Subscription;
 
 public class OverlayRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
     AdapterView.OnItemSelectedListener {
+
+  private static String TAG = "OverlayRouteActivity";
 
   private GoogleMap mMap;
 
@@ -83,29 +89,64 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
     }
 
     viewForTouchFeedback = findViewById(R.id.tempViewForOnSwipe);
-    viewForTouchFeedback.setMotionEventListner(new OnInterceptTouchListener() {
+    Observable.create(new ObservableOnSubscribe<MotionEvent>() {
       @Override
-      public void onTouchEvent(MotionEvent event) {
-        if(mapFragment.getView() != null) {
-          mapFragment.getView().dispatchTouchEvent(event);
-        }
-//        switch (event.getAction()) {
-//          case MotionEvent.ACTION_DOWN:
-//            isDragging = false;
-//            break;
-//          case MotionEvent.ACTION_MOVE:
-//            if (!isDragging) {
-//              dragStarted();
-//            }
-//            isDragging = true;
-//            break;
-//          case MotionEvent.ACTION_UP:
-//            isDragging = false;
-//            dragEnd();
-//            break;
-//        }
+      public void subscribe(ObservableEmitter<MotionEvent> emitter) throws Exception {
+        viewForTouchFeedback.setMotionEventListner(new OnInterceptTouchListener() {
+          @Override
+          public void onTouchEvent(MotionEvent event) {
+            switch (event.getAction()) {
+              case MotionEvent.ACTION_DOWN:
+                if(mapFragment.getView() != null) {
+                  mapFragment.getView().dispatchTouchEvent(event);
+                }
+                break;
+              case MotionEvent.ACTION_MOVE:
+                emitter.onNext(event);
+                break;
+              case MotionEvent.ACTION_UP:
+                if(mapFragment.getView() != null) {
+                  mapFragment.getView().dispatchTouchEvent(event);
+                }
+                break;
+            }
+          }
+        });
       }
-    });
+    }).buffer(25, TimeUnit.MILLISECONDS)
+        .filter(new Predicate<List<MotionEvent>>() {
+          @Override
+          public boolean test(List<MotionEvent> list) {
+            return list != null && list.size() > 0;
+          }
+        })
+        // Run on a background thread
+        .subscribeOn(Schedulers.io())
+        // Be notified on the main thread
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Observer<List<MotionEvent>>() {
+          @Override
+          public void onSubscribe(Disposable d) {
+            Log.d(TAG, " onSubscribe : " + d.isDisposed());
+          }
+
+          @Override
+          public void onNext(List<MotionEvent> value) {
+            if (mapFragment.getView() != null) {
+              mapFragment.getView().dispatchTouchEvent(value.get(value.size() - 1));
+            }
+          }
+
+          @Override
+          public void onError(Throwable e) {
+            Log.d(TAG, " onError : " + e.getMessage());
+          }
+
+          @Override
+          public void onComplete() {
+            Log.d(TAG, " onComplete");
+          }
+        });
 
   }
 
