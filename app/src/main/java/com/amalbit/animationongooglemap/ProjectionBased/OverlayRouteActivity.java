@@ -175,19 +175,18 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
         });
       }
     })
-//        .buffer(interval, TimeUnit.MILLISECONDS)
-        .sample(interval, TimeUnit.MILLISECONDS)
-//        .filter(new Predicate<List<MotionEvent>>() {
-//          @Override
-//          public boolean test(List<MotionEvent> list) {
-//            return list != null && list.size() > 0;
-//          }
-//        })
+        .buffer(interval, TimeUnit.MILLISECONDS)
+        .filter(new Predicate<List<MotionEvent>>() {
+          @Override
+          public boolean test(List<MotionEvent> list) {
+            return list != null && list.size() > 0;
+          }
+        })
         // Run on a background thread
         .subscribeOn(Schedulers.io())
         // Be notified on the main thread
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Observer<MotionEvent>() {
+        .subscribe(new Observer<List<MotionEvent>>() {
           long lastTimeThrottle = 0;
 
           @Override
@@ -196,10 +195,10 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
           }
 
           @Override
-          public void onNext(MotionEvent value) {
+          public void onNext(List<MotionEvent> value) {
             if (mapFragment.getView() != null) {
-                onMotionEvent(value);
-//                mapFragment.getView().dispatchTouchEvent(value.get(value.size() - 1));
+//                onMotionEvent(value);
+                mapFragment.getView().dispatchTouchEvent(value.get(value.size() - 1));
             }
             long currentTime  = System.currentTimeMillis();
             Log.d(TAG, " Motion throttled : " + (currentTime - lastTimeThrottle));
@@ -263,11 +262,11 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
 
 //            mMapOverlayView.setX(currentOverlayPositionX);
 //            mMapOverlayView.setY(currentOverlayPositionY);
-            CameraUpdate update = CameraUpdateFactory.scrollBy(overlayDx, overlayDy);
-            long currentTime = System.currentTimeMillis();
-            Log.i("CameraUpdate", "Throttled : " + (currentTime - touchStartTime));
-            touchStartTime = currentTime;
-            mMap.moveCamera(update);
+//            CameraUpdate update = CameraUpdateFactory.scrollBy(overlayDx, overlayDy);
+//            long currentTime = System.currentTimeMillis();
+//            Log.i("CameraUpdate", "Throttled : " + (currentTime - touchStartTime));
+//            touchStartTime = currentTime;
+//            mMap.moveCamera(update);
 
             overlayDx = currentPoint.x;
             overlayDy = currentPoint.y;
