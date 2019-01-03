@@ -1,5 +1,6 @@
 package com.amalbit.trail;
 
+import android.animation.ObjectAnimator;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.util.Log;
@@ -69,9 +70,11 @@ class ProjectionHelper {
         mMapOverlayView.zoom(mCameraPosition.zoom);
       }
       AdditiveAnimator.animate(mMapOverlayView).rotation(-mCameraPosition.bearing).setDuration(2).start();
-//      AdditiveAnimator.animate(mMapOverlayView).translationXBy(-x).translationYBy(-y).setDuration(2).start();
+//      AdditiveAnimator.animate(mMapOverlayView).translationXBy(-x).translationYBy(-y).setDuration(1).start();
       mMapOverlayView.setTranslationX(mMapOverlayView.getTranslationX()-x);
       mMapOverlayView.setTranslationY(mMapOverlayView.getTranslationY()-y);
+
+
 
 //      logTime();
 //      FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mMapOverlayView.getLayoutParams();

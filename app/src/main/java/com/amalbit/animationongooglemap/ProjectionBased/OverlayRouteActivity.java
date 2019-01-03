@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -14,14 +16,24 @@ import android.widget.Spinner;
 import com.amalbit.animationongooglemap.R;
 import com.amalbit.animationongooglemap.data.Data;
 import com.amalbit.trail.MapOverlayView;
+import com.amalbit.trail.TouchViewGroup;
+import com.amalbit.trail.TouchViewGroup.OnInterceptTouchListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraIdleListener;
+import com.google.android.gms.maps.GoogleMap.OnCameraMoveStartedListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import org.reactivestreams.Subscription;
 
 public class OverlayRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
     AdapterView.OnItemSelectedListener {
@@ -38,21 +50,20 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
 
   private SwitchCompat mSwitchCompat;
 
+  private TouchViewGroup viewForTouchFeedback;
 
+  private SupportMapFragment mapFragment;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_projection_route);
     initUI();
-    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+    mapFragment = (SupportMapFragment) getSupportFragmentManager()
         .findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
     mRoute = Data.getRoute();
-
     mapStyle = MapStyleOptions.loadRawResourceStyle(getApplicationContext(), R.raw.ub__map_style);
-
-
   }
 
   private void initUI() {
@@ -70,8 +81,56 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
       Window w = getWindow();
       w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
     }
+
+    viewForTouchFeedback = findViewById(R.id.tempViewForOnSwipe);
+    viewForTouchFeedback.setMotionEventListner(new OnInterceptTouchListener() {
+      @Override
+      public void onTouchEvent(MotionEvent event) {
+        if(mapFragment.getView() != null) {
+          mapFragment.getView().dispatchTouchEvent(event);
+        }
+//        switch (event.getAction()) {
+//          case MotionEvent.ACTION_DOWN:
+//            isDragging = false;
+//            break;
+//          case MotionEvent.ACTION_MOVE:
+//            if (!isDragging) {
+//              dragStarted();
+//            }
+//            isDragging = true;
+//            break;
+//          case MotionEvent.ACTION_UP:
+//            isDragging = false;
+//            dragEnd();
+//            break;
+//        }
+      }
+    });
+
   }
 
+  private boolean isDragging = false;
+  private Disposable disposable;
+  private long prevTimeDrag;
+
+  private void dragStarted() {
+    if (this.disposable != null) this.disposable.dispose();
+    disposable = Observable.interval(16, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+        .subscribe(tick -> {
+          if (mMap!= null)
+          mMapOverlayView.onCameraMove(mMap);
+          long curTime =  System.currentTimeMillis();
+          //Log interval and the latlng
+          Log.i("onTick", "duration: " + (curTime - prevTimeDrag));
+          prevTimeDrag = curTime;
+        });
+  }
+
+  private void dragEnd() {
+    if (this.disposable != null) this.disposable.dispose();
+  }
+
+  private long prevTime;
   @Override
   public void onMapReady(final GoogleMap map) {
     mMap = map;
@@ -85,7 +144,31 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
       public void onMapLoaded() {
         zoomRoute(mRoute);
         mMap.setOnCameraMoveListener(() -> {
-          mMapOverlayView.onCameraMove(mMap);
+//          if(!isDragging) {
+//            mMapOverlayView.onCameraMove(mMap);
+//          }
+
+          long curTime =  System.currentTimeMillis();
+          //Log interval and the latlng
+          Log.i("onMapLoaded", "duration: " + (curTime - prevTime));
+          prevTime = curTime;
+        });
+
+        mMap.setOnCameraMoveStartedListener(new OnCameraMoveStartedListener() {
+          @Override
+          public void onCameraMoveStarted(int i) {
+            if (!isDragging) {
+              dragStarted();
+            }
+            isDragging = true;
+          }
+        });
+        mMap.setOnCameraIdleListener(new OnCameraIdleListener() {
+          @Override
+          public void onCameraIdle() {
+            isDragging = false;
+            dragEnd();
+          }
         });
 
         Handler handler = new Handler();
@@ -136,10 +219,10 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
   }
 
   private void drawRoute() {
-    if (mSwitchCompat.isChecked()) {
+//    if (mSwitchCompat.isChecked()) {
       mMapOverlayView.drawPath(mRoute, mMap);
-    } else {
-      mMapOverlayView.drawArc(mRoute.get(0), mRoute.get(mRoute.size() - 1), mMap);
-    }
+//    } else {
+//      mMapOverlayView.drawArc(mRoute.get(0), mRoute.get(mRoute.size() - 1), mMap);
+//    }
   }
 }

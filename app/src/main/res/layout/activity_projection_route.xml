@@ -1,9 +1,11 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.amalbit.trail.TouchViewGroup xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:id="@+id/tempViewForOnSwipe"
   android:clipChildren="false">
+
   <fragment
     android:id="@+id/map"
     android:layout_width="match_parent"
@@ -22,5 +24,5 @@
     app:routeStartMarkerImg="@drawable/ic_marker"
     />
   <include layout="@layout/layout_bottom_sheet"/>
-</FrameLayout>
+</com.amalbit.trail.TouchViewGroup>
 
