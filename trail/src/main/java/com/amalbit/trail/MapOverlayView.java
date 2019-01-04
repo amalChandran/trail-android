@@ -43,7 +43,7 @@ public class MapOverlayView extends View {
 
   private static final int DEFAULT_EMPTY = 0;
 
-  private static final int STROKE_WIDTH = 10;
+  private static final int STROKE_WIDTH_DP = 10;
 
   private static final int STROKE_WIDTH_MIN = 6;
 
@@ -94,7 +94,8 @@ public class MapOverlayView extends View {
   protected int routeSecondaryColor;
 
   protected float mZoomValue;
-  ;
+
+  private float mStrokeWidth;
 
   public MapOverlayView(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -150,9 +151,11 @@ public class MapOverlayView extends View {
       routeShadowColor = getResources().getColor(R.color.routeShadowColor);
     }
 
+    mStrokeWidth = Util.convertDpToPixel(STROKE_WIDTH_DP, getContext());
+
     paintTop = new Paint();
     paintTop.setStyle(Paint.Style.STROKE);
-    paintTop.setStrokeWidth(STROKE_WIDTH);
+    paintTop.setStrokeWidth(mStrokeWidth);
     paintTop.setColor(routeMainColor);
     paintTop.setAntiAlias(true);
     paintTop.setStrokeJoin(Paint.Join.ROUND);
@@ -160,7 +163,7 @@ public class MapOverlayView extends View {
 
     paintTopArc = new Paint();
     paintTopArc.setStyle(Paint.Style.STROKE);
-    paintTopArc.setStrokeWidth(STROKE_WIDTH);
+    paintTopArc.setStrokeWidth(mStrokeWidth);
     paintTopArc.setColor(routeMainColor);
     paintTopArc.setAntiAlias(true);
     paintTopArc.setStrokeJoin(Paint.Join.ROUND);
@@ -168,7 +171,7 @@ public class MapOverlayView extends View {
 
     paintBottom = new Paint();
     paintBottom.setStyle(Paint.Style.STROKE);
-    paintBottom.setStrokeWidth(STROKE_WIDTH);
+    paintBottom.setStrokeWidth(mStrokeWidth);
     paintBottom.setColor(routeSecondaryColor);
     paintBottom.setAntiAlias(true);
     paintBottom.setStrokeJoin(Paint.Join.ROUND);
@@ -176,7 +179,7 @@ public class MapOverlayView extends View {
 
     paintBottomArc = new Paint();
     paintBottomArc.setStyle(Paint.Style.STROKE);
-    paintBottomArc.setStrokeWidth(STROKE_WIDTH);
+    paintBottomArc.setStrokeWidth(mStrokeWidth);
     paintBottomArc.setColor(routeSecondaryColor);
     paintBottomArc.setAntiAlias(true);
     paintBottomArc.setStrokeJoin(Paint.Join.ROUND);
@@ -184,7 +187,7 @@ public class MapOverlayView extends View {
 
     paintShadow = new Paint();
     paintShadow.setStyle(Paint.Style.STROKE);
-    paintShadow.setStrokeWidth(STROKE_WIDTH);
+    paintShadow.setStrokeWidth(mStrokeWidth);
     paintShadow.setColor(routeShadowColor);
   }
 
@@ -197,7 +200,7 @@ public class MapOverlayView extends View {
 
   protected void zoom(float zoom) {
     mZoomValue = (float) Math.pow(2f, (zoom - zoomAnchor));
-    float currentWidthValue = STROKE_WIDTH - mZoomValue;
+    float currentWidthValue = mStrokeWidth - mZoomValue;
     float routeWidth = currentWidthValue < STROKE_WIDTH_MIN ? STROKE_WIDTH_MIN : currentWidthValue;
 
     if (!isPathSetup) {
