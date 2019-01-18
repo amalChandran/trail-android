@@ -299,9 +299,10 @@ public class RouteOverlayView extends View {
     Projection projection = map.getProjection();
     this.zoomAnchor = map.getCameraPosition().zoom;
 
-    mProjectionHelper.setCenterLatLng(projection
-        .fromScreenLocation(new Point(getWidth() / 2, getHeight() / 2)));
-    onCameraMove(map);
+    mProjectionHelper.setCenterLatLng(map.getCameraPosition().target);
+//    mProjectionHelper.setCenterLatLng(projection
+//        .fromScreenLocation(new Point(getWidth() / 2, getHeight() / 2)));
+//    onCameraMove(map);
 
     clearAnimation();
     mRoutePath = new Path();

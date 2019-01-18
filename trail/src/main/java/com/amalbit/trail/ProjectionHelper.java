@@ -37,20 +37,20 @@ class ProjectionHelper {
   }
 
   void onCameraMove(GoogleMap mMap, RouteOverlayView mRouteOverlayView) {
+    CameraPosition mCameraPosition = mMap.getCameraPosition();
+    if (previousZoomLevel != mCameraPosition.zoom) {
+      isZooming = true;
+    }
+    previousZoomLevel = mCameraPosition.zoom;
+    Projection mProjection = mMap.getProjection();
+
+    point = mProjection.toScreenLocation(mLineChartCenterLatLng);
+
+    if (previousPoint != null) {
+      x = previousPoint.x - point.x;
+      y = previousPoint.y - point.y;
+    }
     if (isRouteSet) {
-      CameraPosition mCameraPosition = mMap.getCameraPosition();
-      if (previousZoomLevel != mCameraPosition.zoom) {
-        isZooming = true;
-      }
-      previousZoomLevel = mCameraPosition.zoom;
-      Projection mProjection = mMap.getProjection();
-
-      point = mProjection.toScreenLocation(mLineChartCenterLatLng);
-
-      if (previousPoint != null) {
-        x = previousPoint.x - point.x;
-        y = previousPoint.y - point.y;
-      }
       if (isZooming) {
         mRouteOverlayView.scalePathMatrix(mCameraPosition.zoom);
         isZooming = false;
