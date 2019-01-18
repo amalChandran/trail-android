@@ -16,6 +16,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     setContentView(R.layout.activity_home);
     ((Button) findViewById(R.id.btn_polyline)).setOnClickListener(this);
     ((Button) findViewById(R.id.btn_projection)).setOnClickListener(this);
+
+    //Testing
+    ((Button) findViewById(R.id.btn_projection)).performClick();
   }
 
   @Override

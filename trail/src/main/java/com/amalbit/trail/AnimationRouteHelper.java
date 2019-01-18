@@ -35,7 +35,7 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   private boolean isAnimating;
 
-  private MapOverlayView mRouteOverlayView;
+  private RouteOverlayView mRouteOverlayView;
 
   protected float length;
 
@@ -43,14 +43,14 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   protected boolean isFirstTimeDrawing;
 
-  public static AnimationRouteHelper getInstance(MapOverlayView mapOverlayView) {
+  public static AnimationRouteHelper getInstance(RouteOverlayView routeOverlayView) {
     if (singletonInstance == null) {
-      singletonInstance = new AnimationRouteHelper(mapOverlayView);
+      singletonInstance = new AnimationRouteHelper(routeOverlayView);
     }
     return singletonInstance;
   }
 
-  private AnimationRouteHelper(MapOverlayView routeOverlayView) {
+  private AnimationRouteHelper(RouteOverlayView routeOverlayView) {
     this.mRouteOverlayView = routeOverlayView;
   }
 
@@ -182,6 +182,10 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
     init();
     animatorRouteSet.start();
     isAnimating = true;
+  }
+
+  public boolean isAnimating(){
+    return isAnimating;
   }
 
   @Override

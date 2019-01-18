@@ -5,15 +5,19 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.DashPathEffect;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Paint.Cap;
 import android.graphics.Path;
 import android.graphics.PathEffect;
 import android.graphics.PathMeasure;
 import android.graphics.Point;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import com.amalbit.trail.util.Util;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,7 +26,17 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapOverlayView extends View {
+public class RouteOverlayView extends View {
+
+  /**
+   * Debug
+   * **/
+
+  private int debugNumColumns, debugNumRows;
+
+  private int debugCellWidth, debugCellHeight;
+
+  private Paint debugGridPaing = new Paint();
 
   public enum AnimType {
     PATH,
@@ -39,11 +53,13 @@ public class MapOverlayView extends View {
 
   private static final int ZOOM_MIN_TO_STOP_ANIM = 10;
 
+  private static final int ZOOM_MAX_TO_STOP_ANIM = 22;
+
   private static final int ARC_CURVE_RADIUS = 450;
 
   private static final int DEFAULT_EMPTY = 0;
 
-  private static final int STROKE_WIDTH_DP = 10;
+  private static final int STROKE_WIDTH_DP = 6;
 
   private static final int STROKE_WIDTH_MIN = 6;
 
@@ -71,6 +87,8 @@ public class MapOverlayView extends View {
 
   private Path mRoutePath;
 
+  private Path mRoutePathDraw;
+
   private Path mArcPath;
 
   private Path mShadowPath;
@@ -93,18 +111,24 @@ public class MapOverlayView extends View {
 
   protected int routeSecondaryColor;
 
-  protected float mZoomValue;
+  protected float mScaleFactor;
 
   private float mStrokeWidth;
 
-  public MapOverlayView(Context context, AttributeSet attrs) {
+  private Matrix mMatrix = new Matrix();
+
+  private RectF rectF = new RectF();
+
+  public RouteOverlayView(Context context, AttributeSet attrs) {
     super(context, attrs);
     init(attrs, context);
+    setUpDebugProps();
   }
 
-  public MapOverlayView(Context context) {
+  public RouteOverlayView(Context context) {
     super(context);
     init(null, context);
+    setUpDebugProps();
   }
 
   private void init(@Nullable AttributeSet attrSet, Context context) {
@@ -112,35 +136,36 @@ public class MapOverlayView extends View {
     mAnimationRouteHelper = AnimationRouteHelper.getInstance(this);
     mAnimationArcHelper = AnimationArcHelper.getInstance(this);
     mRoutePath = new Path();
+    mRoutePathDraw =  new Path();
     mArcPath = new Path();
     mShadowPath = new Path();
 
     if (attrSet != null) {
-      TypedArray ta = getContext().obtainStyledAttributes(attrSet, R.styleable.MapOverlayView);
-      int pickUpResourceId = ta.getResourceId(R.styleable.MapOverlayView_routeStartMarkerImg, DEFAULT_EMPTY);
+      TypedArray ta = getContext().obtainStyledAttributes(attrSet, R.styleable.RouteOverlayView);
+      int pickUpResourceId = ta.getResourceId(R.styleable.RouteOverlayView_routeStartMarkerImg, DEFAULT_EMPTY);
       if (pickUpResourceId != DEFAULT_EMPTY) {
         pickUpBitmap = BitmapFactory.decodeResource(getResources(), pickUpResourceId);
       }
 
-      int dropResourceId = ta.getResourceId(R.styleable.MapOverlayView_routeEndMarkerImg, DEFAULT_EMPTY);
+      int dropResourceId = ta.getResourceId(R.styleable.RouteOverlayView_routeEndMarkerImg, DEFAULT_EMPTY);
       if (dropResourceId != DEFAULT_EMPTY) {
         dropBitmap = BitmapFactory.decodeResource(getResources(), dropResourceId);
       }
 
-      markerGravity = ta.getInteger(R.styleable.MapOverlayView_markerGravity, MarkerGravity.CENTER);
+      markerGravity = ta.getInteger(R.styleable.RouteOverlayView_markerGravity, MarkerGravity.CENTER);
 
       routeMainColor = ta.getColor(
-          R.styleable.MapOverlayView_routePrimaryColor,
+          R.styleable.RouteOverlayView_routePrimaryColor,
           getResources().getColor(R.color.routePrimaryColor)
       );
 
       routeSecondaryColor = ta.getColor(
-          R.styleable.MapOverlayView_routeSecondaryColor,
+          R.styleable.RouteOverlayView_routeSecondaryColor,
           getResources().getColor(R.color.routeSecondaryColor)
       );
 
       routeShadowColor = ta.getColor(
-          R.styleable.MapOverlayView_routeShadowColor,
+          R.styleable.RouteOverlayView_routeShadowColor,
           getResources().getColor(R.color.routeShadowColor)
       );
 
@@ -159,7 +184,7 @@ public class MapOverlayView extends View {
     paintTop.setColor(routeMainColor);
     paintTop.setAntiAlias(true);
     paintTop.setStrokeJoin(Paint.Join.ROUND);
-    paintTop.setStrokeCap(Paint.Cap.ROUND);
+    paintTop.setStrokeCap(Cap.ROUND);
 
     paintTopArc = new Paint();
     paintTopArc.setStyle(Paint.Style.STROKE);
@@ -175,7 +200,7 @@ public class MapOverlayView extends View {
     paintBottom.setColor(routeSecondaryColor);
     paintBottom.setAntiAlias(true);
     paintBottom.setStrokeJoin(Paint.Join.ROUND);
-    paintBottom.setStrokeCap(Paint.Cap.ROUND);
+    paintBottom.setStrokeCap(Cap.ROUND);
 
     paintBottomArc = new Paint();
     paintBottomArc.setStyle(Paint.Style.STROKE);
@@ -191,6 +216,25 @@ public class MapOverlayView extends View {
     paintShadow.setColor(routeShadowColor);
   }
 
+  private void setUpDebugProps(){
+    debugGridPaing.setColor(Color.GRAY);
+    debugGridPaing.setStyle(Paint.Style.FILL_AND_STROKE);
+  }
+
+  private void calculateDimensionForDebugGrid() {
+    debugNumColumns = getWidth() / 20;
+    debugNumRows = getHeight() / 20;
+    debugCellWidth = getWidth() / debugNumColumns;
+    debugCellHeight = getHeight() / debugNumRows;
+    invalidate();
+  }
+
+  @Override
+  protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+    super.onSizeChanged(w, h, oldw, oldh);
+    calculateDimensionForDebugGrid();
+  }
+
   public void onCameraMove(GoogleMap map) {
     if (mProjectionHelper.mLineChartCenterLatLng == null) {
       return;
@@ -198,25 +242,34 @@ public class MapOverlayView extends View {
     mProjectionHelper.onCameraMove(map, this);
   }
 
-  protected void zoom(float zoom) {
-    mZoomValue = (float) Math.pow(2f, (zoom - zoomAnchor));
-    float currentWidthValue = mStrokeWidth - mZoomValue;
-    float routeWidth = currentWidthValue < STROKE_WIDTH_MIN ? STROKE_WIDTH_MIN : currentWidthValue;
 
-    if (!isPathSetup) {
-      return;
-    }
-    if (currentAnimType == AnimType.PATH && zoom <= ZOOM_MIN_TO_STOP_ANIM) {
-      stopAllAnimation();
-      setVisibility(GONE);
-    } else {
-      setVisibility(VISIBLE);
-    }
+  protected void scalePathMatrix(float zoom) {
+    if (!isPathSetup) return;
+    mScaleFactor = (float) Math.pow(2f, (zoom - zoomAnchor));
+    zoomPath( mScaleFactor);
+    zoomAnchor = zoom;
+  }
 
-    paintTop.setStrokeWidth(routeWidth);
-    paintBottom.setStrokeWidth(routeWidth);
-    paintShadow.setStrokeWidth(routeWidth);
+  private void zoomPath(float scaleFactor) {
+    mRoutePathDraw.computeBounds(rectF, true);
+    Log.i("Path center", "\n x = " + rectF.centerX() + "\n y = "  + rectF.centerY());
+    Matrix matrix = new Matrix();
+    matrix.postScale(scaleFactor, scaleFactor, rectF.centerX(), rectF.centerY());
+    mMatrix.postConcat(matrix);
+    mRoutePathDraw.rewind();
+    mRoutePathDraw.addPath(mRoutePath);
+    mRoutePathDraw.transform(mMatrix);
+    invalidate();
+  }
 
+  public void translatePathMatrix(float dx, float dy) {
+    mRoutePathDraw.computeBounds(rectF, true);//TODO remove. this was added just for debug purposes.
+    Matrix matrix = new Matrix();
+    matrix.postTranslate(dx, dy);
+    mMatrix.postConcat(matrix);
+    mRoutePathDraw.rewind();
+    mRoutePathDraw.addPath(mRoutePath);
+    mRoutePathDraw.transform(mMatrix);
     invalidate();
   }
 
@@ -294,27 +347,42 @@ public class MapOverlayView extends View {
       isArc = true;
     }
     isPathSetup = true;
+
+    invalidate();
+    onCameraMove(map);
   }
 
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
     synchronized (mSvgLock) {
-      scaleCanvas(canvas);
+      drawPathBorder(canvas);
       drawShadow(canvas);
       drawRoute(canvas);
       drawMarkers(canvas);
     }
   }
 
-  private void scaleCanvas(Canvas canvas) {
-    float cX = canvas.getWidth() / 2.0f; //Width/2 gives the horizontal centre
-    float cY = canvas.getHeight() / 2.0f; //Height/2 gives the vertical centre
-    canvas.scale(mZoomValue, mZoomValue, cX, cY);
+  private void drawDebugDrid(Canvas canvas) {
+    int width = getWidth();
+    int height = getHeight();
+    for (int i = 1; i < debugNumColumns; i++) {
+      canvas.drawLine(i * debugCellWidth, 0, i * debugCellWidth, height, debugGridPaing);
+    }
+
+    for (int i = 1; i < debugNumRows; i++) {
+      canvas.drawLine(0, i * debugCellHeight, width, i * debugCellHeight, debugGridPaing);
+    }
   }
 
-  private void drawBorder(Canvas canvas) {
-    canvas.drawRect(new Rect(0, 0, canvas.getWidth(), canvas.getHeight()), paintShadow);
+  private void drawPathBorder(Canvas canvas) {
+//    drawDebugDrid(canvas);
+    canvas.drawRect(rectF, paintTopArc);
+    canvas.drawCircle(rectF.centerX(), rectF.centerY(), 20, paintTopArc);
+    if (mProjectionHelper != null && mProjectionHelper.point!= null) {
+      canvas.drawCircle(mProjectionHelper.point.x, mProjectionHelper.point.y, 10, paintBottomArc);
+//      canvas.drawCircle(mProjectionHelper.previousPoint.x, mProjectionHelper.previousPoint.y, 10, paintBottomArc);
+    }
   }
 
   private void drawShadow(Canvas canvas) {
@@ -325,7 +393,7 @@ public class MapOverlayView extends View {
   }
 
   private void drawRoute(Canvas canvas) {
-    if (mRoutePath == null) {
+    if (mRoutePathDraw == null) {
       return;
     }
     if (isArc) {
@@ -339,10 +407,10 @@ public class MapOverlayView extends View {
       }
     } else {
       if (mAnimationRouteHelper.isFirstTimeDrawing) {
-        canvas.drawPath(mRoutePath, paintTop);
+        canvas.drawPath(mRoutePathDraw, paintTop);
       } else {
-        canvas.drawPath(mRoutePath, paintBottom);
-        canvas.drawPath(mRoutePath, paintTop);
+        canvas.drawPath(mRoutePathDraw, paintBottom);
+        canvas.drawPath(mRoutePathDraw, paintTop);
       }
     }
   }
