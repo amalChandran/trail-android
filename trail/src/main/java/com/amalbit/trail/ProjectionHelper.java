@@ -1,7 +1,6 @@
 package com.amalbit.trail;
 
 import android.graphics.Point;
-import android.util.Log;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -56,8 +55,6 @@ class ProjectionHelper {
         isZooming = false;
       }
       mRouteOverlayView.translatePathMatrix(-x, -y);
-
-      Log.i("onCameraMove", "x,y : " + x + "," + y);
       previousPoint = point;
     }
   }

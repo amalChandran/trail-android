@@ -218,7 +218,7 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
     mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
       @Override
       public void onMapLoaded() {
-        mMap.setPadding(0,0,0,0);
+        mMap.setPadding(0,0,0,200);
         zoomRoute(mRoute);
         drawRoute();
         mRouteOverlayView.onCameraMove(mMap);
@@ -264,13 +264,13 @@ public class OverlayRouteActivity extends AppCompatActivity implements OnMapRead
       return;
     }
     LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
-    for (LatLng latLngPoint : lstLatLngRoute) {
-      boundsBuilder.include(latLngPoint);
-    }
-
-//    for (int i = 0; i < lstLatLngRoute.size()/2; i++) {
-//      boundsBuilder.include(lstLatLngRoute.get(i));
+//    for (LatLng latLngPoint : lstLatLngRoute) {
+//      boundsBuilder.include(latLngPoint);
 //    }
+
+    for (int i = 0; i < lstLatLngRoute.size()/2; i++) {
+      boundsBuilder.include(lstLatLngRoute.get(i));
+    }
 
 //    int routePadding = 300;
     LatLngBounds latLngBounds = boundsBuilder.build();

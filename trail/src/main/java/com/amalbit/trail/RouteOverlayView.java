@@ -246,7 +246,7 @@ public class RouteOverlayView extends View {
   protected void scalePathMatrix(float zoom) {
     if (!isPathSetup) return;
     mScaleFactor = (float) Math.pow(2f, (zoom - zoomAnchor));
-    zoomPath( mScaleFactor);
+    zoomPath(mScaleFactor);
     zoomAnchor = zoom;
   }
 
@@ -299,7 +299,7 @@ public class RouteOverlayView extends View {
     Projection projection = map.getProjection();
     this.zoomAnchor = map.getCameraPosition().zoom;
 
-    mProjectionHelper.setCenterLatLng(map.getCameraPosition().target);
+//    mProjectionHelper.setCenterLatLng(map.getCameraPosition().target);
 //    mProjectionHelper.setCenterLatLng(projection
 //        .fromScreenLocation(new Point(getWidth() / 2, getHeight() / 2)));
 //    onCameraMove(map);
@@ -326,6 +326,14 @@ public class RouteOverlayView extends View {
 
       mAnimationRouteHelper.play();
       isArc = false;
+      mRoutePath.computeBounds(rectF, true);
+      mProjectionHelper.setCenterLatLng(
+          map.getProjection()
+              .fromScreenLocation(
+                  new Point((
+                      (int)rectF.centerX()),
+                      (int)(rectF.centerY()))
+              ));
     } else { //arc
       mArcPath = Util.createCurvedPath(pickUpPoint.x, pickUpPoint.y, dropPoint.x, dropPoint.y, ARC_CURVE_RADIUS);
       mShadowPath = Util.createShadowPath(pickUpPoint.x, pickUpPoint.y, dropPoint.x, dropPoint.y);
