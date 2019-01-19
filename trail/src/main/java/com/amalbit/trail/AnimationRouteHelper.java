@@ -210,26 +210,4 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
     }
     isAnimating = false;
   }
-
-//  @Override
-//  public void stop(AnimationCallback callback) {
-//    if(animatorArcSet != null) {
-//      animatorRepeatArcSet.end();
-//      animatorRepeatArcSet.cancel();
-//      animatorArcSet.end();
-//      animatorArcSet.cancel();
-//      firstTimeArcAnimator.end();
-//      firstTimeArcAnimator.cancel();
-//      secondTimeArcAnimator.end();
-//      secondTimeArcAnimator.cancel();
-//      colorArcAnimation.end();
-//      colorArcAnimation.cancel();
-//
-//      animatorRepeatArcSet = null;
-//      animatorArcSet = null;
-//      firstTimeArcAnimator = null;
-//      secondTimeArcAnimator = null;
-//      colorArcAnimation = null;
-//    }
-//  }
 }

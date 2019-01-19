@@ -132,6 +132,7 @@ public class RouteOverlayView extends View {
   }
 
   private void init(@Nullable AttributeSet attrSet, Context context) {
+    setLayerType(View.LAYER_TYPE_SOFTWARE, null);
     mProjectionHelper = new ProjectionHelper();
     mAnimationRouteHelper = AnimationRouteHelper.getInstance(this);
     mAnimationArcHelper = AnimationArcHelper.getInstance(this);
@@ -299,11 +300,6 @@ public class RouteOverlayView extends View {
     Projection projection = map.getProjection();
     this.zoomAnchor = map.getCameraPosition().zoom;
 
-//    mProjectionHelper.setCenterLatLng(map.getCameraPosition().target);
-//    mProjectionHelper.setCenterLatLng(projection
-//        .fromScreenLocation(new Point(getWidth() / 2, getHeight() / 2)));
-//    onCameraMove(map);
-
     clearAnimation();
     mRoutePath = new Path();
     mArcPath = new Path();
@@ -390,7 +386,6 @@ public class RouteOverlayView extends View {
     canvas.drawCircle(rectF.centerX(), rectF.centerY(), 20, paintTopArc);
     if (mProjectionHelper != null && mProjectionHelper.point!= null) {
       canvas.drawCircle(mProjectionHelper.point.x, mProjectionHelper.point.y, 10, paintBottomArc);
-//      canvas.drawCircle(mProjectionHelper.previousPoint.x, mProjectionHelper.previousPoint.y, 10, paintBottomArc);
     }
   }
 
