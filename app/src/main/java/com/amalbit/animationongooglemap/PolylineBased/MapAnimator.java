@@ -209,6 +209,15 @@ public class MapAnimator {
 
         firstRunAnimSet.start();
     }
+    // This is an handy method to call if you want to remove the polyline because of some condition like back press
+    void stopAndRemovePolyLine(){
+        if(mapAnimator!=null) {
+            backgroundPolyline.remove();
+            foregroundPolyline.remove();
+            firstRunAnimSet.cancel();
+            secondLoopRunAnimSet.cancel();
+        }
+    }
 
     /**
      * This will be invoked by the ObjectAnimator multiple times. Mostly every 16ms.
