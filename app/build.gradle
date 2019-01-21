@@ -27,7 +27,13 @@ dependencies {
   })
   compile 'com.android.support:appcompat-v7:26.1.0'
   compile 'com.android.support:design:26.1.0'
-  compile 'com.google.android.gms:play-services-base:10.0.1'
+  def playServicesVersion = '11.8.0'
+  implementation("com.google.android.gms:play-services-base:$playServicesVersion") {
+    force = true
+  }
+  implementation("com.google.android.gms:play-services-maps:$playServicesVersion") {
+    force = true
+  }
   compile 'com.android.support.constraint:constraint-layout:1.0.2'
   testCompile 'junit:junit:4.12'
   implementation project(':trail')

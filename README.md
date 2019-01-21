@@ -23,6 +23,8 @@
   <a href="https://play.google.com/store/apps/details?id=com.amalbit.animationongooglemap"><img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" alt="Build Status" width="30%"></a>
 
 ## Usage
+If you want to build a debug version of this demo don't forget to insert a Google Maps API Key (follow steps [here](app/src/debug/res/values/google_maps_api.xml))
+
 Replace SupportMapFragment with TrailSupportMapFragment.
 
 ```
