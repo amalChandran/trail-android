@@ -45,7 +45,7 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
     mapFragment = (SupportMapFragment) getSupportFragmentManager()
         .findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
-    mRoute = Data.getNewYorkRoute();
+    mRoute = Data.getRoute();
     mapStyle = MapStyleOptions.loadRawResourceStyle(getApplicationContext(), R.raw.ub__map_style);
   }
 
@@ -100,13 +100,13 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
   public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
     switch (i) {
       case 0:
-        mRoute = Data.getNewYorkRoute();
+        mRoute = Data.getRoute();
         break;
       case 1:
         mRoute = Data.getTokyoRoute();
         break;
       case 2:
-        mRoute = Data.getRoute();
+        mRoute = Data.getNewYorkRoute();
         break;
     }
   }

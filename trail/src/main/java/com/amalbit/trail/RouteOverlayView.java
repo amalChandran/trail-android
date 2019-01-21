@@ -2,8 +2,6 @@ package com.amalbit.trail;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
@@ -43,17 +41,7 @@ public class RouteOverlayView extends View {
     ARC
   }
 
-  public static final class MarkerGravity {
-
-    public static final int CENTER = 1;
-    public static final int BOTTOM = 2;
-  }
-
   private AnimType currentAnimType;
-
-  private static final int ZOOM_MIN_TO_STOP_ANIM = 10;
-
-  private static final int ZOOM_MAX_TO_STOP_ANIM = 22;
 
   private static final int ARC_CURVE_RADIUS = 450;
 
@@ -93,16 +81,6 @@ public class RouteOverlayView extends View {
 
   private Path mShadowPath;
 
-  private Bitmap pickUpBitmap;
-
-  private Bitmap dropBitmap;
-
-  private int markerGravity;
-
-  private Point pickUpPoint;
-
-  private Point dropPoint;
-
   private boolean isPathSetup;
 
   private boolean isArc;
@@ -115,24 +93,26 @@ public class RouteOverlayView extends View {
 
   private float mStrokeWidth;
 
-  private Matrix mMatrix = new Matrix();
+  private Matrix mMatrix;
 
-  private RectF rectF = new RectF();
+  private RectF rectF;
 
   public RouteOverlayView(Context context, AttributeSet attrs) {
     super(context, attrs);
-    init(attrs, context);
+    init(attrs);
     setUpDebugProps();
   }
 
   public RouteOverlayView(Context context) {
     super(context);
-    init(null, context);
+    init(null);
     setUpDebugProps();
   }
 
-  private void init(@Nullable AttributeSet attrSet, Context context) {
+  private void init(@Nullable AttributeSet attrSet) {
     setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+    mMatrix = new Matrix();
+    rectF = new RectF();
     mProjectionHelper = new ProjectionHelper();
     mAnimationRouteHelper = AnimationRouteHelper.getInstance(this);
     mAnimationArcHelper = AnimationArcHelper.getInstance(this);
@@ -143,28 +123,14 @@ public class RouteOverlayView extends View {
 
     if (attrSet != null) {
       TypedArray ta = getContext().obtainStyledAttributes(attrSet, R.styleable.RouteOverlayView);
-      int pickUpResourceId = ta.getResourceId(R.styleable.RouteOverlayView_routeStartMarkerImg, DEFAULT_EMPTY);
-      if (pickUpResourceId != DEFAULT_EMPTY) {
-        pickUpBitmap = BitmapFactory.decodeResource(getResources(), pickUpResourceId);
-      }
-
-      int dropResourceId = ta.getResourceId(R.styleable.RouteOverlayView_routeEndMarkerImg, DEFAULT_EMPTY);
-      if (dropResourceId != DEFAULT_EMPTY) {
-        dropBitmap = BitmapFactory.decodeResource(getResources(), dropResourceId);
-      }
-
-      markerGravity = ta.getInteger(R.styleable.RouteOverlayView_markerGravity, MarkerGravity.CENTER);
-
       routeMainColor = ta.getColor(
           R.styleable.RouteOverlayView_routePrimaryColor,
           getResources().getColor(R.color.routePrimaryColor)
       );
-
       routeSecondaryColor = ta.getColor(
           R.styleable.RouteOverlayView_routeSecondaryColor,
           getResources().getColor(R.color.routeSecondaryColor)
       );
-
       routeShadowColor = ta.getColor(
           R.styleable.RouteOverlayView_routeShadowColor,
           getResources().getColor(R.color.routeShadowColor)
@@ -304,8 +270,8 @@ public class RouteOverlayView extends View {
     mRoutePath = new Path();
     mArcPath = new Path();
 
-    pickUpPoint = projection.toScreenLocation(latLngs.get(0));
-    dropPoint = projection.toScreenLocation(latLngs.get(latLngs.size() - 1));
+    Point pickUpPoint = projection.toScreenLocation(latLngs.get(0));
+    Point dropPoint = projection.toScreenLocation(latLngs.get(latLngs.size() - 1));
 
     if (animType == AnimType.PATH) {
       mRoutePath.moveTo(pickUpPoint.x, pickUpPoint.y);
@@ -364,7 +330,6 @@ public class RouteOverlayView extends View {
       drawPathBorder(canvas);
       drawShadow(canvas);
       drawRoute(canvas);
-      drawMarkers(canvas);
     }
   }
 
@@ -419,26 +384,26 @@ public class RouteOverlayView extends View {
     }
   }
 
-  private void drawMarkers(Canvas canvas) {
-    if (pickUpPoint != null
-        && dropPoint != null
-        && pickUpBitmap != null
-        && dropBitmap != null) {
-      drawMarker(canvas, pickUpBitmap, new Point(pickUpPoint.x, pickUpPoint.y), markerGravity);
-      drawMarker(canvas, dropBitmap, new Point(dropPoint.x, dropPoint.y), markerGravity);
-    }
-  }
-
-  private void drawMarker(Canvas canvas, Bitmap bitmap, Point point, @Nullable int gravity) {
-    if (gravity == MarkerGravity.CENTER) {
-      point.x = point.x - bitmap.getWidth() / 2;
-      point.y = point.y - bitmap.getHeight() / 2;
-    } else { // bottom, for now
-      point.x = point.x - bitmap.getWidth() / 2;
-      point.y = point.y - bitmap.getHeight();
-    }
-    canvas.drawBitmap(bitmap, point.x, point.y, null);
-  }
+//  private void drawMarkers(Canvas canvas) {
+//    if (pickUpPoint != null
+//        && dropPoint != null
+//        && pickUpBitmap != null
+//        && dropBitmap != null) {
+//      drawMarker(canvas, pickUpBitmap, new Point(pickUpPoint.x, pickUpPoint.y), markerGravity);
+//      drawMarker(canvas, dropBitmap, new Point(dropPoint.x, dropPoint.y), markerGravity);
+//    }
+//  }
+//
+//  private void drawMarker(Canvas canvas, Bitmap bitmap, Point point, @Nullable int gravity) {
+//    if (gravity == MarkerGravity.CENTER) {
+//      point.x = point.x - bitmap.getWidth() / 2;
+//      point.y = point.y - bitmap.getHeight() / 2;
+//    } else { // bottom, for now
+//      point.x = point.x - bitmap.getWidth() / 2;
+//      point.y = point.y - bitmap.getHeight();
+//    }
+//    canvas.drawBitmap(bitmap, point.x, point.y, null);
+//  }
 
   /**
    * Given an index in datapointsFromInterpollator, it will make sure the the returned index is

@@ -13,12 +13,9 @@
     android:id="@+id/mapOverlayView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:markerGravity="bottom"
-    app:routeEndMarkerImg="@drawable/ic_marker"
     app:routePrimaryColor="@color/routePrimaryColor"
     app:routeSecondaryColor="@color/routeSecondaryColor"
     app:routeShadowColor="@color/routeShadowColor"
-    app:routeStartMarkerImg="@drawable/ic_marker"
     />
   <include layout="@layout/layout_bottom_sheet"/>
 </FrameLayout>
