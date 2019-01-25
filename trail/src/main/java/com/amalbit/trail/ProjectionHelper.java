@@ -58,4 +58,28 @@ class ProjectionHelper {
       previousPoint = point;
     }
   }
+
+  void onCameraMove(Projection projection, CameraPosition cameraPosition, RouteOverlayView mRouteOverlayView) {
+    this.mCameraPosition = cameraPosition;
+    if (previousZoomLevel != mCameraPosition.zoom) {
+      isZooming = true;
+    }
+    previousZoomLevel = mCameraPosition.zoom;
+    this.mProjection = projection;
+
+    point = mProjection.toScreenLocation(mLineChartCenterLatLng);
+
+    if (previousPoint != null) {
+      x = previousPoint.x - point.x;
+      y = previousPoint.y - point.y;
+    }
+    if (isRouteSet) {
+      if (isZooming) {
+        mRouteOverlayView.scalePathMatrix(mCameraPosition.zoom);
+        isZooming = false;
+      }
+      mRouteOverlayView.translatePathMatrix(-x, -y);
+      previousPoint = point;
+    }
+  }
 }
