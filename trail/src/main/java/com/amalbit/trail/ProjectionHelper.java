@@ -1,7 +1,7 @@
 package com.amalbit.trail;
 
 import android.graphics.Point;
-import com.google.android.gms.maps.GoogleMap;
+import com.amalbit.trail.RouteOverlayView.Route;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -22,28 +22,24 @@ class ProjectionHelper {
 
   private boolean isZooming = false;
 
-  private Projection mProjection;
-
-  private CameraPosition mCameraPosition;
-
-  protected LatLng mLineChartCenterLatLng;
+  private LatLng mLineChartCenterLatLng;
 
   public Point point;
+
+  public ProjectionHelper() {
+  }
 
   public void setCenterLatLng(LatLng lineChartCenterLatLng) {
     mLineChartCenterLatLng = lineChartCenterLatLng;
     isRouteSet = true;
   }
 
-  void onCameraMove(GoogleMap mMap, RouteOverlayView mRouteOverlayView) {
-    CameraPosition mCameraPosition = mMap.getCameraPosition();
-    if (previousZoomLevel != mCameraPosition.zoom) {
+  void onCameraMove(Projection projection, CameraPosition cameraPosition, Route route) {
+    if (previousZoomLevel != cameraPosition.zoom) {
       isZooming = true;
     }
-    previousZoomLevel = mCameraPosition.zoom;
-    Projection mProjection = mMap.getProjection();
-
-    point = mProjection.toScreenLocation(mLineChartCenterLatLng);
+    previousZoomLevel = cameraPosition.zoom;
+    point = projection.toScreenLocation(mLineChartCenterLatLng);
 
     if (previousPoint != null) {
       x = previousPoint.x - point.x;
@@ -51,34 +47,10 @@ class ProjectionHelper {
     }
     if (isRouteSet) {
       if (isZooming) {
-        mRouteOverlayView.scalePathMatrix(mCameraPosition.zoom);
+        route.scalePathMatrix(cameraPosition.zoom);
         isZooming = false;
       }
-      mRouteOverlayView.translatePathMatrix(-x, -y);
-      previousPoint = point;
-    }
-  }
-
-  void onCameraMove(Projection projection, CameraPosition cameraPosition, RouteOverlayView mRouteOverlayView) {
-    this.mCameraPosition = cameraPosition;
-    if (previousZoomLevel != mCameraPosition.zoom) {
-      isZooming = true;
-    }
-    previousZoomLevel = mCameraPosition.zoom;
-    this.mProjection = projection;
-
-    point = mProjection.toScreenLocation(mLineChartCenterLatLng);
-
-    if (previousPoint != null) {
-      x = previousPoint.x - point.x;
-      y = previousPoint.y - point.y;
-    }
-    if (isRouteSet) {
-      if (isZooming) {
-        mRouteOverlayView.scalePathMatrix(mCameraPosition.zoom);
-        isZooming = false;
-      }
-      mRouteOverlayView.translatePathMatrix(-x, -y);
+      route.translatePathMatrix(-x, -y);
       previousPoint = point;
     }
   }

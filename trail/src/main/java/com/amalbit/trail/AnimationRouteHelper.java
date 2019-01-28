@@ -9,6 +9,7 @@ import android.animation.ValueAnimator;
 import android.graphics.DashPathEffect;
 import android.graphics.PathEffect;
 import android.view.animation.DecelerateInterpolator;
+import com.amalbit.trail.RouteOverlayView.Route;
 import com.amalbit.trail.contract.AnimationCallback;
 
 /**
@@ -35,7 +36,9 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   private boolean isAnimating;
 
-  private RouteOverlayView mRouteOverlayView;
+  private Route route;
+
+  private RouteOverlayView routeOverlayView;
 
   protected float length;
 
@@ -43,15 +46,13 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   protected boolean isFirstTimeDrawing;
 
-  public static AnimationRouteHelper getInstance(RouteOverlayView routeOverlayView) {
-    if (singletonInstance == null) {
-      singletonInstance = new AnimationRouteHelper(routeOverlayView);
-    }
-    return singletonInstance;
+  public static AnimationRouteHelper getInstance(RouteOverlayView routeOverlayView, Route route) {
+    return singletonInstance = new AnimationRouteHelper(routeOverlayView, route);
   }
 
-  private AnimationRouteHelper(RouteOverlayView routeOverlayView) {
-    this.mRouteOverlayView = routeOverlayView;
+  private AnimationRouteHelper(RouteOverlayView routeOverlayView, Route route) {
+    this.routeOverlayView = routeOverlayView;
+    this.route = route;
   }
 
   public void init() {
@@ -90,16 +91,16 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
     }
 
     if (colorRouteAnimation == null) {
-      colorRouteAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), mRouteOverlayView.routeSecondaryColor,
-          mRouteOverlayView.routeMainColor);
+      colorRouteAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), route.getBottomLayerColor(),
+          route.getTopLayerColor());
       colorRouteAnimation.setDuration(ANIM_DURATION_REPEAT); // milliseconds
       colorRouteAnimation.setStartDelay(1000);
     }
     colorRouteAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
       @Override
       public void onAnimationUpdate(ValueAnimator animator) {
-        mRouteOverlayView.paintBottom.setColor((int) animator.getAnimatedValue());
-        mRouteOverlayView.invalidate();
+        route.getBottomLayerPaint().setColor((int) animator.getAnimatedValue());
+        routeOverlayView.invalidate();
       }
     });
     colorRouteAnimation.addListener(new Animator.AnimatorListener() {
@@ -111,9 +112,9 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
       @Override
       public void onAnimationEnd(Animator animator) {
         PathEffect effect = new DashPathEffect(new float[]{length, length}, length);
-        mRouteOverlayView.paintTop.setPathEffect(effect);
-        mRouteOverlayView.paintBottom.setColor(mRouteOverlayView.routeSecondaryColor);
-        mRouteOverlayView.invalidate();
+        route.getTopLayerPaint().setPathEffect(effect);
+        route.getBottomLayerPaint().setColor(route.getBottomLayerColor());
+        routeOverlayView.invalidate();
       }
 
       @Override
@@ -166,14 +167,14 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   public void setUpdate(float update) {
     PathEffect effect = new DashPathEffect(dashValue, length * update);
-    mRouteOverlayView.paintTop.setPathEffect(effect);
-    mRouteOverlayView.invalidate();
+    route.getTopLayerPaint().setPathEffect(effect);
+    routeOverlayView.invalidate();
   }
 
   public void setUpdate1(float update) {
     PathEffect effect = new DashPathEffect(dashValue, -length * update);
-    mRouteOverlayView.paintTop.setPathEffect(effect);
-    mRouteOverlayView.invalidate();
+    route.getTopLayerPaint().setPathEffect(effect);
+    routeOverlayView.invalidate();
   }
 
   @Override

@@ -14,6 +14,8 @@ import com.amalbit.animationongooglemap.data.Data;
 import com.amalbit.trail.OverlayMarker;
 import com.amalbit.trail.MarkerOverlayView;
 import com.amalbit.trail.RouteOverlayView;
+import com.amalbit.trail.RouteOverlayView.Route;
+import com.amalbit.trail.RouteOverlayView.RouteType;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -131,12 +133,12 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
             Projection projection = mMap.getProjection();
             CameraPosition cameraPosition = mMap.getCameraPosition();
             mRouteOverlayView.onCameraMove(projection, cameraPosition);
-          mMarkerOverlayView.onCameraMove(projection);
-          mMarkerOverlayView.invalidate();
-          mMarkerOverlayView1.onCameraMove(projection);
-          mMarkerOverlayView1.invalidate();
-          mMarkerOverlayView2.onCameraMove(projection);
-          mMarkerOverlayView2.invalidate();
+//          mMarkerOverlayView.onCameraMove(projection);
+//          mMarkerOverlayView.invalidate();
+//          mMarkerOverlayView1.onCameraMove(projection);
+//          mMarkerOverlayView1.invalidate();
+//          mMarkerOverlayView2.onCameraMove(projection);
+//          mMarkerOverlayView2.invalidate();
 
         }
       );
@@ -182,7 +184,8 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
 
   private void drawRoute() {
 //    if (mSwitchCompat.isChecked()) {
-      mRouteOverlayView.drawPath(mRoute, mMap.getProjection(), mMap.getCameraPosition());
+      mRouteOverlayView.drawPath(mRoute, mMap.getProjection(), mMap.getCameraPosition(), RouteType.PATH);
+    mRouteOverlayView.drawPath(Data.getRouteB(), mMap.getProjection(), mMap.getCameraPosition(), RouteType.DASH);
 //    } else {
 //      mMapOverlayView.drawArc(mRoute.get(0), mRoute.get(mRoute.size() - 1), mMap);
 //    }
