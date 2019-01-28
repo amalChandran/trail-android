@@ -8,12 +8,14 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Cap;
 import android.graphics.Path;
+import android.graphics.PathEffect;
 import android.graphics.PathMeasure;
 import android.graphics.Point;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
+import com.amalbit.trail.contract.Animator;
 import com.amalbit.trail.util.Util;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
@@ -64,7 +66,7 @@ public class RouteOverlayView extends View {
 
 //  protected Paint paintBottomArc;
 
-//  protected Paint paintShadow;
+//  protected Paint shadowPaint;
 
   protected Paint paintDebug;
 
@@ -138,10 +140,10 @@ public class RouteOverlayView extends View {
 //    paintBottomArc.setStrokeJoin(Paint.Join.ROUND);
 //    paintBottomArc.setStrokeCap(Paint.Cap.ROUND);
 //
-//    paintShadow = new Paint();
-//    paintShadow.setStyle(Paint.Style.STROKE);
-//    paintShadow.setStrokeWidth(mStrokeWidth);
-//    paintShadow.setColor(routeShadowColor);
+//    shadowPaint = new Paint();
+//    shadowPaint.setStyle(Paint.Style.STROKE);
+//    shadowPaint.setStrokeWidth(mStrokeWidth);
+//    shadowPaint.setColor(routeShadowColor);
 //
     paintDash = new Paint();
     paintDash.setStyle(Paint.Style.STROKE);
@@ -265,30 +267,49 @@ public class RouteOverlayView extends View {
                       (int) rectF.centerX(),
                       (int) rectF.centerY())
               ));
-      route.setmAnimationRouteHelper(animationRouteHelper);
+      route.setAnimationHelper(animationRouteHelper);
       route.setPath(path);
       route.setZoomAnchor(cameraPosition.zoom);
       routes.add(route);
-    } else if (routeType == RouteType.ARC) { //arc
-//      mArcPath = Util.createCurvedPath(pickUpPoint.x, pickUpPoint.y, dropPoint.x, dropPoint.y, ARC_CURVE_RADIUS);
-//      mShadowPath = Util.createShadowPath(pickUpPoint.x, pickUpPoint.y, dropPoint.x, dropPoint.y);
-//
-//      PathMeasure pathMeasure = new PathMeasure(mArcPath, false);
-//      mAnimationArcHelper.arcLength = pathMeasure.getLength();
-//      mAnimationArcHelper.arcdDashValue = new float[]{mAnimationArcHelper.arcLength, mAnimationArcHelper.arcLength};
-//      PathEffect effect = new DashPathEffect(mAnimationArcHelper.arcdDashValue, -mAnimationArcHelper.arcLength);
-//      paintTopArc.setPathEffect(effect);
-//
-//      PathMeasure shadowPathMeasure = new PathMeasure(mShadowPath, false);
-//      mAnimationArcHelper.shadowLength = shadowPathMeasure.getLength();
-//      mAnimationArcHelper.shadowDashValue = new float[]{mAnimationArcHelper.shadowLength,
-//          mAnimationArcHelper.shadowLength};
-//      PathEffect shadowEffect = new DashPathEffect(mAnimationArcHelper.shadowDashValue,
-//          -mAnimationArcHelper.shadowLength);
-//      paintShadow.setPathEffect(shadowEffect);
-//
-//      mAnimationArcHelper.play();
-//      isArc = true;
+    } else if (routeType == RouteType.ARC) {
+      Route route = new Route(this);
+      route.setRouteType(RouteType.ARC);
+      AnimationArcHelper animationArcHelper = AnimationArcHelper.getInstance(this, route);
+      Path mArcPath = Util.createCurvedPath(pickUpPoint.x, pickUpPoint.y, dropPoint.x, dropPoint.y, ARC_CURVE_RADIUS);
+      Path mShadowPath = Util.createShadowPath(pickUpPoint.x, pickUpPoint.y, dropPoint.x, dropPoint.y);
+
+      PathMeasure pathMeasure = new PathMeasure(mArcPath, false);
+      animationArcHelper.arcLength = pathMeasure.getLength();
+      animationArcHelper.arcdDashValue = new float[]{animationArcHelper.arcLength, animationArcHelper.arcLength};
+      PathEffect effect = new DashPathEffect(animationArcHelper.arcdDashValue, -animationArcHelper.arcLength);
+      route.topLayerPaint.setPathEffect(effect);
+
+      PathMeasure shadowPathMeasure = new PathMeasure(mShadowPath, false);
+      animationArcHelper.shadowLength = shadowPathMeasure.getLength();
+      animationArcHelper.shadowDashValue = new float[]{animationArcHelper.shadowLength,
+          animationArcHelper.shadowLength};
+      PathEffect shadowEffect = new DashPathEffect(animationArcHelper.shadowDashValue,
+          -animationArcHelper.shadowLength);
+      route.shadowPaint.setPathEffect(shadowEffect);
+
+      animationArcHelper.play();
+      isArc = true;
+
+      RectF rectF = new RectF();
+      mArcPath.computeBounds(rectF, true);
+      route.getProjectionHelper().setCenterLatLng(
+          projection
+              .fromScreenLocation(
+                  new Point(
+                      (int) rectF.centerX(),
+                      (int) rectF.centerY())
+              ));
+
+      route.setAnimationHelper(animationArcHelper);
+      route.setPath(mArcPath);
+      route.setShadowPath(mShadowPath);
+      route.setZoomAnchor(cameraPosition.zoom);
+      routes.add(route);
     } else {
       Route route = new Route(this);
       route.setRouteType(RouteType.DASH);
@@ -356,27 +377,24 @@ public class RouteOverlayView extends View {
     }
   }
 
-//  private void drawShadow(Canvas canvas) {
-//      canvas.drawPath(mShadowPath, paintShadow);
-//  }
-
   private void drawRoute(Canvas canvas) {
     for (Route route : routes) {
       if (route.getDrawPath() == null) {
         return;
       }
       if (route.getRouteType() == RouteType.ARC) {
-//        if (mAnimationArcHelper.animStarted) {
-//          if (mAnimationArcHelper.isFirstTimeDrawing) {
-//            canvas.drawPath(mArcPath, paintTopArc);
-//          } else {
-//            canvas.drawPath(mArcPath, paintBottomArc);
-//            canvas.drawPath(mArcPath, paintTopArc);
-//          }
-//          drawShadow(canvas);
-//        }
+        AnimationArcHelper animationArcHelper = (AnimationArcHelper)route.getAnimationHelper();
+        if (animationArcHelper.animStarted) {
+          if (animationArcHelper.isFirstTimeDrawing) {
+            canvas.drawPath(route.getDrawPath(), route.getTopLayerPaint());
+          } else {
+            canvas.drawPath(route.getDrawPath(), route.getBottomLayerPaint());
+            canvas.drawPath(route.getDrawPath(), route.getTopLayerPaint());
+          }
+          canvas.drawPath(route.getShadowDrawPath(), route.getShadowPaint());
+        }
       } else if (route.getRouteType() == RouteType.PATH){
-        if (route.getmAnimationRouteHelper().isFirstTimeDrawing) {
+        if (((AnimationRouteHelper)route.getAnimationHelper()).isFirstTimeDrawing) {
           canvas.drawPath(route.getDrawPath(), route.getTopLayerPaint());
         } else {
           canvas.drawPath(route.getDrawPath(), route.getBottomLayerPaint());
@@ -424,8 +442,8 @@ public class RouteOverlayView extends View {
 
   public void stopAllAnimation() {
     for (Route route : routes) {
-      if (route.getmAnimationRouteHelper() != null)
-        route.getmAnimationRouteHelper().stop(()->{});
+      if (route.getAnimationHelper() != null)
+        route.getAnimationHelper().stop(()->{});
     }
 //    mAnimationArcHelper.stop(() -> {
 //    });
@@ -440,14 +458,19 @@ public class RouteOverlayView extends View {
   public class Route {//TODO Builder pattern for route.
     private Path path;
     private Path drawPath;//Matrix transformation is applied to this path.
+    private Path shadowPath;
+    private Path shadowDrawPath;
     private RouteType routeType;
     private Matrix matrix;
+    private Matrix shadowMatrix;
     private RectF rectF;
     private Paint topLayerPaint;
     private Paint bottomLayerPaint;
+    private Paint shadowPaint;
     private int topLayerColor;
     private int bottomLayerColor;
-    private AnimationRouteHelper mAnimationRouteHelper;
+    private int routeShadowColor;
+    private Animator animationHelper;
     private float zoomAnchor;
     private float scaleFactor;
     private ProjectionHelper projectionHelper;
@@ -460,12 +483,15 @@ public class RouteOverlayView extends View {
 
     private void init() {
       drawPath = new Path();
+      shadowDrawPath = new Path();
       matrix = new Matrix();
+      shadowMatrix = new Matrix();
       rectF = new RectF();
       projectionHelper = new ProjectionHelper();
 
       topLayerColor = getResources().getColor(R.color.routePrimaryColor);
       bottomLayerColor = getResources().getColor(R.color.routeSecondaryColor);
+      routeShadowColor = getResources().getColor(R.color.routeShadowColor);
 
       topLayerPaint = new Paint();
       topLayerPaint.setStyle(Paint.Style.STROKE);
@@ -482,6 +508,11 @@ public class RouteOverlayView extends View {
       bottomLayerPaint.setAntiAlias(true);
       bottomLayerPaint.setStrokeJoin(Paint.Join.ROUND);
       bottomLayerPaint.setStrokeCap(Cap.ROUND);
+
+      shadowPaint = new Paint();
+      shadowPaint.setStyle(Paint.Style.STROKE);
+      shadowPaint.setStrokeWidth(mStrokeWidth);
+      shadowPaint.setColor(routeShadowColor);
     }
 
     public void scalePathMatrix(float zoom) {
@@ -499,6 +530,16 @@ public class RouteOverlayView extends View {
       drawPath.rewind();
       drawPath.addPath(path);
       drawPath.transform(matrix);
+
+      if (shadowPath!= null) {
+        shadowDrawPath.computeBounds(rectF, true);
+        Matrix matrixTemp1 = new Matrix();
+        matrixTemp1.postScale(scaleFactor, scaleFactor, rectF.centerX(), rectF.centerY());
+        shadowMatrix.postConcat(matrixTemp1);
+        shadowDrawPath.rewind();
+        shadowDrawPath.addPath(shadowPath);
+        shadowDrawPath.transform(shadowMatrix);
+      }
       routeOverlayView.invalidate();
     }
 
@@ -511,6 +552,14 @@ public class RouteOverlayView extends View {
       drawPath.rewind();
       drawPath.addPath(path);
       drawPath.transform(matrix);
+      if (shadowPath!= null) {
+        Matrix matrixTemp1 = new Matrix();
+        matrixTemp1.postTranslate(dx, dy);
+        shadowMatrix.postConcat(matrixTemp1);
+        shadowDrawPath.rewind();
+        shadowDrawPath.addPath(shadowPath);
+        shadowDrawPath.transform(shadowMatrix);
+      }
       routeOverlayView.invalidate();
     }
 
@@ -566,12 +615,12 @@ public class RouteOverlayView extends View {
       return bottomLayerColor;
     }
 
-    public AnimationRouteHelper getmAnimationRouteHelper() {
-      return mAnimationRouteHelper;
+    public Animator getAnimationHelper() {
+      return animationHelper;
     }
 
-    public void setmAnimationRouteHelper(AnimationRouteHelper mAnimationRouteHelper) {
-      this.mAnimationRouteHelper = mAnimationRouteHelper;
+    public void setAnimationHelper(Animator animationHelper) {
+      this.animationHelper = animationHelper;
     }
 
     public float getZoomAnchor() {
@@ -584,6 +633,22 @@ public class RouteOverlayView extends View {
 
     public ProjectionHelper getProjectionHelper() {
       return projectionHelper;
+    }
+
+    public Paint getShadowPaint() {
+      return shadowPaint;
+    }
+
+    public void setShadowPaint(Paint shadowPaint) {
+      this.shadowPaint = shadowPaint;
+    }
+
+    public Path getShadowDrawPath() {
+      return shadowDrawPath;
+    }
+
+    public void setShadowPath(Path shadowPath) {
+      this.shadowPath = shadowPath;
     }
   }
 }

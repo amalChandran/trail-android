@@ -151,13 +151,16 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
       return;
     }
     LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
-//    for (LatLng latLngPoint : lstLatLngRoute) {
-//      boundsBuilder.include(latLngPoint);
-//    }
-
-    for (int i = 0; i < lstLatLngRoute.size()/2; i++) {
-      boundsBuilder.include(lstLatLngRoute.get(i));
+    for (LatLng latLngPoint : lstLatLngRoute) {
+      boundsBuilder.include(latLngPoint);
     }
+    for (LatLng latLng : Data.getRouteB()) {
+      boundsBuilder.include(latLng);
+    }
+
+//    for (int i = 0; i < lstLatLngRoute.size()/2; i++) {
+//      boundsBuilder.include(lstLatLngRoute.get(i));
+//    }
 
     LatLngBounds latLngBounds = boundsBuilder.build();
     mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 0));
@@ -184,8 +187,9 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
 
   private void drawRoute() {
 //    if (mSwitchCompat.isChecked()) {
-      mRouteOverlayView.drawPath(mRoute, mMap.getProjection(), mMap.getCameraPosition(), RouteType.PATH);
+    mRouteOverlayView.drawPath(mRoute, mMap.getProjection(), mMap.getCameraPosition(), RouteType.PATH);
     mRouteOverlayView.drawPath(Data.getRouteB(), mMap.getProjection(), mMap.getCameraPosition(), RouteType.DASH);
+    mRouteOverlayView.drawPath(Data.getRouteB(), mMap.getProjection(), mMap.getCameraPosition(), RouteType.ARC);
 //    } else {
 //      mMapOverlayView.drawArc(mRoute.get(0), mRoute.get(mRoute.size() - 1), mMap);
 //    }

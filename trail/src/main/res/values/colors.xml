@@ -2,5 +2,5 @@
 <resources>
   <color name="routePrimaryColor">#63c495</color>
   <color name="routeSecondaryColor">#4e487c</color>
-  <color name="routeShadowColor">#40d1cfcf</color>
+  <color name="routeShadowColor">#db949494</color>
 </resources>
