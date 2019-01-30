@@ -8,6 +8,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.graphics.DashPathEffect;
 import android.graphics.PathEffect;
+import android.graphics.PathMeasure;
 import android.support.annotation.NonNull;
 import android.view.animation.DecelerateInterpolator;
 import com.amalbit.trail.RouteOverlayView.Route;
@@ -188,5 +189,13 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
       secondTimeArcAnimator = null;
       colorArcAnimation = null;
     }
+  }
+
+  @Override
+  public void onPathMeasureChange() {
+    PathMeasure pathMeasure = new PathMeasure(route.getDrawPath(), false);
+    arcLength = pathMeasure.getLength();
+    arcdDashValue =
+        new float[]{arcLength, arcLength};
   }
 }

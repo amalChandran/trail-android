@@ -9,4 +9,6 @@ public interface Animator {
   void play();
 
   void stop(AnimationCallback callback);
+
+  void onPathMeasureChange();
 }

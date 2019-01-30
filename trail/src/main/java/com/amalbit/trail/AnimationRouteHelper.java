@@ -8,6 +8,8 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.graphics.DashPathEffect;
 import android.graphics.PathEffect;
+import android.graphics.PathMeasure;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import com.amalbit.trail.RouteOverlayView.Route;
 import com.amalbit.trail.contract.AnimationCallback;
@@ -60,7 +62,7 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
     if (firstTimeRouteAnimator == null) {
       firstTimeRouteAnimator = ObjectAnimator.ofFloat(this, "update", 1f, 0f);
       firstTimeRouteAnimator.setDuration(ANIM_DURATION_DEFAULT);
-      firstTimeRouteAnimator.setInterpolator(new DecelerateInterpolator());
+      firstTimeRouteAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
     }
 
     firstTimeRouteAnimator.addListener(new Animator.AnimatorListener() {
@@ -210,5 +212,13 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
       colorRouteAnimation = null;
     }
     isAnimating = false;
+  }
+
+  @Override
+  public void onPathMeasureChange() {
+    PathMeasure pathMeasure = new PathMeasure(route.getDrawPath(), false);
+    length = pathMeasure.getLength();
+    dashValue =
+        new float[]{length, length};
   }
 }
