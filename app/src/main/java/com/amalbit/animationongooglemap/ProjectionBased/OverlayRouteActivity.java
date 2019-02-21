@@ -10,11 +10,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import com.amalbit.animationongooglemap.R;
-import com.amalbit.animationongooglemap.data.Data;
+import com.amalbit.animationongooglemap.data.LatlngData;
 import com.amalbit.trail.OverlayMarker;
 import com.amalbit.trail.MarkerOverlayView;
 import com.amalbit.trail.RouteOverlayView;
-import com.amalbit.trail.RouteOverlayView.Route;
 import com.amalbit.trail.RouteOverlayView.RouteType;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -62,7 +61,7 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
     mapFragment = (SupportMapFragment) getSupportFragmentManager()
         .findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
-    mRoute = Data.getRoute();
+    mRoute = LatlngData.getRoute();
     mapStyle = MapStyleOptions.loadRawResourceStyle(getApplicationContext(), R.raw.ub__map_style);
   }
 
@@ -76,10 +75,10 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
 
 //        List<OverlayMarker> overlayMarkers = new ArrayList<>();
         Bitmap markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.car);
-//        for (LatLng latLng : getRandomLocation(Data.getRoute().get(0), 1000)) {
+//        for (LatLng latLng : getRandomLocation(LatlngData.getRoute().get(0), 1000)) {
           overlayMarker = new OverlayMarker();
           overlayMarker.setIcon(markerIcon);
-          overlayMarker.setLatLng(Data.getRoute().get(0));
+          overlayMarker.setLatLng(LatlngData.getRoute().get(0));
 //          overlayMarkers.add(overlayMarker);
 //        }
         mMarkerOverlayView.addMarker(overlayMarker, mMap.getProjection());
@@ -89,13 +88,13 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
         //Two
         OverlayMarker overlayMarker1 = new OverlayMarker();
         overlayMarker1.setIcon(markerIcon);
-        overlayMarker1.setLatLng(Data.getRoute().get(20));
+        overlayMarker1.setLatLng(LatlngData.getRoute().get(20));
         mMarkerOverlayView.addMarker(overlayMarker1, mMap.getProjection());
 
 
         break;
       case R.id.btnRemove:
-        mRouteOverlayView.removePath();
+        mRouteOverlayView.removeRoute();
         if ( overlayMarker!=null) {
           overlayMarker.remove();
         }
@@ -154,11 +153,11 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
     for (LatLng latLngPoint : lstLatLngRoute) {
       boundsBuilder.include(latLngPoint);
     }
-    for (LatLng latLng : Data.getRouteB()) {
+    for (LatLng latLng : LatlngData.getRouteB()) {
       boundsBuilder.include(latLng);
     }
 
-//    for (int i = 0; i < lstLatLngRoute.size()/2; i++) {
+//    for (int i = 0; i < lstLatLngRoute.size()/4; i++) {
 //      boundsBuilder.include(lstLatLngRoute.get(i));
 //    }
 
@@ -170,13 +169,13 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
   public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
     switch (i) {
       case 0:
-        mRoute = Data.getRoute();
+        mRoute = LatlngData.getRoute();
         break;
       case 1:
-        mRoute = Data.getTokyoRoute();
+        mRoute = LatlngData.getTokyoRoute();
         break;
       case 2:
-        mRoute = Data.getNewYorkRoute();
+        mRoute = LatlngData.getNewYorkRoute();
         break;
     }
   }
@@ -187,9 +186,9 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
 
   private void drawRoute() {
 //    if (mSwitchCompat.isChecked()) {
-    mRouteOverlayView.drawPath(mRoute, mMap.getProjection(), mMap.getCameraPosition(), RouteType.PATH);
-    mRouteOverlayView.drawPath(Data.getRouteB(), mMap.getProjection(), mMap.getCameraPosition(), RouteType.DASH);
-    mRouteOverlayView.drawPath(Data.getRouteB(), mMap.getProjection(), mMap.getCameraPosition(), RouteType.ARC);
+    mRouteOverlayView.drawRoute(mRoute, mMap.getProjection(), mMap.getCameraPosition(), RouteType.PATH);
+    mRouteOverlayView.drawRoute(LatlngData.getRouteB(), mMap.getProjection(), mMap.getCameraPosition(), RouteType.DASH);
+    mRouteOverlayView.drawRoute(LatlngData.getRouteB(), mMap.getProjection(), mMap.getCameraPosition(), RouteType.ARC);
 //    } else {
 //      mMapOverlayView.drawArc(mRoute.get(0), mRoute.get(mRoute.size() - 1), mMap);
 //    }

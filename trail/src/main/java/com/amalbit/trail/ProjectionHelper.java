@@ -26,7 +26,14 @@ class ProjectionHelper {
 
   public Point point;
 
-  public ProjectionHelper() {
+  private boolean isShadow;
+
+  public ProjectionHelper(boolean isShadow) {
+    this.isShadow = isShadow;
+  }
+
+  public LatLng getCenterLatLng() {
+    return mLineChartCenterLatLng;
   }
 
   public void setCenterLatLng(LatLng lineChartCenterLatLng) {
@@ -47,10 +54,18 @@ class ProjectionHelper {
     }
     if (isRouteSet) {
       if (isZooming) {
-        route.scalePathMatrix(cameraPosition.zoom);
+        if (isShadow) {
+          route.scaleShadowPathMatrix(cameraPosition.zoom);
+        } else {
+          route.scalePathMatrix(cameraPosition.zoom);
+        }
         isZooming = false;
       }
-      route.translatePathMatrix(-x, -y);
+      if (!isShadow) {
+        route.translatePathMatrix(-x, -y);
+      } else {
+        route.translateShadowPathMatrix(-x, -y);
+      }
       previousPoint = point;
     }
   }

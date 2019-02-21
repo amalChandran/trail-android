@@ -15,8 +15,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     setContentView(R.layout.activity_home);
     findViewById(R.id.btn_polyline).setOnClickListener(this);
     findViewById(R.id.btn_projection).setOnClickListener(this);
+    findViewById(R.id.btn_fromto).setOnClickListener(this);
 
     //Testing
+//    findViewById(R.id.btn_fromto).performClick();
     findViewById(R.id.btn_projection).performClick();
   }
 
@@ -28,6 +30,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         break;
       case R.id.btn_projection:
         startActivity(new Intent(HomeActivity.this, OverlayRouteActivity.class));
+        break;
+      case R.id.btn_fromto:
+        startActivity(new Intent(HomeActivity.this, FromToActivity.class));
         break;
     }
   }

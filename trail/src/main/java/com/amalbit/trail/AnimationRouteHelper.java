@@ -9,8 +9,7 @@ import android.animation.ValueAnimator;
 import android.graphics.DashPathEffect;
 import android.graphics.PathEffect;
 import android.graphics.PathMeasure;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import com.amalbit.trail.RouteOverlayView.Route;
 import com.amalbit.trail.contract.AnimationCallback;
 
@@ -20,11 +19,9 @@ import com.amalbit.trail.contract.AnimationCallback;
 
 public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator {
 
-  private static AnimationRouteHelper singletonInstance;
+  private static final int ANIM_DURATION_DEFAULT = 1000;
 
-  private static final int ANIM_DURATION_DEFAULT = 2000;
-
-  private static final int ANIM_DURATION_REPEAT = 1500;
+  private static final int ANIM_DURATION_REPEAT = 750;
 
   private AnimatorSet animatorRouteSet;
 
@@ -49,7 +46,7 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
   protected boolean isFirstTimeDrawing;
 
   public static AnimationRouteHelper getInstance(RouteOverlayView routeOverlayView, Route route) {
-    return singletonInstance = new AnimationRouteHelper(routeOverlayView, route);
+    return new AnimationRouteHelper(routeOverlayView, route);
   }
 
   private AnimationRouteHelper(RouteOverlayView routeOverlayView, Route route) {
@@ -62,7 +59,7 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
     if (firstTimeRouteAnimator == null) {
       firstTimeRouteAnimator = ObjectAnimator.ofFloat(this, "update", 1f, 0f);
       firstTimeRouteAnimator.setDuration(ANIM_DURATION_DEFAULT);
-      firstTimeRouteAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+      firstTimeRouteAnimator.setInterpolator(new AccelerateInterpolator());
     }
 
     firstTimeRouteAnimator.addListener(new Animator.AnimatorListener() {
@@ -89,14 +86,14 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
     if (secondTimeRouteAnimator == null) {
       secondTimeRouteAnimator = ObjectAnimator.ofFloat(this, "update1", 0f, 1f);
       secondTimeRouteAnimator.setDuration(ANIM_DURATION_DEFAULT);
-      secondTimeRouteAnimator.setInterpolator(new DecelerateInterpolator());
+      secondTimeRouteAnimator.setInterpolator(new AccelerateInterpolator());
     }
 
     if (colorRouteAnimation == null) {
       colorRouteAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), route.getBottomLayerColor(),
           route.getTopLayerColor());
       colorRouteAnimation.setDuration(ANIM_DURATION_REPEAT); // milliseconds
-      colorRouteAnimation.setStartDelay(1000);
+      colorRouteAnimation.setStartDelay(500);
     }
     colorRouteAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
       @Override

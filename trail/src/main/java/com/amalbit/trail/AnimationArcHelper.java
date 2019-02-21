@@ -79,6 +79,7 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
       public void onAnimationEnd(Animator animator) {
         super.onAnimationEnd(animator);
         isFirstTimeDrawing = false;
+        route.getShadowPaint().setPathEffect(null);
       }
     });
 
