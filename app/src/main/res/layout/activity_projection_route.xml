@@ -12,15 +12,7 @@
   <com.amalbit.trail.RouteOverlayView
     android:id="@+id/mapOverlayView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:routePrimaryColor="@color/routePrimaryColor"
-    app:routeSecondaryColor="@color/routeSecondaryColor"
-    app:routeShadowColor="@color/routeShadowColor"
-    />
-  <com.amalbit.trail.MarkerOverlayView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/mapMarkerOverlayView"/>
+    android:layout_height="match_parent"/>
   <include layout="@layout/layout_bottom_sheet"/>
 </FrameLayout>
 

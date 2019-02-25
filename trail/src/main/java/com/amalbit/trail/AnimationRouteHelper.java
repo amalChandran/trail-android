@@ -10,7 +10,7 @@ import android.graphics.DashPathEffect;
 import android.graphics.PathEffect;
 import android.graphics.PathMeasure;
 import android.view.animation.AccelerateInterpolator;
-import com.amalbit.trail.RouteOverlayView.Route;
+import android.view.animation.DecelerateInterpolator;
 import com.amalbit.trail.contract.AnimationCallback;
 
 /**
@@ -21,7 +21,7 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   private static final int ANIM_DURATION_DEFAULT = 1000;
 
-  private static final int ANIM_DURATION_REPEAT = 750;
+  private static final int ANIM_DURATION_REPEAT = 1500;
 
   private AnimatorSet animatorRouteSet;
 
@@ -59,7 +59,7 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
     if (firstTimeRouteAnimator == null) {
       firstTimeRouteAnimator = ObjectAnimator.ofFloat(this, "update", 1f, 0f);
       firstTimeRouteAnimator.setDuration(ANIM_DURATION_DEFAULT);
-      firstTimeRouteAnimator.setInterpolator(new AccelerateInterpolator());
+      firstTimeRouteAnimator.setInterpolator(new DecelerateInterpolator());
     }
 
     firstTimeRouteAnimator.addListener(new Animator.AnimatorListener() {
@@ -85,7 +85,7 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
     if (secondTimeRouteAnimator == null) {
       secondTimeRouteAnimator = ObjectAnimator.ofFloat(this, "update1", 0f, 1f);
-      secondTimeRouteAnimator.setDuration(ANIM_DURATION_DEFAULT);
+      secondTimeRouteAnimator.setDuration(ANIM_DURATION_REPEAT);
       secondTimeRouteAnimator.setInterpolator(new AccelerateInterpolator());
     }
 
@@ -93,14 +93,11 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
       colorRouteAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), route.getBottomLayerColor(),
           route.getTopLayerColor());
       colorRouteAnimation.setDuration(ANIM_DURATION_REPEAT); // milliseconds
-      colorRouteAnimation.setStartDelay(500);
+      colorRouteAnimation.setStartDelay(750);
     }
-    colorRouteAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-      @Override
-      public void onAnimationUpdate(ValueAnimator animator) {
-        route.getBottomLayerPaint().setColor((int) animator.getAnimatedValue());
-        routeOverlayView.invalidate();
-      }
+    colorRouteAnimation.addUpdateListener(animator -> {
+      route.getBottomLayerPaint().setColor((int) animator.getAnimatedValue());
+      routeOverlayView.invalidate();
     });
     colorRouteAnimation.addListener(new Animator.AnimatorListener() {
       @Override

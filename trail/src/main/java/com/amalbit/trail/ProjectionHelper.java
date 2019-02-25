@@ -1,7 +1,6 @@
 package com.amalbit.trail;
 
 import android.graphics.Point;
-import com.amalbit.trail.RouteOverlayView.Route;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -28,7 +27,10 @@ class ProjectionHelper {
 
   private boolean isShadow;
 
-  public ProjectionHelper(boolean isShadow) {
+  private Route route;
+
+  public ProjectionHelper(Route route, boolean isShadow) {
+    this.route = route;
     this.isShadow = isShadow;
   }
 
@@ -41,7 +43,7 @@ class ProjectionHelper {
     isRouteSet = true;
   }
 
-  void onCameraMove(Projection projection, CameraPosition cameraPosition, Route route) {
+  void onCameraMove(Projection projection, CameraPosition cameraPosition) {
     if (previousZoomLevel != cameraPosition.zoom) {
       isZooming = true;
     }

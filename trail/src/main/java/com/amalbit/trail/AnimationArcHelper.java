@@ -11,7 +11,6 @@ import android.graphics.PathEffect;
 import android.graphics.PathMeasure;
 import android.support.annotation.NonNull;
 import android.view.animation.DecelerateInterpolator;
-import com.amalbit.trail.RouteOverlayView.Route;
 import com.amalbit.trail.contract.AnimationCallback;
 import com.amalbit.trail.util.AnimatorListener;
 

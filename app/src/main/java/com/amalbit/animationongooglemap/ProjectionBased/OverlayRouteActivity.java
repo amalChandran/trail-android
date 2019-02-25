@@ -1,10 +1,12 @@
 package com.amalbit.animationongooglemap.ProjectionBased;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import com.amalbit.animationongooglemap.R;
 import com.amalbit.animationongooglemap.data.LatlngData;
+import com.amalbit.trail.Route;
 import com.amalbit.trail.RouteOverlayView;
 import com.amalbit.trail.RouteOverlayView.RouteType;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -98,17 +100,36 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
       boundsBuilder.include(latLng);
     }
 
-//    for (int i = 0; i < lstLatLngRoute.size()/4; i++) {
-//      boundsBuilder.include(lstLatLngRoute.get(i));
-//    }
-
     LatLngBounds latLngBounds = boundsBuilder.build();
     mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100));
   }
 
   private void drawRoutes() {
-    mRouteOverlayView.drawRoute(mRoute, mMap.getProjection(), mMap.getCameraPosition(), RouteType.PATH);
-    mRouteOverlayView.drawRoute(LatlngData.getRouteB(), mMap.getProjection(), mMap.getCameraPosition(), RouteType.DASH);
-    mRouteOverlayView.drawRoute(LatlngData.getRouteB(), mMap.getProjection(), mMap.getCameraPosition(), RouteType.ARC);
+    Route normalRoute = new Route.Builder(mRouteOverlayView)
+        .setRouteType(RouteType.PATH)
+        .setCameraPosition(mMap.getCameraPosition())
+        .setProjection(mMap.getProjection())
+        .setLatLngs(mRoute)
+        .setBottomLayerColor(Color.YELLOW)
+        .setTopLayerColor(Color.RED)
+        .create();
+
+    Route dashRoute = new Route.Builder(mRouteOverlayView)
+        .setRouteType(RouteType.DASH)
+        .setCameraPosition(mMap.getCameraPosition())
+        .setProjection(mMap.getProjection())
+        .setLatLngs(LatlngData.getRouteB())
+        .setDashColor(Color.BLACK)
+        .create();
+
+    Route arcRoute = new Route.Builder(mRouteOverlayView)
+        .setRouteType(RouteType.ARC)
+        .setCameraPosition(mMap.getCameraPosition())
+        .setProjection(mMap.getProjection())
+        .setLatLngs(LatlngData.getRouteB())
+        .setBottomLayerColor(Color.GRAY)
+        .setTopLayerColor(Color.BLACK)
+        .setRouteShadowColor(Color.GRAY)
+        .create();
   }
 }
