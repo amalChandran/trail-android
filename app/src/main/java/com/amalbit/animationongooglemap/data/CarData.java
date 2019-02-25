@@ -20,7 +20,7 @@ public class CarData {
   }
 
   public static class Car {
-    private int carId;
+    private int carId = -1;
     private int currentPointer;
     private boolean isBackwardCounting;
     private List<LatLng> route;
@@ -33,7 +33,7 @@ public class CarData {
       this.carId = carId;
     }
 
-    public LatLng getCurrentLatLng() {
+    public LatLng getLatLng() {
       LatLng latLng = route.get(currentPointer);
       next();
       return latLng;

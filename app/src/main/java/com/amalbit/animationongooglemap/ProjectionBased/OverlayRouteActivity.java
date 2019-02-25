@@ -43,10 +43,6 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
 
   private MarkerOverlayView mMarkerOverlayView;
 
-  private MarkerOverlayView mMarkerOverlayView1;
-
-  private MarkerOverlayView mMarkerOverlayView2;
-
   private Spinner mSpinner;
 
   private SwitchCompat mSwitchCompat;

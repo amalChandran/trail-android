@@ -1,16 +1,26 @@
 package com.amalbit.animationongooglemap;
 
+import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.animation.LinearInterpolator;
+import com.amalbit.animationongooglemap.marker.LatLngInterpolator;
+import com.amalbit.animationongooglemap.marker.Repeat;
 import com.amalbit.animationongooglemap.data.CarData.Car;
 import com.amalbit.animationongooglemap.data.LatlngData;
+import com.amalbit.trail.MarkerOverlayView;
+import com.amalbit.trail.OverlayMarker;
+import com.amalbit.trail.OverlayMarker.OnMarkerUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -28,21 +38,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 
-public class FromToActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class FromToActivity extends AppCompatActivity implements OnMapReadyCallback, OnMarkerUpdate {
 
   private GoogleMap mMap;
 
+  private MarkerOverlayView markerOverlayView;
+
   private List<LatLng> fromTO = new ArrayList<>();
+
+  private Bitmap markerIcon;
+
+  private Repeat repeat;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_from_to);
+    markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.car);
+    markerOverlayView = findViewById(R.id.mapMarkerOverlayView);
     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
         .findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
@@ -53,19 +69,13 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
     mMap = map;
 
     mMap.setOnMapLoadedCallback(() -> {
+      mMap.setOnCameraMoveListener(() -> markerOverlayView.onCameraMove(mMap));
+
       setMapBounds();
 
-      ArrayList<Car> getIndiranagarRoutes = LatlngData.getIndiranagarRoutes();
-      new Timer().scheduleAtFixedRate(new TimerTask() {
-        @Override
-        public void run() {
-          //your method
-          runOnUiThread(() -> mMap.clear());
-          for (Car car : getIndiranagarRoutes) {
-            runOnUiThread(() -> mMap.addMarker(new MarkerOptions().position(car.getCurrentLatLng())));
-          }
-        }
-      }, 0, 1000);
+      ArrayList<Car> indiranagarRoutes = LatlngData.getIndiranagarRoutes();
+      repeat = new Repeat(() -> addMarkerWithAnimation(indiranagarRoutes), 1000);
+      repeat.startUpdates();
 
       mMap.setOnMapClickListener(latLng -> {
         Log.i("LatlngClick", latLng.latitude + "," + latLng.longitude);
@@ -86,10 +96,10 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
 
   public void setMapBounds() {
     List<LatLng> latLngs = new ArrayList<>();
-    latLngs.add(new LatLng(12.9715002,77.6374856));//NW
-    latLngs.add(new LatLng(12.9703733,77.6372037));//NE
-    latLngs.add(new LatLng(12.9595674,77.6366595));//SE
-    latLngs.add(new LatLng(12.9595672,77.6519803));//SW
+    latLngs.add(new LatLng(12.9715002, 77.6374856));//NW
+    latLngs.add(new LatLng(12.9703733, 77.6372037));//NE
+    latLngs.add(new LatLng(12.9595674, 77.6366595));//SE
+    latLngs.add(new LatLng(12.9595672, 77.6519803));//SW
     LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
     for (LatLng latLngPoint : latLngs) {
       boundsBuilder.include(latLngPoint);
@@ -98,6 +108,69 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
     mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100));
   }
 
+  public void addMarkerWithAnimation(List<Car> cars) {
+    runOnUiThread(() -> {
+      for (Car car : cars) {
+        final OverlayMarker overlayMarker = markerOverlayView.findMarkerById(car.getCarId());
+        if (overlayMarker == null) {
+          OverlayMarker overlayMarker1 = new OverlayMarker();
+          overlayMarker1.setIcon(markerIcon);
+          overlayMarker1.setMarkerId(car.getCarId());
+          overlayMarker1.setLatLng(car.getLatLng());
+          overlayMarker1.setOnMarkerUpdate(FromToActivity.this);
+          markerOverlayView.addMarker(overlayMarker1, mMap.getProjection());
+        } else {
+          final LatLng startLatLng = overlayMarker.getLatLng();
+          final LatLng endLatLng = car.getLatLng();
+
+          ValueAnimator valueAnimator = new ValueAnimator();
+          valueAnimator.setInterpolator(new LinearInterpolator());
+          valueAnimator.addUpdateListener(new AnimatorUpdateListener() {
+            private LatLng lastLatlng = null;
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+              float v = animation.getAnimatedFraction();
+              float bearing= 0;
+              LatLng newPosition = new LatLngInterpolator.Linear().interpolate(v, startLatLng, endLatLng);
+              if (lastLatlng ==  null) {
+                bearing = getBearing(startLatLng, newPosition);
+              } else {
+                bearing = getBearing(lastLatlng, startLatLng);
+              }
+              overlayMarker.setLatLng(newPosition);
+              overlayMarker.setBearing(bearing);
+              markerOverlayView.updateMarker(overlayMarker, mMap.getProjection());
+
+              lastLatlng = newPosition;
+            }
+          });
+          valueAnimator.setFloatValues(0, 1); // Ignored.
+          valueAnimator.setDuration(1000);
+          valueAnimator.start();
+
+        }
+      }
+    });
+  }
+
+  TypeEvaluator<LatLng> typeEvaluator =
+      (fraction, startValue, endValue) ->
+          new LatLngInterpolator.Linear().interpolate(fraction, startValue, endValue);
+
+  private float getBearing(LatLng begin, LatLng end) {
+    double lat = Math.abs(begin.latitude - end.latitude);
+    double lng = Math.abs(begin.longitude - end.longitude);
+
+    if (begin.latitude < end.latitude && begin.longitude < end.longitude)
+      return (float) (Math.toDegrees(Math.atan(lng / lat)));
+    else if (begin.latitude >= end.latitude && begin.longitude < end.longitude)
+      return (float) ((90 - Math.toDegrees(Math.atan(lng / lat))) + 90);
+    else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude)
+      return (float) (Math.toDegrees(Math.atan(lng / lat)) + 180);
+    else if (begin.latitude < end.latitude && begin.longitude >= end.longitude)
+      return (float) ((90 - Math.toDegrees(Math.atan(lng / lat))) + 270);
+    return -1;
+  }
   public void addMarker(List<LatLng> latLngs) {
     for (LatLng latLng : latLngs) {
       mMap.addMarker(new MarkerOptions().position(latLng));
@@ -124,6 +197,12 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
         }
       }
     });
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    repeat.stopUpdates();
   }
 
   private GeoApiContext getGeoContext() {
@@ -160,5 +239,10 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
     catch (IOException e) {
       Log.e("Exception", "File write failed: " + e.toString());
     }
+  }
+
+  @Override
+  public void onMarkerUpdate() {
+    markerOverlayView.invalidate();
   }
 }
