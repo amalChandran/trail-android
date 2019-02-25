@@ -10,17 +10,20 @@
   android:paddingTop="16dp"
   android:background="#ccffffff"
   android:gravity="top|center">
-  <Spinner
-    android:id="@+id/spinner_location"
+  <Button
+    android:id="@+id/btnAdd"
+    style="@style/Base.Widget.AppCompat.Button.Borderless"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
-    android:spinnerMode="dialog"/>
-  <android.support.v7.widget.SwitchCompat
-    android:id="@+id/switch_btn"
+    android:layout_weight="1"
+    android:onClick="onClick1"
+    android:text="@string/add_routes"/>
+  <Button
+    android:id="@+id/btnRemove"
+    style="@style/Base.Widget.AppCompat.Button.Borderless"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingLeft="20dp"
-    android:gravity="center"
-    android:text="Route  "/>
+    android:layout_weight="1"
+    android:onClick="onClick1"
+    android:text="@string/remove_routes"/>
 </LinearLayout>

@@ -12,4 +12,7 @@
     <item>New York</item>
   </string-array>
 
+  <string name="add_routes">Add Routes</string>
+  <string name="remove_routes">Remove Routes</string>
+
 </resources>

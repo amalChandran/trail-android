@@ -138,7 +138,7 @@ public class RouteOverlayView extends View {
     return addPath(latLngs, projection, cameraPosition, routeType);
   }
 
-  public void removeRoute() {
+  public void removeRoutes() {
     isPathSetup = false;
     clearAnimation();
     stopAllAnimation();
