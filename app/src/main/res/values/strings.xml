@@ -14,5 +14,8 @@
 
   <string name="add_routes">Add Routes</string>
   <string name="remove_routes">Remove Routes</string>
+  <string name="btn_projection_based">PROJECTION BASED ROUTE</string>
+  <string name="btn_polyline_based">Polyline based Route</string>
+  <string name="btn_markers">Markers (In Progress)</string>
 
 </resources>

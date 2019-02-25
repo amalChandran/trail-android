@@ -7,37 +7,37 @@
   android:layout_height="match_parent"
   tools:context="com.amalbit.animationongooglemap.HomeActivity">
 
-  <Button
+  <android.support.v7.widget.AppCompatButton
     android:id="@+id/btn_projection"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
-    android:text="PROJECTION BASED ROUTE"
+    android:text="@string/btn_projection_based"
     app:layout_constraintBottom_toTopOf="@+id/btn_polyline"
     app:layout_constraintHorizontal_bias="0.0"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"/>
-  <Button
+  <android.support.v7.widget.AppCompatButton
     android:id="@+id/btn_polyline"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
-    android:text="Polyline based Route"
+    android:text="@string/btn_polyline_based"
     app:layout_constraintBottom_toTopOf="@+id/btn_fromto"
     app:layout_constraintHorizontal_bias="0.0"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"/>
-  <Button
+  <android.support.v7.widget.AppCompatButton
     android:id="@+id/btn_fromto"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
-    android:text="Get Directions"
+    android:text="@string/btn_markers"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintHorizontal_bias="0.0"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"/>
-  <ImageView
+  <android.support.v7.widget.AppCompatImageView
     android:id="@+id/imageView"
     android:layout_width="164dp"
     android:layout_height="144dp"

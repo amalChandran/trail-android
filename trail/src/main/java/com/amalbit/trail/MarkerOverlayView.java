@@ -102,14 +102,14 @@ public class MarkerOverlayView extends View implements MarkerRemoveListner {
 
   private void drawMarkers(Canvas canvas) {
     if (overlayMarkers.size() > 0) {
-      Matrix markerMatrix = new Matrix();
+//      Matrix markerMatrix = new Matrix();
       for (OverlayMarker overlayMarker : overlayMarkers) {
         Point point = new Point();
         point.x = overlayMarker.getScreenPoint().x - overlayMarker.getIcon().getWidth() / 2;
         point.y = overlayMarker.getScreenPoint().y - overlayMarker.getIcon().getHeight() / 2;
-        markerMatrix.postRotate(overlayMarker.getBearing());
-        markerMatrix.postTranslate(point.x, point.y);
-        canvas.drawBitmap(overlayMarker.getIcon(), markerMatrix,null);
+//        markerMatrix.postRotate(overlayMarker.getBearing());
+//        markerMatrix.postTranslate(point.x, point.y);
+        canvas.drawBitmap(overlayMarker.getIcon(), point.x, point.y,null);
       }
     }
   }
