@@ -5,6 +5,10 @@ package com.amalbit.trail.contract;
  */
 
 public interface Animator {
+
   void play();
+
   void stop(AnimationCallback callback);
+
+  void onPathMeasureChange();
 }

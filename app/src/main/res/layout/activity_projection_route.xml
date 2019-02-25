@@ -1,17 +1,48 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
   <fragment
-      android:id="@+id/map"
-      android:name="com.amalbit.trail.TrailSupportMapFragment"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      tools:context="com.amalbit.animationongooglemap.PolylineBased.MapsActivity"/>
-
-  <include layout="@layout/layout_bottom_sheet" />
-
+    android:id="@+id/map"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:name="com.google.android.gms.maps.SupportMapFragment"
+    tools:context="com.amalbit.animationongooglemap.PolylineBased.MapsActivity"/>
+  <com.amalbit.trail.RouteOverlayView
+    android:id="@+id/mapOverlayView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:routePrimaryColor="@color/routePrimaryColor"
+    app:routeSecondaryColor="@color/routeSecondaryColor"
+    app:routeShadowColor="@color/routeShadowColor"
+    />
+  <com.amalbit.trail.MarkerOverlayView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/mapMarkerOverlayView"/>
+  <com.amalbit.trail.MarkerOverlayView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/mapMarkerOverlayView1"/>
+  <com.amalbit.trail.MarkerOverlayView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/mapMarkerOverlayView2"/>
+  <include layout="@layout/layout_bottom_sheet"/>
+  <Button
+    android:id="@+id/btnAdd"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:onClick="onClick1"
+    android:text="Add"/>
+  <Button
+    android:id="@+id/btnRemove"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="right"
+    android:onClick="onClick1"
+    android:text="Remove"/>
 </FrameLayout>
+
 

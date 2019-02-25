@@ -8,9 +8,12 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.graphics.DashPathEffect;
 import android.graphics.PathEffect;
+import android.graphics.PathMeasure;
+import android.support.annotation.NonNull;
 import android.view.animation.DecelerateInterpolator;
+import com.amalbit.trail.RouteOverlayView.Route;
 import com.amalbit.trail.contract.AnimationCallback;
-import javax.security.auth.callback.Callback;
+import com.amalbit.trail.util.AnimatorListener;
 
 /**
  * Created by amal.chandran on 15/11/17.
@@ -18,20 +21,13 @@ import javax.security.auth.callback.Callback;
 
 public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
 
-  static AnimationArcHelper ourInstance;
+  private static final int ANIM_DURATION_DEFAULT = 1000;
 
-  float length;
-
-  float[] dashValue;
+  private static final int ANIM_DURATION_REPEAT = 1500;
 
   private AnimatorSet animatorArcSet;
+
   private AnimatorSet animatorRepeatArcSet;
-
-  //private ValueAnimator hideArcAnimation;
-
-  boolean isFirstTimeDrawing;
-
-  private boolean isAnimating;
 
   private RouteOverlayView mRouteOverlayView;
 
@@ -41,112 +37,78 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
 
   private ValueAnimator colorArcAnimation;
 
-  public static AnimationArcHelper getInstance(RouteOverlayView routeOverlayView) {
-    if( ourInstance == null ) {
-      ourInstance = new AnimationArcHelper(routeOverlayView);
-    }
-    return ourInstance;
+  protected float arcLength;
+
+  protected float shadowLength;
+
+  protected float[] arcdDashValue;
+
+  protected float[] shadowDashValue;
+
+  protected boolean isFirstTimeDrawing;
+
+  protected boolean animStarted;
+
+  private Route route;
+
+  public static AnimationArcHelper getInstance(RouteOverlayView routeOverlayView, Route route) {
+    return new AnimationArcHelper(routeOverlayView, route);
   }
 
-  private AnimationArcHelper(RouteOverlayView routeOverlayView) {
+  private AnimationArcHelper(RouteOverlayView routeOverlayView, Route route) {
     this.mRouteOverlayView = routeOverlayView;
+    this.route = route;
   }
 
-  public void init() {
+  private void init() {
 
-    if(firstTimeArcAnimator == null) {
+    if (firstTimeArcAnimator == null) {
       firstTimeArcAnimator = ObjectAnimator.ofFloat(this, "update", 1f, 0f);
-      firstTimeArcAnimator.setDuration(1000);
+      firstTimeArcAnimator.setDuration(ANIM_DURATION_DEFAULT);
       firstTimeArcAnimator.setInterpolator(new DecelerateInterpolator());
     }
-    firstTimeArcAnimator.addListener(new Animator.AnimatorListener() {
-      @Override public void onAnimationStart(Animator animator) {
+    firstTimeArcAnimator.addListener(new AnimatorListener() {
+      @Override
+      public void onAnimationStart(Animator animator) {
+        super.onAnimationStart(animator);
         isFirstTimeDrawing = true;
+        animStarted = true;
       }
 
-      @Override public void onAnimationEnd(Animator animator) {
+      @Override
+      public void onAnimationEnd(Animator animator) {
+        super.onAnimationEnd(animator);
         isFirstTimeDrawing = false;
-      }
-
-      @Override public void onAnimationCancel(Animator animator) {
-
-      }
-
-      @Override public void onAnimationRepeat(Animator animator) {
-
+        route.getShadowPaint().setPathEffect(null);
       }
     });
 
-    if(secondTimeArcAnimator == null) {
+    if (secondTimeArcAnimator == null) {
       secondTimeArcAnimator = ObjectAnimator.ofFloat(this, "update1", 0f, 1f);
-      secondTimeArcAnimator.setDuration(1000);
+      secondTimeArcAnimator.setDuration(ANIM_DURATION_REPEAT);
       secondTimeArcAnimator.setInterpolator(new DecelerateInterpolator());
     }
 
-    if(colorArcAnimation == null) {
-      colorArcAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), mRouteOverlayView.routeShadwoColor,
-          mRouteOverlayView.routeMainColor);
-      colorArcAnimation.setDuration(750); // milliseconds
-      colorArcAnimation.setStartDelay(450);
+    if (colorArcAnimation == null) {
+      colorArcAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), route.getBottomLayerColor(),
+          route.getTopLayerColor());
+      colorArcAnimation.setDuration(ANIM_DURATION_REPEAT); // milliseconds
+      colorArcAnimation.setStartDelay(250);
     }
 
-    colorArcAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    colorArcAnimation.addUpdateListener(animator -> {
+      route.getBottomLayerPaint().setColor((int) animator.getAnimatedValue());
+      mRouteOverlayView.invalidate();
+    });
+    colorArcAnimation.addListener(new AnimatorListener() {
       @Override
-      public void onAnimationUpdate(ValueAnimator animator) {
-        mRouteOverlayView.paintBottomArc.setColor((int)animator.getAnimatedValue());
+      public void onAnimationEnd(Animator animator) {
+        PathEffect effect = new DashPathEffect(new float[]{arcLength, arcLength}, arcLength);
+        route.getTopLayerPaint().setPathEffect(effect);
+        route.getBottomLayerPaint().setColor(route.getBottomLayerColor());
         mRouteOverlayView.invalidate();
       }
     });
-    colorArcAnimation.addListener(new Animator.AnimatorListener() {
-      @Override public void onAnimationStart(Animator animator) {
-
-      }
-
-      @Override public void onAnimationEnd(Animator animator) {
-        PathEffect effect = new DashPathEffect(new float[] { length, length }, length);
-        mRouteOverlayView.paintTopArc.setPathEffect(effect);
-        mRouteOverlayView.paintBottomArc.setColor(mRouteOverlayView.routeShadwoColor);
-        mRouteOverlayView.invalidate();
-      }
-
-      @Override public void onAnimationCancel(Animator animator) {
-
-      }
-
-      @Override public void onAnimationRepeat(Animator animator) {
-
-      }
-    });
-
-    //hideArcAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), mRouteOverlayView.routeShadwoColor, mRouteOverlayView.routeMainColor);
-    //hideArcAnimation.setDuration(300); // milliseconds
-    //hideArcAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-    //  @Override
-    //  public void onAnimationUpdate(ValueAnimator animator) {
-    //    mRouteOverlayView.paintBottomArc.setColor((int)animator.getAnimatedValue());
-    //    mRouteOverlayView.invalidate();
-    //  }
-    //});
-    //hideArcAnimation.addListener(new Animator.AnimatorListener() {
-    //  @Override public void onAnimationStart(Animator animator) {
-    //
-    //  }
-    //
-    //  @Override public void onAnimationEnd(Animator animator) {
-    //    PathEffect effect = new DashPathEffect(new float[] { length, length }, length);
-    //    mRouteOverlayView.paintTopArc.setPathEffect(effect);
-    //    mRouteOverlayView.paintBottomArc.setColor(mRouteOverlayView.routeShadwoColor);
-    //    mRouteOverlayView.invalidate();
-    //  }
-    //
-    //  @Override public void onAnimationCancel(Animator animator) {
-    //
-    //  }
-    //
-    //  @Override public void onAnimationRepeat(Animator animator) {
-    //
-    //  }
-    //});
 
     animatorRepeatArcSet = new AnimatorSet();
     animatorArcSet = new AnimatorSet();
@@ -167,21 +129,18 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
       }
 
       @Override
-      public void onAnimationEnd(Animator animation) {
+      public void onAnimationEnd(@NonNull Animator animation) {
         if (!mCanceled) {
           animation.start();
-        } else {
-
         }
       }
 
     });
 
-
-
     animatorArcSet.playSequentially(firstTimeArcAnimator, animatorRepeatArcSet);
     animatorArcSet.addListener(new AnimatorListenerAdapter() {
-      @Override public void onAnimationCancel(Animator animation) {
+      @Override
+      public void onAnimationCancel(Animator animation) {
         super.onAnimationCancel(animation);
         animatorRepeatArcSet.cancel();
       }
@@ -189,48 +148,55 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
   }
 
   public void setUpdate(float update) {
-    PathEffect effect = new DashPathEffect(dashValue, length * update);
-    mRouteOverlayView.paintTopArc.setPathEffect(effect);
+    PathEffect effect = new DashPathEffect(arcdDashValue, arcLength * update);
+    route.getTopLayerPaint().setPathEffect(effect);
+
+    PathEffect shadowEffect = new DashPathEffect(shadowDashValue, shadowLength * update);
+    route.getShadowPaint().setPathEffect(shadowEffect);
+
     mRouteOverlayView.invalidate();
   }
 
   public void setUpdate1(float update) {
-    PathEffect effect = new DashPathEffect(dashValue, -length * update);
-    mRouteOverlayView.paintTopArc.setPathEffect(effect);
+    PathEffect effect = new DashPathEffect(arcdDashValue, -arcLength * update);
+    route.getTopLayerPaint().setPathEffect(effect);
     mRouteOverlayView.invalidate();
   }
 
-  @Override public void play() {
-    if(isAnimating) {
-      stop(null);
-    }
-
+  @Override
+  public void play() {
+    stop(null);
     init();
     animatorArcSet.start();
-
-    isAnimating = true;
   }
-  //if(isAnimating) {
-  //  stop(null);
-  //}
-  //
-  //init();
-  //  animatorRouteSet.start();
-  //
-  //isAnimating = true;
 
-  @Override public void stop(AnimationCallback callback) {
-
-    if(animatorArcSet != null) {
-      animatorArcSet.end();
-      animatorArcSet.cancel();
-      firstTimeArcAnimator.end();
-      firstTimeArcAnimator.cancel();
-      secondTimeArcAnimator.end();
-      secondTimeArcAnimator.cancel();
+  @Override
+  public void stop(AnimationCallback callback) {
+    if (animatorArcSet != null) {
       colorArcAnimation.end();
       colorArcAnimation.cancel();
+      secondTimeArcAnimator.end();
+      secondTimeArcAnimator.cancel();
+      firstTimeArcAnimator.end();
+      firstTimeArcAnimator.cancel();
+      animatorRepeatArcSet.end();
+      animatorRepeatArcSet.cancel();
+      animatorArcSet.end();
+      animatorArcSet.cancel();
+
+      animatorRepeatArcSet = null;
+      animatorArcSet = null;
+      firstTimeArcAnimator = null;
+      secondTimeArcAnimator = null;
+      colorArcAnimation = null;
     }
-    isAnimating = false;
+  }
+
+  @Override
+  public void onPathMeasureChange() {
+    PathMeasure pathMeasure = new PathMeasure(route.getDrawPath(), false);
+    arcLength = pathMeasure.getLength();
+    arcdDashValue =
+        new float[]{arcLength, arcLength};
   }
 }

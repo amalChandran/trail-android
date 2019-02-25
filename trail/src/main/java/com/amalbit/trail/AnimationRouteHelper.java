@@ -8,7 +8,9 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.graphics.DashPathEffect;
 import android.graphics.PathEffect;
-import android.view.animation.DecelerateInterpolator;
+import android.graphics.PathMeasure;
+import android.view.animation.AccelerateInterpolator;
+import com.amalbit.trail.RouteOverlayView.Route;
 import com.amalbit.trail.contract.AnimationCallback;
 
 /**
@@ -17,11 +19,9 @@ import com.amalbit.trail.contract.AnimationCallback;
 
 public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator {
 
-  static AnimationRouteHelper ourInstance;
+  private static final int ANIM_DURATION_DEFAULT = 1000;
 
-  float length;
-
-  float[] dashValue;
+  private static final int ANIM_DURATION_REPEAT = 750;
 
   private AnimatorSet animatorRouteSet;
 
@@ -33,82 +33,96 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   private ValueAnimator colorRouteAnimation;
 
-  boolean isFirstTimeDrawing;
-
   private boolean isAnimating;
 
-  private RouteOverlayView mRouteOverlayView;
+  private Route route;
 
-  public static AnimationRouteHelper getInstance(RouteOverlayView routeOverlayView) {
-    if( ourInstance == null ) {
-      ourInstance = new AnimationRouteHelper(routeOverlayView);
-    }
-    return ourInstance;
+  private RouteOverlayView routeOverlayView;
+
+  protected float length;
+
+  protected float[] dashValue;
+
+  protected boolean isFirstTimeDrawing;
+
+  public static AnimationRouteHelper getInstance(RouteOverlayView routeOverlayView, Route route) {
+    return new AnimationRouteHelper(routeOverlayView, route);
   }
 
-  private AnimationRouteHelper(RouteOverlayView routeOverlayView) {
-    this.mRouteOverlayView = routeOverlayView;
+  private AnimationRouteHelper(RouteOverlayView routeOverlayView, Route route) {
+    this.routeOverlayView = routeOverlayView;
+    this.route = route;
   }
 
   public void init() {
 
-    if(firstTimeRouteAnimator == null) {
+    if (firstTimeRouteAnimator == null) {
       firstTimeRouteAnimator = ObjectAnimator.ofFloat(this, "update", 1f, 0f);
-      firstTimeRouteAnimator.setDuration(2000);
-      firstTimeRouteAnimator.setInterpolator(new DecelerateInterpolator());
+      firstTimeRouteAnimator.setDuration(ANIM_DURATION_DEFAULT);
+      firstTimeRouteAnimator.setInterpolator(new AccelerateInterpolator());
     }
 
     firstTimeRouteAnimator.addListener(new Animator.AnimatorListener() {
-      @Override public void onAnimationStart(Animator animator) { isFirstTimeDrawing = true;
+      @Override
+      public void onAnimationStart(Animator animator) {
+        isFirstTimeDrawing = true;
       }
-      @Override public void onAnimationEnd(Animator animator) {
+
+      @Override
+      public void onAnimationEnd(Animator animator) {
         isFirstTimeDrawing = false;
       }
 
-      @Override public void onAnimationCancel(Animator animator) {
+      @Override
+      public void onAnimationCancel(Animator animator) {
       }
 
-      @Override public void onAnimationRepeat(Animator animator) {
+      @Override
+      public void onAnimationRepeat(Animator animator) {
 
       }
     });
 
-    if(secondTimeRouteAnimator == null) {
+    if (secondTimeRouteAnimator == null) {
       secondTimeRouteAnimator = ObjectAnimator.ofFloat(this, "update1", 0f, 1f);
-      secondTimeRouteAnimator.setDuration(2000);
-      secondTimeRouteAnimator.setInterpolator(new DecelerateInterpolator());
+      secondTimeRouteAnimator.setDuration(ANIM_DURATION_DEFAULT);
+      secondTimeRouteAnimator.setInterpolator(new AccelerateInterpolator());
     }
 
-    if(colorRouteAnimation == null) {
-      colorRouteAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), mRouteOverlayView.routeShadwoColor,
-          mRouteOverlayView.routeMainColor);
-      colorRouteAnimation.setDuration(1500); // milliseconds
-      colorRouteAnimation.setStartDelay(1000);
+    if (colorRouteAnimation == null) {
+      colorRouteAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), route.getBottomLayerColor(),
+          route.getTopLayerColor());
+      colorRouteAnimation.setDuration(ANIM_DURATION_REPEAT); // milliseconds
+      colorRouteAnimation.setStartDelay(500);
     }
     colorRouteAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
       @Override
       public void onAnimationUpdate(ValueAnimator animator) {
-        mRouteOverlayView.paintBottom.setColor((int)animator.getAnimatedValue());
-        mRouteOverlayView.invalidate();
+        route.getBottomLayerPaint().setColor((int) animator.getAnimatedValue());
+        routeOverlayView.invalidate();
       }
     });
     colorRouteAnimation.addListener(new Animator.AnimatorListener() {
-      @Override public void onAnimationStart(Animator animator) {
+      @Override
+      public void onAnimationStart(Animator animator) {
 
       }
 
-      @Override public void onAnimationEnd(Animator animator) {
-        PathEffect effect = new DashPathEffect(new float[] { length, length }, length);
-        mRouteOverlayView.paintTop.setPathEffect(effect);
-        mRouteOverlayView.paintBottom.setColor(mRouteOverlayView.routeShadwoColor);
-        mRouteOverlayView.invalidate();
+      @Override
+      public void onAnimationEnd(Animator animator) {
+        PathEffect effect = new DashPathEffect(new float[]{length, length}, length);
+        route.getTopLayerPaint().setPathEffect(effect);
+        route.getBottomLayerPaint().setColor(route.getBottomLayerColor());
+        routeOverlayView.invalidate();
       }
 
-      @Override public void onAnimationCancel(Animator animator) {
+      @Override
+      public void onAnimationCancel(Animator animator) {
 
       }
 
-      @Override public void onAnimationRepeat(Animator animator) {
+      @Override
+      public void onAnimationRepeat(Animator animator) {
 
       }
     });
@@ -135,8 +149,6 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
       public void onAnimationEnd(Animator animation) {
         if (!mCanceled) {
           animation.start();
-        } else {
-
         }
       }
 
@@ -144,7 +156,8 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
     animatorRouteSet.playSequentially(firstTimeRouteAnimator, animatorRepeatRouteSet);
     animatorRouteSet.addListener(new AnimatorListenerAdapter() {
-      @Override public void onAnimationCancel(Animator animation) {
+      @Override
+      public void onAnimationCancel(Animator animation) {
         super.onAnimationCancel(animation);
         animatorRepeatRouteSet.cancel();
       }
@@ -153,43 +166,56 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   public void setUpdate(float update) {
     PathEffect effect = new DashPathEffect(dashValue, length * update);
-    mRouteOverlayView.paintTop.setPathEffect(effect);
-    mRouteOverlayView.invalidate();
+    route.getTopLayerPaint().setPathEffect(effect);
+    routeOverlayView.invalidate();
   }
 
   public void setUpdate1(float update) {
     PathEffect effect = new DashPathEffect(dashValue, -length * update);
-    mRouteOverlayView.paintTop.setPathEffect(effect);
-    mRouteOverlayView.invalidate();
+    route.getTopLayerPaint().setPathEffect(effect);
+    routeOverlayView.invalidate();
   }
 
-  @Override public void play() {
-    if(isAnimating) {
-      stop(null);
-    }
-
+  @Override
+  public void play() {
+    stop(null);
     init();
     animatorRouteSet.start();
-
     isAnimating = true;
   }
 
-  @Override public void stop(AnimationCallback callback) {
-    //mRouteOverlayView.clearAnimation();
-    if(animatorRouteSet != null) {
+  public boolean isAnimating(){
+    return isAnimating;
+  }
+
+  @Override
+  public void stop(AnimationCallback callback) {
+    if (animatorRouteSet != null) {
       animatorRouteSet.end();
       animatorRouteSet.cancel();
+      animatorRepeatRouteSet.end();
+      animatorRepeatRouteSet.cancel();
       firstTimeRouteAnimator.end();
       firstTimeRouteAnimator.cancel();
       secondTimeRouteAnimator.end();
       secondTimeRouteAnimator.cancel();
       colorRouteAnimation.end();
       colorRouteAnimation.cancel();
+
+      animatorRouteSet = null;
+      animatorRepeatRouteSet = null;
+      firstTimeRouteAnimator = null;
+      secondTimeRouteAnimator = null;
+      colorRouteAnimation = null;
     }
     isAnimating = false;
   }
 
-  public interface Update {
-    void onUpdate();
+  @Override
+  public void onPathMeasureChange() {
+    PathMeasure pathMeasure = new PathMeasure(route.getDrawPath(), false);
+    length = pathMeasure.getLength();
+    dashValue =
+        new float[]{length, length};
   }
 }

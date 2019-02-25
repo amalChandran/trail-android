@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="RouteOverlayView">
+    <attr format="color" name="routePrimaryColor"/>
+    <attr format="color" name="routeSecondaryColor"/>
+    <attr format="color" name="routeShadowColor"/>
+  </declare-styleable>
+</resources>
