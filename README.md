@@ -16,7 +16,7 @@
   <img src="extras/trailv1.5.gif" width="30%" />
 </p>
 <p align="center">
-  <a href="https://youtu.be/H_BWRTf0d8g"><img src="extras/youtube_grab_v1.5.png" width="50%" /></a>
+  <a href="https://www.youtube.com/watch?v=ENOcDomhCPw"><img src="extras/youtube_grab_v1.5.png" width="50%" /></a>
 </p>
 
 ## Setup
