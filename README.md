@@ -42,9 +42,10 @@ Place RouteOverlayView over your google map layout in xml. Make sure that the ro
     android:layout_height="match_parent"/>
 </FrameLayout>
 ```
-In your activity, create routes with three predefined styles as of now.
+In your activity, create routes with three predefined styles as of now(PATH, ARC and DASH).
 
 ```
+mMap.setOnMapLoadedCallback(() -> {
     Route normalRoute = new Route.Builder(mRouteOverlayView)
         .setRouteType(RouteType.PATH)
         .setCameraPosition(mMap.getCameraPosition())
@@ -53,8 +54,9 @@ In your activity, create routes with three predefined styles as of now.
         .setBottomLayerColor(Color.YELLOW)
         .setTopLayerColor(Color.RED)
         .create();
+});
 ```
-To make sure that the overlay moves along with the Google maps movement we need to add a hook from its cameramovelistener.
+To make sure that the overlay layer moves along with the Google maps movement we need to add a hook from its cameramovelistener.
 ```
       mMap.setOnCameraMoveListener(() -> {
             mRouteOverlayView.onCameraMove(mMap.getProjection(), mMap.getCameraPosition());
