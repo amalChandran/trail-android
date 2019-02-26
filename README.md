@@ -9,14 +9,11 @@
 </p>
 
 <p align="left">
-  (Gif running @ 10fps. Check the video on youtube.)
+  (Gif running @ 10fps. Check the video on <a href="https://www.youtube.com/watch?v=ENOcDomhCPw">youtube</a>.)
 </p>
 
 <p align="left">
   <img src="extras/trailv1.5.gif" width="30%" />
-</p>
-<p align="left">
-  <a href="https://www.youtube.com/watch?v=ENOcDomhCPw"><img src="extras/youtube_grab_v1.5.png" width="50%" /></a>
 </p>
 
 ## Setup
@@ -56,6 +53,7 @@ Place RouteOverlayView over your google map layout in xml. Make sure that the ro
 In your activity, create routes with three predefined styles as of now.
 
 ```
+googleMap.setOnMapLoadedCallback(() -> {
     Route normalRoute = new Route.Builder(mRouteOverlayView)
         .setRouteType(RouteType.PATH)
         .setCameraPosition(mMap.getCameraPosition())
@@ -67,12 +65,20 @@ In your activity, create routes with three predefined styles as of now.
 ```
 To make sure that the overlay moves along with the Google maps movement we need to add a hook from its cameramovelistener.
 ```
-      mMap.setOnCameraMoveListener(() -> {
-            mRouteOverlayView.onCameraMove(mMap.getProjection(), mMap.getCameraPosition());
-          }
-      );
+googleMap.setOnCameraMoveListener(() -> {
+      mRouteOverlayView.onCameraMove(googleMap.getProjection(), googleMap.getCameraPosition());
+    }
+);
 ```
-
+Library uses java 8 bytecode, so dont forget to enable java 8 in your application's build.gradle file.
+```
+android {
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+}
+```
 
 ## License
 MIT © Amal Chandran
