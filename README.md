@@ -58,10 +58,10 @@ mMap.setOnMapLoadedCallback(() -> {
 ```
 To make sure that the overlay layer moves along with the Google maps movement we need to add a hook from its cameramovelistener.
 ```
-      mMap.setOnCameraMoveListener(() -> {
-            mRouteOverlayView.onCameraMove(mMap.getProjection(), mMap.getCameraPosition());
-          }
-      );
+mMap.setOnCameraMoveListener(() -> {
+      mRouteOverlayView.onCameraMove(mMap.getProjection(), mMap.getCameraPosition());
+    }
+);
 ```
 
 The library contains java 8 byte code, so dont forget to enable java 8 in your applications's build.gradle file.
