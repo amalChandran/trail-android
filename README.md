@@ -8,6 +8,17 @@
   <a href="https://github.com/angular/angular.js/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-lightgrey.svg" alt="License: MIT"></a>
 </p>
 
+<p align="center">
+  (Gif running @ 10fps. Check the video on youtube.)
+</p>
+
+<p align="center">
+  <img src="extras/trailv1.5.gif" width="30%" />
+</p>
+<p align="center">
+  <a href="https://youtu.be/H_BWRTf0d8g"><img src="extras/youtube_grab_v1.5.png" width="50%" /></a>
+</p>
+
 ## Setup
 1. Add jitpack to the root build.gradle file of your project at the end of repositories.
 ```
@@ -42,10 +53,9 @@ Place RouteOverlayView over your google map layout in xml. Make sure that the ro
     android:layout_height="match_parent"/>
 </FrameLayout>
 ```
-In your activity, create routes with three predefined styles as of now(PATH, ARC and DASH).
+In your activity, create routes with three predefined styles as of now.
 
 ```
-mMap.setOnMapLoadedCallback(() -> {
     Route normalRoute = new Route.Builder(mRouteOverlayView)
         .setRouteType(RouteType.PATH)
         .setCameraPosition(mMap.getCameraPosition())
@@ -54,24 +64,13 @@ mMap.setOnMapLoadedCallback(() -> {
         .setBottomLayerColor(Color.YELLOW)
         .setTopLayerColor(Color.RED)
         .create();
-});
 ```
-To make sure that the overlay layer moves along with the Google maps movement we need to add a hook from its cameramovelistener.
+To make sure that the overlay moves along with the Google maps movement we need to add a hook from its cameramovelistener.
 ```
-mMap.setOnCameraMoveListener(() -> {
-      mRouteOverlayView.onCameraMove(mMap.getProjection(), mMap.getCameraPosition());
-    }
-);
-```
-
-The library contains java 8 byte code, so dont forget to enable java 8 in your applications's build.gradle file.
-```
-android {
-    compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
-    }
-}
+      mMap.setOnCameraMoveListener(() -> {
+            mRouteOverlayView.onCameraMove(mMap.getProjection(), mMap.getCameraPosition());
+          }
+      );
 ```
 
 
