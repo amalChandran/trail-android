@@ -66,22 +66,29 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
       firstTimeArcAnimator.setDuration(ANIM_DURATION_DEFAULT);
       firstTimeArcAnimator.setInterpolator(new DecelerateInterpolator());
     }
-    firstTimeArcAnimator.addListener(new AnimatorListener() {
+    firstTimeArcAnimator.addListener(new Animator.AnimatorListener() {
       @Override
       public void onAnimationStart(Animator animator) {
-        super.onAnimationStart(animator);
         isFirstTimeDrawing = true;
         animStarted = true;
       }
 
       @Override
       public void onAnimationEnd(Animator animator) {
-        super.onAnimationEnd(animator);
         isFirstTimeDrawing = false;
         route.getShadowPaint().setPathEffect(null);
       }
-    });
 
+      @Override
+      public void onAnimationCancel(Animator animator) {
+      }
+
+      @Override
+      public void onAnimationRepeat(Animator animator) {
+
+      }
+    });
+    
     if (secondTimeArcAnimator == null) {
       secondTimeArcAnimator = ObjectAnimator.ofFloat(this, "update1", 0f, 1f);
       secondTimeArcAnimator.setDuration(ANIM_DURATION_REPEAT);
