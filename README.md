@@ -84,4 +84,4 @@ android {
 MIT © Amal Chandran
 
 ## Logo
-<a href="https://dribbble.com/josephjrscribbles">Jibin</a>
+<a href="https://dribbble.com/josephjrscribbles">Jibin Joseph</a>
