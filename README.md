@@ -8,11 +8,11 @@
   <a href="https://github.com/angular/angular.js/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-lightgrey.svg" alt="License: MIT"></a>
 </p>
 
-<p align="center">
+<p align="left">
   (Gif running @ 10fps. Check the video on youtube.)
 </p>
 
-<p align="center">
+<p align="left">
   <img src="extras/trailv1.5.gif" width="30%" />
 </p>
 <p align="center">
