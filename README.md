@@ -15,7 +15,7 @@
 <p align="left">
   <img src="extras/trailv1.5.gif" width="30%" />
 </p>
-<p align="center">
+<p align="left">
   <a href="https://www.youtube.com/watch?v=ENOcDomhCPw"><img src="extras/youtube_grab_v1.5.png" width="50%" /></a>
 </p>
 
