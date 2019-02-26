@@ -64,6 +64,16 @@ To make sure that the overlay layer moves along with the Google maps movement we
       );
 ```
 
+The library contains java 8 byte code, so dont forget to enable java 8 in your applications's build.gradle file.
+```
+android {
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+}
+```
+
 
 ## License
 MIT © Amal Chandran
