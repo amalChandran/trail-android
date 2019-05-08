@@ -2,6 +2,8 @@ package com.amalbit.trail.util;
 
 import android.content.Context;
 import android.graphics.Path;
+import android.graphics.Point;
+import android.graphics.RectF;
 import android.util.DisplayMetrics;
 
 /**
@@ -10,7 +12,44 @@ import android.util.DisplayMetrics;
 
 public class Util {
 
-  public static Path createCurvedPath(int x1, int y1, int x2, int y2, int curveRadius) {
+
+//  public static Path createArcPath(int x1, int y1, int x2, int y2, int curveRadius) {
+//    int startAngle = (int) (180 / Math.PI * Math.atan2(y1 - y2, x1 - x2));
+//    float sweepAngle = 180;
+//    float distanceBtweenPoints = ((float) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)))/2;
+////    float radius = 40;
+//    final RectF oval = new RectF();
+//    oval.set(x2 - distanceBtweenPoints, y2 - distanceBtweenPoints, x2 + distanceBtweenPoints, y2+ distanceBtweenPoints);
+//    Path myPath = new Path();
+//    myPath.arcTo(oval, startAngle, -(float) sweepAngle, true);
+//    return myPath;
+//  }
+
+  public static Path createCurvedPath(Point point1 ,Point point2) {
+    Path path = new Path();
+    int midX = point1.x + ((point2.x - point1.x) / 2);
+    int midY = point1.y + ((point2.y - point1.y) / 2);
+    float xDiff, yDiff;
+    if (point2.x > point1.x) {
+      xDiff = midX - point1.x;
+      yDiff = midY - point1.y;
+    } else {
+      xDiff = midX - point2.x;
+      yDiff = midY - point2.y;
+    }
+
+    double radius = (Math.sqrt(Math.pow(point1.x - point2.x, 2.0) + Math.pow(point1.y - point2.y, 2.0))) * .76;
+
+    double angle = (Math.atan2(yDiff, xDiff) * (180 / Math.PI)) - 90;
+    double angleRadians = Math.toRadians(angle);
+    float pointX = (float) (midX + radius * Math.cos(angleRadians));
+    float pointY = (float) (midY + radius * Math.sin(angleRadians));
+
+    path.moveTo(point1.x, point1.y);
+    path.cubicTo(point1.x, point1.y, pointX, pointY, point2.x, point2.y);
+    return path;
+  }
+  public static Path createCurvedPath(int x1, int y1, int x2, int y2) {
     Path path = new Path();
     int midX = x1 + ((x2 - x1) / 2);
     int midY = y1 + ((y2 - y1) / 2);
@@ -22,10 +61,13 @@ public class Util {
       xDiff = midX - x2;
       yDiff = midY - y2;
     }
+
+    double radius = (Math.sqrt(Math.pow(x1 - x2, 2.0) + Math.pow(y1 - y2, 2.0))) * .76;
+
     double angle = (Math.atan2(yDiff, xDiff) * (180 / Math.PI)) - 90;
     double angleRadians = Math.toRadians(angle);
-    float pointX = (float) (midX + curveRadius * Math.cos(angleRadians));
-    float pointY = (float) (midY + curveRadius * Math.sin(angleRadians));
+    float pointX = (float) (midX + radius * Math.cos(angleRadians));
+    float pointY = (float) (midY + radius * Math.sin(angleRadians));
     path.moveTo(x1, y1);
     path.cubicTo(x1, y1, pointX, pointY, x2, y2);
     return path;

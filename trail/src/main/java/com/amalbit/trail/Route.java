@@ -58,7 +58,7 @@ public class Route {//TODO Builder pattern for route.
       throw new NullPointerException("Projection cannot be null");
     } else if (builder.cameraPosition == null) {
       throw new NullPointerException("cameraPosition cannot be null");
-    } else if (builder.latLngs == null || builder.latLngs.isEmpty() || builder.latLngs.size() <= 2) {
+    } else if (builder.latLngs == null || builder.latLngs.isEmpty() || builder.latLngs.size() < 2) {
       throw new NullPointerException("LatLngs cannot be null or then count less than 2.");
     }
     this.routeOverlayView = builder.routeOverlayView;
@@ -167,7 +167,7 @@ public class Route {//TODO Builder pattern for route.
       animationRouteHelper.play();
     } else if (routeType == RouteType.ARC) {
       AnimationArcHelper animationArcHelper = AnimationArcHelper.getInstance(routeOverlayView, this);
-      Path arcPath = Util.createCurvedPath(pickUpPoint.x, pickUpPoint.y, dropPoint.x, dropPoint.y, ARC_CURVE_RADIUS);
+      Path arcPath = Util.createCurvedPath(pickUpPoint.x, pickUpPoint.y, dropPoint.x, dropPoint.y);
       Path shadowPath = Util.createShadowPath(pickUpPoint.x, pickUpPoint.y, dropPoint.x, dropPoint.y);
 
       PathMeasure pathMeasure = new PathMeasure(arcPath, false);

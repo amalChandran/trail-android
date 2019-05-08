@@ -11,6 +11,7 @@ import com.amalbit.trail.RouteOverlayView;
 import com.amalbit.trail.RouteOverlayView.RouteType;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.CancelableCallback;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -51,7 +52,6 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
       case R.id.btnAdd:
         mRouteOverlayView.removeRoutes();
         zoomRoute(mRoute);
-        drawRoutes();
         break;
       case R.id.btnRemove:
         mRouteOverlayView.removeRoutes();
@@ -101,7 +101,18 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
     }
 
     LatLngBounds latLngBounds = boundsBuilder.build();
-    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100));
+
+    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100), 200, new CancelableCallback() {
+      @Override
+      public void onFinish() {
+        drawRoutes();
+      }
+
+      @Override
+      public void onCancel() {
+
+      }
+    });
   }
 
   private void drawRoutes() {
