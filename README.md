@@ -28,7 +28,7 @@ allprojects {
 ```
 2. Add the dependency
 ```
-implementation 'com.github.amalChandran:trail-android:v1.5'
+implementation 'com.github.amalChandran:trail-android:v1.51'
 ```
 ## Usage
 Place RouteOverlayView over your google map layout in xml. Make sure that the routeoverlayview covers the map completely. This is the view in which the routes will be drawn.
