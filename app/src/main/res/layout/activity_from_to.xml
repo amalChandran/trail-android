@@ -13,8 +13,16 @@
     android:name="com.google.android.gms.maps.SupportMapFragment"
     tools:context="com.amalbit.animationongooglemap.PolylineBased.MapsActivity"/>
   <com.amalbit.trail.MarkerOverlayView
+    android:id="@+id/mapMarkerOverlayView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/mapMarkerOverlayView"/>
-
+    android:layout_height="match_parent"/>
+  <android.support.v7.widget.AppCompatImageView
+    android:id="@+id/imgTest"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:srcCompat="@drawable/car"
+    app:layout_constraintBottom_toBottomOf="@+id/mapMarkerOverlayView"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="@+id/mapMarkerOverlayView"
+    app:layout_constraintTop_toTopOf="@+id/mapMarkerOverlayView"/>
 </android.support.constraint.ConstraintLayout>

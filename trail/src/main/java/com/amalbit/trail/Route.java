@@ -18,7 +18,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import java.util.List;
 
-public class Route {//TODO Builder pattern for route.
+public class Route {
   private static final int ARC_CURVE_RADIUS = 450;
   private static final int STROKE_WIDTH_DP = 3;
   private Path path;
@@ -29,7 +29,7 @@ public class Route {//TODO Builder pattern for route.
   private Matrix matrix;
   private Matrix shadowMatrix;
   private RectF rectF;
-  private RectF shadowrRectF;
+  private RectF shadowRectF;
   private Paint topLayerPaint;
   private Paint bottomLayerPaint;
   private Paint shadowPaint;
@@ -51,9 +51,9 @@ public class Route {//TODO Builder pattern for route.
 
   private Route(Builder builder) {
     if (builder.routeOverlayView == null) {
-      throw new NullPointerException("Routeoverlayview cannot be null");
+      throw new NullPointerException("RouteOverlayView cannot be null");
     } else if (builder.routeType1 ==  null) {
-      throw new NullPointerException("Routetype cannot be null");
+      throw new NullPointerException("RouteType cannot be null");
     } else if (builder.projection ==  null) {
       throw new NullPointerException("Projection cannot be null");
     } else if (builder.cameraPosition == null) {
@@ -84,7 +84,7 @@ public class Route {//TODO Builder pattern for route.
     matrix = new Matrix();
     shadowMatrix = new Matrix();
     rectF = new RectF();
-    shadowrRectF = new RectF();
+    shadowRectF = new RectF();
     projectionHelper = new ProjectionHelper(this, false);
     shadowProjectionHelper = new ProjectionHelper(this, true);
 
@@ -276,9 +276,9 @@ public class Route {//TODO Builder pattern for route.
 
 
   private void zoomShadowPath(Path path, Path drawPath, Matrix matrix, float scaleFactor) {
-    drawPath.computeBounds(shadowrRectF, true);
+    drawPath.computeBounds(shadowRectF, true);
     Matrix matrixTemp = new Matrix();
-    matrixTemp.postScale(scaleFactor, scaleFactor, shadowrRectF.centerX(), shadowrRectF.centerY());
+    matrixTemp.postScale(scaleFactor, scaleFactor, shadowRectF.centerX(), shadowRectF.centerY());
     matrix.postConcat(matrixTemp);
     drawPath.rewind();
     drawPath.addPath(path);
@@ -379,8 +379,8 @@ public class Route {//TODO Builder pattern for route.
     this.shadowProjectionHelper = shadowProjectionHelper;
   }
 
-  public RectF getShadowrRectF() {
-    return shadowrRectF;
+  public RectF getShadowRectF() {
+    return shadowRectF;
   }
 
   Paint getPaintDebug() {

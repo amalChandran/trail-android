@@ -51,6 +51,17 @@ public class MarkerOverlayView extends View implements MarkerRemoveListner {
     invalidate();
   }
 
+  public void updateMarkerAngle(OverlayMarker overlayMarker) {
+    OverlayMarker currentMarker  = findMarkerById(overlayMarker.getMarkerId());
+    currentMarker.setLatLng(overlayMarker.getLatLng());
+    overlayMarker.setMarkerRemoveListner(this);
+    invalidate();
+  }
+
+  public int getMarkerCount() {
+    return overlayMarkers.size();
+  }
+
   public OverlayMarker findMarkerById(int markerId) {
     for (OverlayMarker marker : overlayMarkers) {
       if (marker.getMarkerId() == markerId) {
@@ -107,9 +118,14 @@ public class MarkerOverlayView extends View implements MarkerRemoveListner {
         Point point = new Point();
         point.x = overlayMarker.getScreenPoint().x - overlayMarker.getIcon().getWidth() / 2;
         point.y = overlayMarker.getScreenPoint().y - overlayMarker.getIcon().getHeight() / 2;
-//        markerMatrix.postRotate(overlayMarker.getBearing());
-//        markerMatrix.postTranslate(point.x, point.y);
-        canvas.drawBitmap(overlayMarker.getIcon(), point.x, point.y,null);
+
+        Matrix rotateMatrix = new Matrix();
+        int xRotatePoint = overlayMarker.getIcon().getWidth()/2;
+        int yRotatePoint = overlayMarker.getIcon().getHeight()/2;
+        rotateMatrix.postRotate(overlayMarker.getBearing(), xRotatePoint, yRotatePoint);
+        rotateMatrix.postTranslate(point.x, point.y);
+
+        canvas.drawBitmap(overlayMarker.getIcon(), rotateMatrix,null);
       }
     }
   }

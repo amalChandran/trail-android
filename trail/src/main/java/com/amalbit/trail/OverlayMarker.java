@@ -1,11 +1,14 @@
 package com.amalbit.trail;
 
+import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import com.google.android.gms.maps.model.LatLng;
 
 public class OverlayMarker {
+
+  public static int count = 0;
 
   private int markerId = -1;
 
@@ -20,6 +23,10 @@ public class OverlayMarker {
   private MarkerRemoveListner markerRemoveListner;
 
   private OnMarkerUpdate onMarkerUpdate;
+
+  private ValueAnimator translateValueAnimator;
+
+  private ValueAnimator rotateValueAnimator;
 
   public LatLng getLatLng() {
     return latLng;
@@ -37,6 +44,17 @@ public class OverlayMarker {
 
   public void setIcon(Bitmap icon) {
     this.icon = icon;
+  }
+
+  public void rotateIcon(float degrees) {
+//    int width = icon.getWidth();
+//    int height = icon.getHeight();
+//
+//    Matrix matrix = new Matrix();
+//    matrix.postRotate(degrees);
+//
+//    Bitmap scaledBitmap = Bitmap.createScaledBitmap(icon, width, height, true);
+//    icon = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
   }
 
   public Point getScreenPoint() {
@@ -104,4 +122,31 @@ public class OverlayMarker {
   public void setBearing(float bearing) {
     this.bearing = bearing;
   }
+
+  public ValueAnimator getTranslateValueAnimator() {
+    return translateValueAnimator;
+  }
+
+  public void setTranslateValueAnimator(ValueAnimator translateValueAnimator) {
+    this.translateValueAnimator = translateValueAnimator;
+  }
+
+  public ValueAnimator getRotateValueAnimator() {
+    return rotateValueAnimator;
+  }
+
+  public void setRotateValueAnimator(ValueAnimator rotateValueAnimator) {
+    this.rotateValueAnimator = rotateValueAnimator;
+  }
+
+//  private Bitmap rotateBitmap(Bitmap bitmap, float bearing) {
+//
+//    Matrix matrix = new Matrix();
+//    matrix.setRotate(bearing);
+//    bitmap.getWidth();
+//    bitmap.getHeight();
+//    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+//  }
+
+
 }

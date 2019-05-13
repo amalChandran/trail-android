@@ -18,7 +18,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     findViewById(R.id.btn_fromto).setOnClickListener(this);
 
     //Testing
-//    findViewById(R.id.btn_fromto).performClick();
+    findViewById(R.id.btn_fromto).performClick();
 //    findViewById(R.id.btn_projection).performClick();
   }
 
