@@ -112,7 +112,7 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
         final OverlayMarker overlayMarker = markerOverlayView.findMarkerById(car.getCarId());
         if (overlayMarker == null) {
           OverlayMarker overlayMarker1 = new OverlayMarker();
-          overlayMarker1.setIcon(markerIcon);
+          overlayMarker1.setIcon(markerIcon.copy(markerIcon.getConfig(), true));
           overlayMarker1.setMarkerId(car.getCarId());
           overlayMarker1.setLatLng(car.getLatLng());
           overlayMarker1.setOnMarkerUpdate(FromToActivity.this);
@@ -130,15 +130,11 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
           final LatLng startLatLng = overlayMarker.getLatLng();
           final LatLng endLatLng = car.getLatLng();
           float bearing = 0;
-          overlayMarker.setIcon(markerIcon);
+//          overlayMarker.setIcon(markerIcon);
           bearing = getBearing(startLatLng, endLatLng);
 
-//          if (markerIcon != null && markerIcon.getWidth() > 0 && markerIcon.getHeight() > 0) {
-//            bearing = getBearing(startLatLng, endLatLng);
-//            overlayMarker.setIcon(rotateBitmap1(markerIcon, bearing));
-//          }
-
           ValueAnimator valueAnimator = overlayMarker.getTranslateValueAnimator();
+          valueAnimator.removeAllUpdateListeners();
           valueAnimator.addUpdateListener(animation -> {
             float v = animation.getAnimatedFraction();
             LatLng newPosition = new LatLngInterpolator.Linear().interpolate(v, startLatLng, endLatLng);
@@ -149,19 +145,22 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
           valueAnimator.setDuration(1000);
           valueAnimator.start();
 
+          overlayMarker.setLatLng(endLatLng);
+          markerOverlayView.updateMarker(overlayMarker, mMap.getProjection());
+
           float lastBearing = overlayMarker.getBearing();
           ValueAnimator rotateValueAnimator = overlayMarker.getRotateValueAnimator();
           rotateValueAnimator.removeAllUpdateListeners();
           rotateValueAnimator.cancel();
 
           final float brearingFinal = bearing;
-          rotateValueAnimator = ValueAnimator.ofFloat(lastBearing, bearing);
+
+          rotateValueAnimator = ValueAnimator.ofFloat(lastBearing, calcMinAngle(lastBearing, bearing));
           rotateValueAnimator.addUpdateListener(animation -> {
             float v = (float) animation.getAnimatedValue();
             overlayMarker.setBearing(v);
             overlayMarker.rotateIcon(v);
-//            overlayMarker.setIcon(rotateBitmap1(markerIcon, v));
-            U.log("rotation", "from " + lastBearing + "| to " + brearingFinal + " || " + "fraction : " + v);
+//            U.log("rotation", "from " + lastBearing + "| to " + brearingFinal + " || " + "fraction : " + v);
             markerOverlayView.updateMarkerAngle(overlayMarker);
           });
           rotateValueAnimator.setDuration(200);
@@ -171,6 +170,24 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
         }
       }
     });
+  }
+
+
+  public static final int STRAIGHT_ANGLE = 180;
+  public static final int FULL_ROTATION = 360;
+
+  private float calcMinAngle(float markerCurrentRotation, float markerNextRotation) {
+    float angleDifference = (Math.abs(markerNextRotation - markerCurrentRotation));
+    if (angleDifference > STRAIGHT_ANGLE) {
+      if (markerCurrentRotation < 0) {
+        markerNextRotation = (-FULL_ROTATION + angleDifference) + markerCurrentRotation;
+      } else {
+        markerNextRotation = (FULL_ROTATION - angleDifference) + markerCurrentRotation;
+      }
+    }
+    return markerNextRotation > FULL_ROTATION
+        ? markerNextRotation - FULL_ROTATION
+        : markerNextRotation;
   }
 
   private Bitmap rotateBitmap(Bitmap original, float degrees) {
