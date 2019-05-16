@@ -32,7 +32,7 @@ public class RouteOverlayView extends View {
 
   private final Object mSvgLock = new Object();
 
-  private List<Route> routes;
+  private List<OverlayPolyline> overlayPolylines;
 
   public RouteOverlayView(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -48,7 +48,7 @@ public class RouteOverlayView extends View {
 
   private void init(@Nullable AttributeSet attrSet) {
     setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-    routes = new ArrayList<>();
+    overlayPolylines = new ArrayList<>();
   }
 
   private void setUpDebugProps() {
@@ -71,13 +71,13 @@ public class RouteOverlayView extends View {
   }
 
   public void onCameraMove(Projection projection, CameraPosition cameraPosition) {
-    if (routes == null) return;
-    for (Route route : routes) {
-      if (route.getProjectionHelper().getCenterLatLng() != null) {
-        route.getProjectionHelper().onCameraMove(projection, cameraPosition);
+    if (overlayPolylines == null) return;
+    for (OverlayPolyline overlayPolyline : overlayPolylines) {
+      if (overlayPolyline.getProjectionHelper().getCenterLatLng() != null) {
+        overlayPolyline.getProjectionHelper().onCameraMove(projection, cameraPosition);
       }
-      if (route.getShadowProjectionHelper().getCenterLatLng() != null) {
-        route.getShadowProjectionHelper().onCameraMove(projection, cameraPosition);
+      if (overlayPolyline.getShadowProjectionHelper().getCenterLatLng() != null) {
+        overlayPolyline.getShadowProjectionHelper().onCameraMove(projection, cameraPosition);
       }
     }
   }
@@ -85,19 +85,19 @@ public class RouteOverlayView extends View {
   public void removeRoutes() {
     clearAnimation();
     stopAllAnimation();
-    routes.clear();
+    overlayPolylines.clear();
     invalidate();
   }
 
-  public void removeRoute(Route route) {
-    routes.remove(route);
+  public void removeRoute(OverlayPolyline overlayPolyline) {
+    overlayPolylines.remove(overlayPolyline);
     invalidate();
   }
 
-  protected void addPath(Route route) {
-    routes.add(route);
+  protected void addPath(OverlayPolyline overlayPolyline) {
+    overlayPolylines.add(overlayPolyline);
     invalidate();
-    onCameraMove(route.getInitialProjection(), route.getInitialCameraPosition());
+    onCameraMove(overlayPolyline.getInitialProjection(), overlayPolyline.getInitialCameraPosition());
   }
 
   @Override
@@ -124,57 +124,59 @@ public class RouteOverlayView extends View {
   private void drawPathBorder(Canvas canvas) {
 //    drawDebugDrid(canvas);
     int count = 0;
-    for (Route route : routes) {
-      canvas.drawRect(route.getRectF(), route.getPaintDebug());
-      canvas.drawCircle(route.getRectF().centerX(), route.getRectF().centerY(), 20, route.getTopLayerPaint());
-      canvas.drawText("" + count, route.getRectF().centerX(), route.getRectF().centerY(), route.getPaintDebug());
-      if (route.getProjectionHelper() != null && route.getProjectionHelper().point != null) {
-        canvas.drawCircle(route.getProjectionHelper().point.x, route.getProjectionHelper().point.y, 10,
-            route.getBottomLayerPaint());
+    for (OverlayPolyline overlayPolyline : overlayPolylines) {
+      canvas.drawRect(overlayPolyline.getRectF(), overlayPolyline.getPaintDebug());
+      canvas.drawCircle(overlayPolyline.getRectF().centerX(), overlayPolyline.getRectF().centerY(), 20, overlayPolyline.getTopLayerPaint());
+      canvas.drawText("" + count, overlayPolyline.getRectF().centerX(), overlayPolyline.getRectF().centerY(), overlayPolyline
+          .getPaintDebug());
+      if (overlayPolyline.getProjectionHelper() != null && overlayPolyline.getProjectionHelper().point != null) {
+        canvas.drawCircle(overlayPolyline.getProjectionHelper().point.x, overlayPolyline.getProjectionHelper().point.y, 10,
+            overlayPolyline.getBottomLayerPaint());
         canvas
-            .drawText("" + count, route.getProjectionHelper().point.x, route.getProjectionHelper().point.y, route.getPaintDebug());
+            .drawText("" + count, overlayPolyline.getProjectionHelper().point.x, overlayPolyline.getProjectionHelper().point.y, overlayPolyline
+                .getPaintDebug());
       }
-      if (route.getShadowDrawPath() != null) {
+      if (overlayPolyline.getShadowDrawPath() != null) {
         RectF rectF = new RectF();
-        route.getShadowDrawPath().computeBounds(rectF, true);
-        canvas.drawRect(rectF, route.getPaintDebug());
+        overlayPolyline.getShadowDrawPath().computeBounds(rectF, true);
+        canvas.drawRect(rectF, overlayPolyline.getPaintDebug());
       }
-      if (route.getShadowProjectionHelper() != null && route.getShadowProjectionHelper().point != null) {
-        canvas.drawCircle(route.getShadowProjectionHelper().point.x, route.getShadowProjectionHelper().point.y, 20,
-            route.getPaintDebug());
+      if (overlayPolyline.getShadowProjectionHelper() != null && overlayPolyline.getShadowProjectionHelper().point != null) {
+        canvas.drawCircle(overlayPolyline.getShadowProjectionHelper().point.x, overlayPolyline.getShadowProjectionHelper().point.y, 20,
+            overlayPolyline.getPaintDebug());
       }
       count++;
     }
   }
 
   private void drawRoute(Canvas canvas) {
-    for (Route route : routes) {
-      if (route.getDrawPath() == null) {
+    for (OverlayPolyline overlayPolyline : overlayPolylines) {
+      if (overlayPolyline.getDrawPath() == null) {
         return;
       }
-      if (route.getRouteType() == RouteType.ARC) {
-        AnimationArcHelper animationArcHelper = (AnimationArcHelper) route.getAnimationHelper();
+      if (overlayPolyline.getRouteType() == RouteType.ARC) {
+        AnimationArcHelper animationArcHelper = (AnimationArcHelper) overlayPolyline.getAnimationHelper();
         if (animationArcHelper.animStarted) {
-          if (route.getShadowDrawPath() != null) {
-            canvas.drawPath(route.getShadowDrawPath(),
-                route.getShadowPaint());
+          if (overlayPolyline.getShadowDrawPath() != null) {
+            canvas.drawPath(overlayPolyline.getShadowDrawPath(),
+                overlayPolyline.getShadowPaint());
           }
           if (animationArcHelper.isFirstTimeDrawing) {
-            canvas.drawPath(route.getDrawPath(), route.getTopLayerPaint());
+            canvas.drawPath(overlayPolyline.getDrawPath(), overlayPolyline.getTopLayerPaint());
           } else {
-            canvas.drawPath(route.getDrawPath(), route.getBottomLayerPaint());
-            canvas.drawPath(route.getDrawPath(), route.getTopLayerPaint());
+            canvas.drawPath(overlayPolyline.getDrawPath(), overlayPolyline.getBottomLayerPaint());
+            canvas.drawPath(overlayPolyline.getDrawPath(), overlayPolyline.getTopLayerPaint());
           }
         }
-      } else if (route.getRouteType() == RouteType.PATH) {
-        if (((AnimationRouteHelper) route.getAnimationHelper()).isFirstTimeDrawing) {
-          canvas.drawPath(route.getDrawPath(), route.getTopLayerPaint());
+      } else if (overlayPolyline.getRouteType() == RouteType.PATH) {
+        if (((AnimationRouteHelper) overlayPolyline.getAnimationHelper()).isFirstTimeDrawing) {
+          canvas.drawPath(overlayPolyline.getDrawPath(), overlayPolyline.getTopLayerPaint());
         } else {
-          canvas.drawPath(route.getDrawPath(), route.getBottomLayerPaint());
-          canvas.drawPath(route.getDrawPath(), route.getTopLayerPaint());
+          canvas.drawPath(overlayPolyline.getDrawPath(), overlayPolyline.getBottomLayerPaint());
+          canvas.drawPath(overlayPolyline.getDrawPath(), overlayPolyline.getTopLayerPaint());
         }
-      } else if (route.getRouteType() == RouteType.DASH) {
-        canvas.drawPath(route.getDrawPath(), route.getPaintDash());
+      } else if (overlayPolyline.getRouteType() == RouteType.DASH) {
+        canvas.drawPath(overlayPolyline.getDrawPath(), overlayPolyline.getPaintDash());
       }
     }
   }
@@ -202,9 +204,9 @@ public class RouteOverlayView extends View {
 
 
   public void stopAllAnimation() {
-    for (Route route : routes) {
-      if (route.getAnimationHelper() != null) {
-        route.getAnimationHelper().stop(() -> {
+    for (OverlayPolyline overlayPolyline : overlayPolylines) {
+      if (overlayPolyline.getAnimationHelper() != null) {
+        overlayPolyline.getAnimationHelper().stop(() -> {
         });
       }
     }

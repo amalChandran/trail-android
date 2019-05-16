@@ -5,14 +5,14 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  tools:context=".FromToActivity">
+  tools:context=".projectionBased.FromToActivity">
   <fragment
     android:id="@+id/map"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:name="com.google.android.gms.maps.SupportMapFragment"
-    tools:context="com.amalbit.animationongooglemap.PolylineBased.MapsActivity"/>
-  <com.amalbit.trail.MarkerOverlayView
+    tools:context="com.amalbit.animationongooglemap.polylineBased.MapsActivity"/>
+  <com.amalbit.trail.marker.MarkerOverlayView
     android:id="@+id/mapMarkerOverlayView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"/>

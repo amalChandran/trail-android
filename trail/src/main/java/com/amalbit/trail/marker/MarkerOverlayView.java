@@ -1,14 +1,13 @@
-package com.amalbit.trail;
+package com.amalbit.trail.marker;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
-import com.amalbit.trail.OverlayMarker.MarkerRemoveListner;
+import com.amalbit.trail.marker.OverlayMarker.MarkerRemoveListner;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import java.util.ArrayList;
@@ -18,6 +17,9 @@ public class MarkerOverlayView extends View implements MarkerRemoveListner {
 
   private final Object mSvgLock = new Object();
 
+  /**
+   * TO be converted to a HashMap.
+   * **/
   private List<OverlayMarker> overlayMarkers;
 
   public MarkerOverlayView(Context context) {
@@ -40,6 +42,15 @@ public class MarkerOverlayView extends View implements MarkerRemoveListner {
     overlayMarker.setScreenPoint(projection.toScreenLocation(overlayMarker.getLatLng()));
     overlayMarker.setMarkerRemoveListner(this);
     overlayMarkers.add(overlayMarker);
+    invalidate();
+  }
+
+  public void addMarkers(List<OverlayMarker> overlayMarkers, Projection projection) {
+    for (OverlayMarker overlayMarker : overlayMarkers) {
+      overlayMarker.setScreenPoint(projection.toScreenLocation(overlayMarker.getLatLng()));
+      overlayMarker.setMarkerRemoveListner(this);
+      this.overlayMarkers.add(overlayMarker);
+    }
     invalidate();
   }
 
@@ -71,13 +82,6 @@ public class MarkerOverlayView extends View implements MarkerRemoveListner {
      return null;
   }
 
-  public void addMarker(List<OverlayMarker> overlayMarkers) {
-    for (OverlayMarker overlayMarker : overlayMarkers) {
-      overlayMarker.setMarkerRemoveListner(this);
-      this.overlayMarkers.add(overlayMarker);
-    }
-  }
-
   @Override
   public void onRemove(OverlayMarker overlayMarker) {
     overlayMarkers.remove(overlayMarker);
@@ -86,13 +90,6 @@ public class MarkerOverlayView extends View implements MarkerRemoveListner {
 
   public void removeAllMarker() {
     overlayMarkers.clear();
-    invalidate();
-  }
-
-  public void onCameraMove(Projection projection) {
-    for (OverlayMarker overlayMarker : overlayMarkers) {
-      overlayMarker.setScreenPoint(projection.toScreenLocation(overlayMarker.getLatLng()));
-    }
     invalidate();
   }
 
@@ -113,7 +110,6 @@ public class MarkerOverlayView extends View implements MarkerRemoveListner {
 
   private void drawMarkers(Canvas canvas) {
     if (overlayMarkers.size() > 0) {
-//      Matrix markerMatrix = new Matrix();
       for (OverlayMarker overlayMarker : overlayMarkers) {
         Point point = new Point();
         point.x = overlayMarker.getScreenPoint().x - overlayMarker.getIcon().getWidth() / 2;

@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import com.amalbit.animationongooglemap.PolylineBased.MapsActivity;
-import com.amalbit.animationongooglemap.ProjectionBased.OverlayRouteActivity;
+import com.amalbit.animationongooglemap.polylineBased.MapsActivity;
+import com.amalbit.animationongooglemap.projectionBased.FromToActivity;
+import com.amalbit.animationongooglemap.projectionBased.OverlayRouteActivity;
+import com.amalbit.animationongooglemap.projectionBased.ViewOverlayActivity;
 
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -16,10 +18,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     findViewById(R.id.btn_polyline).setOnClickListener(this);
     findViewById(R.id.btn_projection).setOnClickListener(this);
     findViewById(R.id.btn_fromto).setOnClickListener(this);
+    findViewById(R.id.btnViewOverly).setOnClickListener(this);
 
-    //Testing
-    findViewById(R.id.btn_fromto).performClick();
+    //Debugging
+//    findViewById(R.id.btn_fromto).performClick();
 //    findViewById(R.id.btn_projection).performClick();
+    findViewById(R.id.btnViewOverly).performClick();
   }
 
   @Override
@@ -33,6 +37,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         break;
       case R.id.btn_fromto:
         startActivity(new Intent(HomeActivity.this, FromToActivity.class));
+        break;
+      case R.id.btnViewOverly:
+        startActivity(new Intent(HomeActivity.this, ViewOverlayActivity.class));
         break;
     }
   }

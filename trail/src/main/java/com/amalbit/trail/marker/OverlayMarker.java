@@ -1,8 +1,7 @@
-package com.amalbit.trail;
+package com.amalbit.trail.marker;
 
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -33,7 +32,6 @@ public class OverlayMarker {
   }
 
   public void setLatLng(LatLng latLng) {
-    //TODO update the canvas
     if (onMarkerUpdate!= null) onMarkerUpdate.onMarkerUpdate();
     this.latLng = latLng;
   }

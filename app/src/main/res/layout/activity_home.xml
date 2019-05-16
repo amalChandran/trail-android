@@ -11,7 +11,7 @@
     android:id="@+id/btn_projection"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="4dp"
     android:text="@string/btn_projection_based"
     app:layout_constraintBottom_toTopOf="@+id/btn_polyline"
     app:layout_constraintHorizontal_bias="0.0"
@@ -21,7 +21,7 @@
     android:id="@+id/btn_polyline"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="4dp"
     android:text="@string/btn_polyline_based"
     app:layout_constraintBottom_toTopOf="@+id/btn_fromto"
     app:layout_constraintHorizontal_bias="0.0"
@@ -31,9 +31,9 @@
     android:id="@+id/btn_fromto"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="4dp"
     android:text="@string/btn_markers"
-    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintBottom_toTopOf="@+id/btnViewOverly"
     app:layout_constraintHorizontal_bias="0.0"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"/>
@@ -50,4 +50,13 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     app:srcCompat="@drawable/ic_app"/>
+  <Button
+    android:id="@+id/btnViewOverly"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="4dp"
+    android:text="ViewOverlay - Info window"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"/>
 </android.support.constraint.ConstraintLayout>

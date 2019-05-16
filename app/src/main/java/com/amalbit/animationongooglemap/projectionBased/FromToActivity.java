@@ -1,4 +1,4 @@
-package com.amalbit.animationongooglemap;
+package com.amalbit.animationongooglemap.projectionBased;
 
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
@@ -6,27 +6,25 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
+import com.amalbit.animationongooglemap.R;
+import com.amalbit.animationongooglemap.U;
 import com.amalbit.animationongooglemap.data.CarData.Car;
 import com.amalbit.animationongooglemap.data.LatlngData;
 import com.amalbit.animationongooglemap.marker.LatLngInterpolator;
 import com.amalbit.animationongooglemap.marker.Repeat;
-import com.amalbit.trail.MarkerOverlayView;
-import com.amalbit.trail.OverlayMarker;
-import com.amalbit.trail.OverlayMarker.OnMarkerUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
+import com.amalbit.trail.marker.MarkerOverlayView;
+import com.amalbit.trail.marker.OverlayMarker;
+import com.amalbit.trail.marker.OverlayMarker.OnMarkerUpdate;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
-public class FromToActivity extends AppCompatActivity implements OnMapReadyCallback, OnMarkerUpdate {
+public class FromToActivity extends BaseActivity implements OnMapReadyCallback, OnMarkerUpdate {
 
   private GoogleMap mMap;
 
@@ -52,7 +50,7 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
 //          rotateBitmap1(markerIcon, )
 //      );
 
-      float bearing = ThreadLocalRandom.current().nextInt(0, 360 + 1);
+      float bearing = 30;//ThreadLocalRandom.current().nextInt(0, 360 + 1);
       ValueAnimator rotateValueAnimator = ValueAnimator.ofFloat(lastBearing, bearing);
       rotateValueAnimator.addUpdateListener(animation -> {
         float v1 = (float) animation.getAnimatedValue();
@@ -77,7 +75,7 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
     mMap.setOnMapLoadedCallback(() -> {
       mMap.setOnCameraMoveListener(() -> markerOverlayView.onCameraMove(mMap));
 
-      setMapBounds();
+      setMapBounds(map);
 
       ArrayList<Car> indiranagarRoutes = LatlngData.getIndiranagarRoutes();
       repeat = new Repeat(() -> addMarkerWithAnimation(indiranagarRoutes), 1000);
@@ -86,20 +84,6 @@ public class FromToActivity extends AppCompatActivity implements OnMapReadyCallb
         repeat.startUpdates();
       });
     });
-  }
-
-  public void setMapBounds() {
-    List<LatLng> latLngs = new ArrayList<>();
-    latLngs.add(new LatLng(12.9715002, 77.6374856));//NW
-    latLngs.add(new LatLng(12.9703733, 77.6372037));//NE
-    latLngs.add(new LatLng(12.9595674, 77.6366595));//SE
-    latLngs.add(new LatLng(12.9595672, 77.6519803));//SW
-    LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
-    for (LatLng latLngPoint : latLngs) {
-      boundsBuilder.include(latLngPoint);
-    }
-    LatLngBounds latLngBounds = boundsBuilder.build();
-    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100));
   }
 
   public void addMarkerWithAnimation(List<Car> cars) {

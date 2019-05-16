@@ -10,6 +10,7 @@ import android.graphics.PathEffect;
 import android.graphics.PathMeasure;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.util.Log;
 import com.amalbit.trail.RouteOverlayView.RouteType;
 import com.amalbit.trail.contract.Animator;
 import com.amalbit.trail.util.Util;
@@ -18,7 +19,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import java.util.List;
 
-public class Route {
+public class OverlayPolyline {
   private static final int ARC_CURVE_RADIUS = 450;
   private static final int STROKE_WIDTH_DP = 3;
   private Path path;
@@ -49,7 +50,7 @@ public class Route {
   private Projection initialProjection;
   private CameraPosition initialCameraPosition;
 
-  private Route(Builder builder) {
+  private OverlayPolyline(Builder builder) {
     if (builder.routeOverlayView == null) {
       throw new NullPointerException("RouteOverlayView cannot be null");
     } else if (builder.routeType1 ==  null) {
@@ -71,7 +72,7 @@ public class Route {
     bottomLayerColor = (builder.bottomLayerColor != 0 ) ? builder.bottomLayerColor
         : routeOverlayView.getResources().getColor(R.color.routeSecondaryColor);
     routeShadowColor = (builder.routeShadowColor != 0 ) ? builder.routeShadowColor
-        :routeOverlayView.getResources().getColor(R.color.routeShadowColor);
+        : routeOverlayView.getResources().getColor(R.color.routeShadowColor);
     dashColor = (builder.dashColor != 0 ) ? builder.dashColor
         : Color.BLACK;
     init();
@@ -255,6 +256,7 @@ public class Route {
 
   void scaleShadowPathMatrix(float zoom) {
     scaleFactor = (float) Math.pow(2f, (zoom - shadowZoomAnchor));
+    Log.i("scale", "zoom : " + zoom + " | scaleFactor : " + scaleFactor);
     if (shadowPath != null) {
       zoomShadowPath(shadowPath, shadowDrawPath, shadowMatrix, scaleFactor);
     }
@@ -298,9 +300,9 @@ public class Route {
 
   private void translatePath(Path path, Path drawPath, Matrix matrix, float dx, float dy) {
     drawPath.computeBounds(rectF, true);//Only for drawing debug path bounds.
-    Matrix matrixTemp = new Matrix();
-    matrixTemp.postTranslate(dx, dy);
-    matrix.postConcat(matrixTemp);
+    Matrix translateMatrix = new Matrix();
+    translateMatrix.postTranslate(dx, dy);
+    matrix.postConcat(translateMatrix);
     drawPath.rewind();
     drawPath.addPath(path);
     drawPath.transform(matrix);
@@ -458,10 +460,10 @@ public class Route {
       return this;
     }
 
-    public Route create() {
-      Route route = new Route(this);
-      routeOverlayView.addPath(route);
-      return route;
+    public OverlayPolyline create() {
+      OverlayPolyline overlayPolyline = new OverlayPolyline(this);
+      routeOverlayView.addPath(overlayPolyline);
+      return overlayPolyline;
     }
 
   }

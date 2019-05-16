@@ -1,4 +1,4 @@
-package com.amalbit.animationongooglemap.PolylineBased;
+package com.amalbit.animationongooglemap.polylineBased;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

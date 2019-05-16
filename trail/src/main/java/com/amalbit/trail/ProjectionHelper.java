@@ -27,10 +27,10 @@ class ProjectionHelper {
 
   private boolean isShadow;
 
-  private Route route;
+  private OverlayPolyline overlayPolyline;
 
-  public ProjectionHelper(Route route, boolean isShadow) {
-    this.route = route;
+  public ProjectionHelper(OverlayPolyline overlayPolyline, boolean isShadow) {
+    this.overlayPolyline = overlayPolyline;
     this.isShadow = isShadow;
   }
 
@@ -57,16 +57,16 @@ class ProjectionHelper {
     if (isRouteSet) {
       if (isZooming) {
         if (isShadow) {
-          route.scaleShadowPathMatrix(cameraPosition.zoom);
+          overlayPolyline.scaleShadowPathMatrix(cameraPosition.zoom);
         } else {
-          route.scalePathMatrix(cameraPosition.zoom);
+          overlayPolyline.scalePathMatrix(cameraPosition.zoom);
         }
         isZooming = false;
       }
       if (!isShadow) {
-        route.translatePathMatrix(-x, -y);
+        overlayPolyline.translatePathMatrix(-x, -y);
       } else {
-        route.translateShadowPathMatrix(-x, -y);
+        overlayPolyline.translateShadowPathMatrix(-x, -y);
       }
       previousPoint = point;
     }

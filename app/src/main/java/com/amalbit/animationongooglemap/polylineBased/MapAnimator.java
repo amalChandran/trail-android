@@ -1,4 +1,4 @@
-package com.amalbit.animationongooglemap.PolylineBased;
+package com.amalbit.animationongooglemap.polylineBased;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;

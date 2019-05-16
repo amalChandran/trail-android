@@ -35,7 +35,7 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   private boolean isAnimating;
 
-  private Route route;
+  private OverlayPolyline overlayPolyline;
 
   private RouteOverlayView routeOverlayView;
 
@@ -45,13 +45,13 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   protected boolean isFirstTimeDrawing;
 
-  public static AnimationRouteHelper getInstance(RouteOverlayView routeOverlayView, Route route) {
-    return new AnimationRouteHelper(routeOverlayView, route);
+  public static AnimationRouteHelper getInstance(RouteOverlayView routeOverlayView, OverlayPolyline overlayPolyline) {
+    return new AnimationRouteHelper(routeOverlayView, overlayPolyline);
   }
 
-  private AnimationRouteHelper(RouteOverlayView routeOverlayView, Route route) {
+  private AnimationRouteHelper(RouteOverlayView routeOverlayView, OverlayPolyline overlayPolyline) {
     this.routeOverlayView = routeOverlayView;
-    this.route = route;
+    this.overlayPolyline = overlayPolyline;
   }
 
   public void init() {
@@ -90,13 +90,13 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
     }
 
     if (colorRouteAnimation == null) {
-      colorRouteAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), route.getBottomLayerColor(),
-          route.getTopLayerColor());
+      colorRouteAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), overlayPolyline.getBottomLayerColor(),
+          overlayPolyline.getTopLayerColor());
       colorRouteAnimation.setDuration(ANIM_DURATION_REPEAT); // milliseconds
       colorRouteAnimation.setStartDelay(750);
     }
     colorRouteAnimation.addUpdateListener(animator -> {
-      route.getBottomLayerPaint().setColor((int) animator.getAnimatedValue());
+      overlayPolyline.getBottomLayerPaint().setColor((int) animator.getAnimatedValue());
       routeOverlayView.invalidate();
     });
     colorRouteAnimation.addListener(new Animator.AnimatorListener() {
@@ -108,8 +108,8 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
       @Override
       public void onAnimationEnd(Animator animator) {
         PathEffect effect = new DashPathEffect(new float[]{length, length}, length);
-        route.getTopLayerPaint().setPathEffect(effect);
-        route.getBottomLayerPaint().setColor(route.getBottomLayerColor());
+        overlayPolyline.getTopLayerPaint().setPathEffect(effect);
+        overlayPolyline.getBottomLayerPaint().setColor(overlayPolyline.getBottomLayerColor());
         routeOverlayView.invalidate();
       }
 
@@ -163,13 +163,13 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   public void setUpdate(float update) {
     PathEffect effect = new DashPathEffect(dashValue, length * update);
-    route.getTopLayerPaint().setPathEffect(effect);
+    overlayPolyline.getTopLayerPaint().setPathEffect(effect);
     routeOverlayView.invalidate();
   }
 
   public void setUpdate1(float update) {
     PathEffect effect = new DashPathEffect(dashValue, -length * update);
-    route.getTopLayerPaint().setPathEffect(effect);
+    overlayPolyline.getTopLayerPaint().setPathEffect(effect);
     routeOverlayView.invalidate();
   }
 
@@ -210,7 +210,7 @@ public class AnimationRouteHelper implements com.amalbit.trail.contract.Animator
 
   @Override
   public void onPathMeasureChange() {
-    PathMeasure pathMeasure = new PathMeasure(route.getDrawPath(), false);
+    PathMeasure pathMeasure = new PathMeasure(overlayPolyline.getDrawPath(), false);
     length = pathMeasure.getLength();
     dashValue =
         new float[]{length, length};

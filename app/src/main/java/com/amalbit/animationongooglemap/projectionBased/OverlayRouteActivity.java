@@ -1,4 +1,4 @@
-package com.amalbit.animationongooglemap.ProjectionBased;
+package com.amalbit.animationongooglemap.projectionBased;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import com.amalbit.animationongooglemap.R;
 import com.amalbit.animationongooglemap.data.LatlngData;
-import com.amalbit.trail.Route;
+import com.amalbit.trail.OverlayPolyline;
 import com.amalbit.trail.RouteOverlayView;
 import com.amalbit.trail.RouteOverlayView.RouteType;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -116,7 +116,7 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
   }
 
   private void drawRoutes() {
-    Route normalRoute = new Route.Builder(mRouteOverlayView)
+    OverlayPolyline normalOverlayPolyline = new OverlayPolyline.Builder(mRouteOverlayView)
         .setRouteType(RouteType.PATH)
         .setCameraPosition(mMap.getCameraPosition())
         .setProjection(mMap.getProjection())
@@ -125,7 +125,7 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
         .setTopLayerColor(Color.RED)
         .create();
 
-    Route dashRoute = new Route.Builder(mRouteOverlayView)
+    OverlayPolyline dashOverlayPolyline = new OverlayPolyline.Builder(mRouteOverlayView)
         .setRouteType(RouteType.DASH)
         .setCameraPosition(mMap.getCameraPosition())
         .setProjection(mMap.getProjection())
@@ -133,7 +133,7 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
         .setDashColor(Color.BLACK)
         .create();
 
-    Route arcRoute = new Route.Builder(mRouteOverlayView)
+    OverlayPolyline arcOverlayPolyline = new OverlayPolyline.Builder(mRouteOverlayView)
         .setRouteType(RouteType.ARC)
         .setCameraPosition(mMap.getCameraPosition())
         .setProjection(mMap.getProjection())

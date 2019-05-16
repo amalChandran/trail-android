@@ -48,15 +48,15 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
 
   protected boolean animStarted;
 
-  private Route route;
+  private OverlayPolyline overlayPolyline;
 
-  public static AnimationArcHelper getInstance(RouteOverlayView routeOverlayView, Route route) {
-    return new AnimationArcHelper(routeOverlayView, route);
+  public static AnimationArcHelper getInstance(RouteOverlayView routeOverlayView, OverlayPolyline overlayPolyline) {
+    return new AnimationArcHelper(routeOverlayView, overlayPolyline);
   }
 
-  private AnimationArcHelper(RouteOverlayView routeOverlayView, Route route) {
+  private AnimationArcHelper(RouteOverlayView routeOverlayView, OverlayPolyline overlayPolyline) {
     this.mRouteOverlayView = routeOverlayView;
-    this.route = route;
+    this.overlayPolyline = overlayPolyline;
   }
 
   private void init() {
@@ -76,7 +76,7 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
       @Override
       public void onAnimationEnd(Animator animator) {
         isFirstTimeDrawing = false;
-        route.getShadowPaint().setPathEffect(null);
+        overlayPolyline.getShadowPaint().setPathEffect(null);
       }
 
       @Override
@@ -96,22 +96,22 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
     }
 
     if (colorArcAnimation == null) {
-      colorArcAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), route.getBottomLayerColor(),
-          route.getTopLayerColor());
+      colorArcAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), overlayPolyline.getBottomLayerColor(),
+          overlayPolyline.getTopLayerColor());
       colorArcAnimation.setDuration(ANIM_DURATION_REPEAT); // milliseconds
       colorArcAnimation.setStartDelay(250);
     }
 
     colorArcAnimation.addUpdateListener(animator -> {
-      route.getBottomLayerPaint().setColor((int) animator.getAnimatedValue());
+      overlayPolyline.getBottomLayerPaint().setColor((int) animator.getAnimatedValue());
       mRouteOverlayView.invalidate();
     });
     colorArcAnimation.addListener(new AnimatorListener() {
       @Override
       public void onAnimationEnd(Animator animator) {
         PathEffect effect = new DashPathEffect(new float[]{arcLength, arcLength}, arcLength);
-        route.getTopLayerPaint().setPathEffect(effect);
-        route.getBottomLayerPaint().setColor(route.getBottomLayerColor());
+        overlayPolyline.getTopLayerPaint().setPathEffect(effect);
+        overlayPolyline.getBottomLayerPaint().setColor(overlayPolyline.getBottomLayerColor());
         mRouteOverlayView.invalidate();
       }
     });
@@ -155,17 +155,17 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
 
   public void setUpdate(float update) {
     PathEffect effect = new DashPathEffect(arcdDashValue, arcLength * update);
-    route.getTopLayerPaint().setPathEffect(effect);
+    overlayPolyline.getTopLayerPaint().setPathEffect(effect);
 
     PathEffect shadowEffect = new DashPathEffect(shadowDashValue, shadowLength * update);
-    route.getShadowPaint().setPathEffect(shadowEffect);
+    overlayPolyline.getShadowPaint().setPathEffect(shadowEffect);
 
     mRouteOverlayView.invalidate();
   }
 
   public void setUpdate1(float update) {
     PathEffect effect = new DashPathEffect(arcdDashValue, -arcLength * update);
-    route.getTopLayerPaint().setPathEffect(effect);
+    overlayPolyline.getTopLayerPaint().setPathEffect(effect);
     mRouteOverlayView.invalidate();
   }
 
@@ -200,7 +200,7 @@ public class AnimationArcHelper implements com.amalbit.trail.contract.Animator {
 
   @Override
   public void onPathMeasureChange() {
-    PathMeasure pathMeasure = new PathMeasure(route.getDrawPath(), false);
+    PathMeasure pathMeasure = new PathMeasure(overlayPolyline.getDrawPath(), false);
     arcLength = pathMeasure.getLength();
     arcdDashValue =
         new float[]{arcLength, arcLength};
