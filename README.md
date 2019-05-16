@@ -54,7 +54,7 @@ In your activity, create routes with three predefined styles as of now.
 
 ```
 googleMap.setOnMapLoadedCallback(() -> {
-    Route normalRoute = new Route.Builder(mRouteOverlayView)
+    Route normalOverlayPolyline = new Route.Builder(mRouteOverlayView)
         .setRouteType(RouteType.PATH)
         .setCameraPosition(mMap.getCameraPosition())
         .setProjection(mMap.getProjection())
