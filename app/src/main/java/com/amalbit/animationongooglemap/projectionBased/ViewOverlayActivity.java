@@ -66,9 +66,12 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 
     mMap.setOnMapLoadedCallback(() -> {
       mMap.setOnCameraMoveListener(() -> {
+        zoomLevel = mMap.getCameraPosition().zoom;
 //        updatePixelPerZoom();
         viewOverlayView.onCameraMove(mMap);
 //        print();
+        updatePixelPerZoom();
+        updateSecondMarkerPointOnScreen();
       });
       setMapBoundsRow(map);
       viewOverlayView.setCenterLatlng(map);
@@ -165,7 +168,7 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     U.log("distance", "3 to 4 meters    -> " + thirdLocation.distanceTo(fourthLocation));
     U.log("distance", "3 to 4 pixels    -> " + Math.abs(thirdPoint.x - fourthPoint.x));
 
-    Point centerPoint = viewOverlayView.getCenterPoint();
+    Point centerPoint = viewOverlayView.getCenterMarker().getScreenPoint();
     LatLng centerLatLng = mMap.getCameraPosition().target;
     double difference = centerLatLng.longitude - pointOne.longitude;
 
@@ -256,11 +259,30 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     lastZoomLevel = zoomLevel;
   }
 
+  private void updateSecondMarkerPointOnScreen() {
+    //(Difference between longs / 0.00001252926886 )
+    int dx = (int) ((viewOverlayView.getCenterMarker().getLatLng().longitude - viewOverlayView.getSecondMarker().getLatLng().longitude) / latLngPerPixel);
+    //(Difference between lats / 0.00001252926886 )
+    int dy = (int) ((viewOverlayView.getCenterMarker().getLatLng().latitude - viewOverlayView.getSecondMarker().getLatLng().latitude) / latLngPerPixel);
+
+    U.log("updateSecondMarkerPointOnScreen", "dx, dy : " + dx + ", " + dy);
+    U.log("updateSecondMarkerPointOnScreen", "zoom,latLngPerPixel :" + zoomLevel + ", " + latLngPerPixel);
+    Point predictedPointOnScreen = new Point(
+        viewOverlayView.getCenterMarker().getScreenPoint().x - dx,
+        viewOverlayView.getCenterMarker().getScreenPoint().y + dy);
+    viewOverlayView.getSecondMarker().setScreenPoint(predictedPointOnScreen);
+    viewOverlayView.getSecondMarker().setLatLng(viewOverlayView.getSecondMarker().getLatLng());
+    viewOverlayView.invalidate();
+  }
+
   private void moveToLatLngWithoutProjection(final LatLng latLng) {
 //(Difference between longs / 0.00001252926886 )
     int dx = (int) ((viewOverlayView.getCenterMarker().getLatLng().longitude - latLng.longitude) / latLngPerPixel);
     //(Difference between lats / 0.00001252926886 )
     int dy = (int) ((viewOverlayView.getCenterMarker().getLatLng().latitude - latLng.latitude) / latLngPerPixel);
+
+    U.log("updateSecondMarkerPointOnScreen", "dx, dy              : " + dx + ", " + dy);
+    U.log("updateSecondMarkerPointOnScreen", "zoom,latLngPerPixel :" + zoomLevel + ", " + latLngPerPixel);
 
     Point predictedPointOnScreen = new Point(
         viewOverlayView.getCenterMarker().getScreenPoint().x - dx,
@@ -360,11 +382,13 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
         zoomLevel += 1;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
         updatePixelPerZoom();
+        updateSecondMarkerPointOnScreen();
         break;
       case R.id.btnMinus:
         zoomLevel -= 1;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
         updatePixelPerZoom();
+        updateSecondMarkerPointOnScreen();
         break;
       case R.id.btnPrint:
         print();

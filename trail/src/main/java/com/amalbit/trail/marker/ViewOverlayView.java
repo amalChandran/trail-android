@@ -52,7 +52,7 @@ public class ViewOverlayView extends View implements MarkerRemoveListner {
     invalidate();
   }
 
-  public OverlayMarkerOptim getCenterMarker() {
+  public final OverlayMarkerOptim getCenterMarker() {
     return centerMarker;
   }
 
@@ -77,14 +77,14 @@ public class ViewOverlayView extends View implements MarkerRemoveListner {
   public void onCameraMove(GoogleMap googleMap) {
     if (centerMarker != null) {
       centerMarker.setScreenPoint(googleMap.getProjection().toScreenLocation(centerMarker.getLatLng()));
-      moveSecondMarker();
+//      moveSecondMarker();
       invalidate();
     }
   }
 
   public void moveSecondMarker() {
 
-    Point centerPoint  = centerMarker.getScreenPoint();
+    final Point centerPoint  = centerMarker.getScreenPoint();
     if (previousPoint != null) {
       dx = previousPoint.x - centerPoint.x;
       dy = previousPoint.y - centerPoint.y;
@@ -135,10 +135,6 @@ public class ViewOverlayView extends View implements MarkerRemoveListner {
 
       canvas.drawBitmap(secondMarker.getIcon(), rotateMatrix, null);
     }
-  }
-
-  public Point getCenterPoint() {
-    return previousPoint;
   }
 
 }
