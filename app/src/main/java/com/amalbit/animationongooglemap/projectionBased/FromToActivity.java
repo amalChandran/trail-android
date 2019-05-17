@@ -157,23 +157,6 @@ public class FromToActivity extends BaseActivity implements OnMapReadyCallback, 
   }
 
 
-  public static final int STRAIGHT_ANGLE = 180;
-  public static final int FULL_ROTATION = 360;
-
-  private float calcMinAngle(float markerCurrentRotation, float markerNextRotation) {
-    float angleDifference = (Math.abs(markerNextRotation - markerCurrentRotation));
-    if (angleDifference > STRAIGHT_ANGLE) {
-      if (markerCurrentRotation < 0) {
-        markerNextRotation = (-FULL_ROTATION + angleDifference) + markerCurrentRotation;
-      } else {
-        markerNextRotation = (FULL_ROTATION - angleDifference) + markerCurrentRotation;
-      }
-    }
-    return markerNextRotation > FULL_ROTATION
-        ? markerNextRotation - FULL_ROTATION
-        : markerNextRotation;
-  }
-
   private Bitmap rotateBitmap(Bitmap original, float degrees) {
     int width = original.getWidth();
     int height = original.getHeight();
@@ -203,23 +186,6 @@ public class FromToActivity extends BaseActivity implements OnMapReadyCallback, 
 //    original.recycle();
 
     return Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
-  }
-
-
-  private float getBearing(LatLng begin, LatLng end) {
-    double lat = Math.abs(begin.latitude - end.latitude);
-    double lng = Math.abs(begin.longitude - end.longitude);
-
-    if (begin.latitude < end.latitude && begin.longitude < end.longitude) {
-      return (float) (Math.toDegrees(Math.atan(lng / lat)));
-    } else if (begin.latitude >= end.latitude && begin.longitude < end.longitude) {
-      return (float) ((90 - Math.toDegrees(Math.atan(lng / lat))) + 90);
-    } else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude) {
-      return (float) (Math.toDegrees(Math.atan(lng / lat)) + 180);
-    } else if (begin.latitude < end.latitude && begin.longitude >= end.longitude) {
-      return (float) ((90 - Math.toDegrees(Math.atan(lng / lat))) + 270);
-    }
-    return -1;
   }
 
   @Override

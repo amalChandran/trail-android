@@ -57,15 +57,15 @@ public class MarkerOverlayView extends View implements MarkerRemoveListner {
   public void updateMarker(OverlayMarker overlayMarker, Projection projection) {
     OverlayMarker currentMarker  = findMarkerById(overlayMarker.getMarkerId());
     currentMarker.setLatLng(overlayMarker.getLatLng());
-    overlayMarker.setScreenPoint(projection.toScreenLocation(overlayMarker.getLatLng()));
-    overlayMarker.setMarkerRemoveListner(this);
+    currentMarker.setScreenPoint(projection.toScreenLocation(overlayMarker.getLatLng()));
+    currentMarker.setMarkerRemoveListner(this);
     invalidate();
   }
 
   public void updateMarkerAngle(OverlayMarker overlayMarker) {
     OverlayMarker currentMarker  = findMarkerById(overlayMarker.getMarkerId());
     currentMarker.setLatLng(overlayMarker.getLatLng());
-    overlayMarker.setMarkerRemoveListner(this);
+    currentMarker.setMarkerRemoveListner(this);
     invalidate();
   }
 

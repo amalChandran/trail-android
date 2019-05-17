@@ -38,4 +38,38 @@ public class BaseActivity extends AppCompatActivity {
     googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100));
   }
 
+  float getBearing(LatLng begin, LatLng end) {
+    double lat = Math.abs(begin.latitude - end.latitude);
+    double lng = Math.abs(begin.longitude - end.longitude);
+
+    if (begin.latitude < end.latitude && begin.longitude < end.longitude) {
+      return (float) (Math.toDegrees(Math.atan(lng / lat)));
+    } else if (begin.latitude >= end.latitude && begin.longitude < end.longitude) {
+      return (float) ((90 - Math.toDegrees(Math.atan(lng / lat))) + 90);
+    } else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude) {
+      return (float) (Math.toDegrees(Math.atan(lng / lat)) + 180);
+    } else if (begin.latitude < end.latitude && begin.longitude >= end.longitude) {
+      return (float) ((90 - Math.toDegrees(Math.atan(lng / lat))) + 270);
+    }
+    return -1;
+  }
+
+  public static final int STRAIGHT_ANGLE = 180;
+  public static final int FULL_ROTATION = 360;
+
+  float calcMinAngle(float markerCurrentRotation, float markerNextRotation) {
+    float angleDifference = (Math.abs(markerNextRotation - markerCurrentRotation));
+    if (angleDifference > STRAIGHT_ANGLE) {
+      if (markerCurrentRotation < 0) {
+        markerNextRotation = (-FULL_ROTATION + angleDifference) + markerCurrentRotation;
+      } else {
+        markerNextRotation = (FULL_ROTATION - angleDifference) + markerCurrentRotation;
+      }
+    }
+    return markerNextRotation > FULL_ROTATION
+        ? markerNextRotation - FULL_ROTATION
+        : markerNextRotation;
+  }
+
+
 }
