@@ -52,8 +52,8 @@ public class ViewOverlayView extends View implements MarkerRemoveListner {
     invalidate();
   }
 
-  public Point getCenterMarker() {
-    return centerMarker.getScreenPoint();
+  public OverlayMarkerOptim getCenterMarker() {
+    return centerMarker;
   }
 
   public void addSecondMarker(OverlayMarkerOptim overlayMarker, Projection projection) {
@@ -84,17 +84,18 @@ public class ViewOverlayView extends View implements MarkerRemoveListner {
 
   public void moveSecondMarker() {
 
-    Point point  = centerMarker.getScreenPoint();
+    Point centerPoint  = centerMarker.getScreenPoint();
     if (previousPoint != null) {
-      dx = previousPoint.x - point.x;
-      dy = previousPoint.y - point.y;
+      dx = previousPoint.x - centerPoint.x;
+      dy = previousPoint.y - centerPoint.y;
     }
 
     Point currentScreenPoint = secondMarker.getScreenPoint();
     secondMarker.setScreenPoint(new Point((int)(currentScreenPoint.x - dx), (int)(currentScreenPoint.y - dy)));
 
-//    overlayMarkerOptim.translatePathMatrix(-dx, -dy);
-    previousPoint = point;
+    previousPoint = centerPoint;
+
+
   }
 
   @Override

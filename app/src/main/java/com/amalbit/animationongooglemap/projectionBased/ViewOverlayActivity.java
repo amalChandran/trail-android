@@ -1,6 +1,5 @@
 package com.amalbit.animationongooglemap.projectionBased;
 
-import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -8,10 +7,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.LinearInterpolator;
 import com.amalbit.animationongooglemap.R;
 import com.amalbit.animationongooglemap.U;
-import com.amalbit.animationongooglemap.marker.LatLngInterpolator;
 import com.amalbit.trail.marker.OverlayMarkerOptim;
 import com.amalbit.trail.marker.OverlayMarkerOptim.OnMarkerUpdate;
 import com.amalbit.trail.marker.ViewOverlayView;
@@ -69,6 +66,7 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 
     mMap.setOnMapLoadedCallback(() -> {
       mMap.setOnCameraMoveListener(() -> {
+//        updatePixelPerZoom();
         viewOverlayView.onCameraMove(mMap);
 //        print();
       });
@@ -211,11 +209,6 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     viewOverlayView.invalidate();
   }
 
-
-  private float anchorzoomLevel = 16;
-  private float zoomLevel = 16;
-  private static final float PIXEL_DISTANCE_ZOOMLEVEL = 163;
-
   private void print() {
     U.log("point", "-------------------------------------------------------------------------");
 //    double average1pixDistanceX = 0;
@@ -241,109 +234,67 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     U.log("point", "-------------------------------------------------------------------------");
   }
 
+  private static final float PIXEL_DISTANCE_ZOOMLEVEL = 163;
+
+  private float anchorZoomLevel = 16;
+
   private int getPixelPerZoomLevel() {
-    return (int) (PIXEL_DISTANCE_ZOOMLEVEL * Math.pow(2, zoomLevel - anchorzoomLevel));
+    return (int) (PIXEL_DISTANCE_ZOOMLEVEL * Math.pow(2, zoomLevel - anchorZoomLevel));
   }
 
-  @Override
-  public void onClick(View v) {
-    switch (v.getId()) {
-      case R.id.btnPlus:
-        zoomLevel += 1;
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
-        break;
-      case R.id.btnMinus:
-        moveToLatLngWithoutProjection(pointEight);
-//        moveToLatWithoutProjection(pointEight);
-//        zoomLevel -= 1;
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
-        break;
-      case R.id.btnPrint:
-        print();
-        break;
-      case R.id.btnOne:
-        findScreenPointForFirstLatLng();
-        break;
-      case R.id.btnMoveLeft:
-        moveSecondMarkerLeft();
-        break;
-      case R.id.btnMoveRight:
-        moveSecondMarkerRight();
-        break;
-      case R.id.btnMoveTop:
-        moveSecondMarkerTop();
-        break;
-      case R.id.btnMoveDown:
-        moveSecondMarkerDown();
-        break;
-    }
+  private double anchorLatLngPerPixel = 0.00000637024641;
+  private double latLngPerPixel = 0.00000637024641;
+  private float lastZoomLevel = 16;
+  private float zoomLevel = 16;
+
+  private void updatePixelPerZoom() {
+    U.log("updatePixelPerZoom", "anchorLatLngPerPixel " + anchorLatLngPerPixel);
+    U.log("updatePixelPerZoom", "lastZoomLevel        " + lastZoomLevel);
+    U.log("updatePixelPerZoom", "zoomLevel            " + zoomLevel);
+    latLngPerPixel = latLngPerPixel * Math.pow(2, lastZoomLevel - zoomLevel);
+    U.log("updatePixelPerZoom", "latLngPerPixel       " + latLngPerPixel);
+    lastZoomLevel = zoomLevel;
   }
 
-//  Zoom level	average lng/lng per pixel
-//    17	0.000003352761269
-//    16	0.00000637024641
-//    15	0.00001252926886
-//    14	0.00002435110509
-//    13	0.00004895031452
-//    12	0.00009790062904
-//    11	0.0001961365342
-//    10	0.0003922730684
-//    9	  0.0007845461369
-//    8	  0.0015694275498390198
-//    7	  0.0031388550996780396
-//    6	  0.006277710199356079
-//    5	  0.012555420398712158
-//    4	  0.025110840797424174
-//    3	  0.05022168159484863
-//    2	  0.05022168159484863
-//    1	  0.05022168159484835
-
-
-//  private void moveToLngWithoutProjection(LatLng latLng) {
-//    //(Difference between longitude / 0.00001252926886 )
-//    int dx = (int) (Math.abs(viewOverlayView.getSecondMarker().getLatLng().longitude - latLng.longitude) / 0.00001252926886);
-//    Point predictedPointOnScreen = new Point(viewOverlayView.getSecondMarker().getScreenPoint().x + dx, viewOverlayView.getSecondMarker().getScreenPoint().y);
-//    viewOverlayView.getSecondMarker().setScreenPoint(predictedPointOnScreen);
-//    viewOverlayView.invalidate();
-//  }
-//
-//  private void moveToLatWithoutProjection(LatLng latLng) {
-//    //(Difference between latitude / 0.00001252926886 )
-//    int dy = (int) ((viewOverlayView.getSecondMarker().getLatLng().latitude - latLng.latitude) / 0.00001252926886);
-//    Point predictedPointOnScreen = new Point(viewOverlayView.getSecondMarker().getScreenPoint().x, viewOverlayView.getSecondMarker().getScreenPoint().y + dy);
-//    viewOverlayView.getSecondMarker().setScreenPoint(predictedPointOnScreen);
-//    viewOverlayView.invalidate();
-//  }
-
-  private static final double ZOOM_16 = 0.00000637024641;
   private void moveToLatLngWithoutProjection(final LatLng latLng) {
+//(Difference between longs / 0.00001252926886 )
+    int dx = (int) ((viewOverlayView.getCenterMarker().getLatLng().longitude - latLng.longitude) / latLngPerPixel);
+    //(Difference between lats / 0.00001252926886 )
+    int dy = (int) ((viewOverlayView.getCenterMarker().getLatLng().latitude - latLng.latitude) / latLngPerPixel);
 
-    ValueAnimator valueAnimator = new ValueAnimator();
-    valueAnimator.setInterpolator(new LinearInterpolator());
-    valueAnimator.addUpdateListener(animation -> {
-      float v = animation.getAnimatedFraction();
-      LatLng newPosition = new LatLngInterpolator.Linear().interpolate(v, viewOverlayView.getSecondMarker().getLatLng(), latLng);
+    Point predictedPointOnScreen = new Point(
+        viewOverlayView.getCenterMarker().getScreenPoint().x - dx,
+        viewOverlayView.getCenterMarker().getScreenPoint().y + dy);
+    viewOverlayView.getSecondMarker().setScreenPoint(predictedPointOnScreen);
+    viewOverlayView.getSecondMarker().setLatLng(latLng);
+    viewOverlayView.invalidate();
 
-      //(Difference between latitude / 0.00001252926886 )
-      int dx = (int) ((viewOverlayView.getSecondMarker().getLatLng().longitude - newPosition.longitude) / ZOOM_16);
-//    int x =
-
-      int dy = (int) ((viewOverlayView.getSecondMarker().getLatLng().latitude - newPosition.latitude) / ZOOM_16);
-      Point predictedPointOnScreen = new Point(viewOverlayView.getSecondMarker().getScreenPoint().x - dx, viewOverlayView.getSecondMarker().getScreenPoint().y + dy);
-      viewOverlayView.getSecondMarker().setScreenPoint(predictedPointOnScreen);
-      viewOverlayView.getSecondMarker().setLatLng(newPosition);
-      viewOverlayView.invalidate();
-    });
-    valueAnimator.setFloatValues(0, 1);
-    valueAnimator.reverse();
-    valueAnimator.setRepeatCount(10);
-    valueAnimator.setDuration(1000);
-    valueAnimator.start();
+//    ValueAnimator valueAnimator = new ValueAnimator();
+//    valueAnimator.setInterpolator(new LinearInterpolator());
+//    valueAnimator.addUpdateListener(animation -> {
+//      float v = animation.getAnimatedFraction();
+//      LatLng newPosition = new LatLngInterpolator.Linear().interpolate(v, viewOverlayView.getSecondMarker().getLatLng(), latLng);
+//
+//      //(Difference between longs / 0.00001252926886 )
+//      int dx = (int) ((viewOverlayView.getSecondMarker().getLatLng().longitude - newPosition.longitude) / latLngPerPixel);
+//      //(Difference between lats / 0.00001252926886 )
+//      int dy = (int) ((viewOverlayView.getSecondMarker().getLatLng().latitude - newPosition.latitude) / latLngPerPixel);
+//
+//      Point predictedPointOnScreen = new Point(viewOverlayView.getSecondMarker().getScreenPoint().x - dx, viewOverlayView.getSecondMarker().getScreenPoint().y + dy);
+//      viewOverlayView.getSecondMarker().setScreenPoint(predictedPointOnScreen);
+//      viewOverlayView.getSecondMarker().setLatLng(newPosition);
+//      viewOverlayView.invalidate();
+//    });
+//    valueAnimator.setFloatValues(0, 1);
+//    valueAnimator.reverse();
+//    valueAnimator.setRepeatCount(10);
+//    valueAnimator.setDuration(1000);
+//    valueAnimator.start();
 
   }
 
   private void moveSecondMarkerTop() {
-    Point centerPoint = new Point(viewOverlayView.getCenterMarker().x, viewOverlayView.getCenterMarker().y);
+    Point centerPoint = new Point(viewOverlayView.getCenterMarker().getScreenPoint().x, viewOverlayView.getCenterMarker().getScreenPoint().y);
     centerPoint.x = viewOverlayView.getSecondMarker().getScreenPoint().x;
     centerPoint.y = viewOverlayView.getSecondMarker().getScreenPoint().y - getPixelPerZoomLevel();
     viewOverlayView.getSecondMarker().setScreenPoint(centerPoint);
@@ -351,7 +302,7 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
   }
 
   private void moveSecondMarkerDown() {
-    Point centerPoint = new Point(viewOverlayView.getCenterMarker().x, viewOverlayView.getCenterMarker().y);
+    Point centerPoint = new Point(viewOverlayView.getCenterMarker().getScreenPoint().x, viewOverlayView.getCenterMarker().getScreenPoint().y);
     centerPoint.x = viewOverlayView.getSecondMarker().getScreenPoint().x;
     centerPoint.y = viewOverlayView.getSecondMarker().getScreenPoint().y + getPixelPerZoomLevel();
     viewOverlayView.getSecondMarker().setScreenPoint(centerPoint);
@@ -359,7 +310,7 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
   }
 
   private void moveSecondMarkerLeft() {
-    Point centerPoint = new Point(viewOverlayView.getCenterMarker().x, viewOverlayView.getCenterMarker().y);
+    Point centerPoint = new Point(viewOverlayView.getCenterMarker().getScreenPoint().x, viewOverlayView.getCenterMarker().getScreenPoint().y);
     centerPoint.y = viewOverlayView.getSecondMarker().getScreenPoint().y;
     centerPoint.x = viewOverlayView.getSecondMarker().getScreenPoint().x - getPixelPerZoomLevel();
     viewOverlayView.getSecondMarker().setScreenPoint(centerPoint);
@@ -381,7 +332,7 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
   }
 
   private void moveSecondMarkerRight() {
-    Point centerPoint = new Point(viewOverlayView.getCenterMarker().x, viewOverlayView.getCenterMarker().y);
+    Point centerPoint = new Point(viewOverlayView.getCenterMarker().getScreenPoint().x, viewOverlayView.getCenterMarker().getScreenPoint().y);
     centerPoint.y = viewOverlayView.getSecondMarker().getScreenPoint().y;
     centerPoint.x = viewOverlayView.getSecondMarker().getScreenPoint().x + getPixelPerZoomLevel();
     viewOverlayView.getSecondMarker().setScreenPoint(centerPoint);
@@ -400,5 +351,39 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 //    valueAnimator.setFloatValues(viewOverlayView.getSecondMarker().getScreenPoint().x, viewOverlayView.getSecondMarker().getScreenPoint().x + 163); // Ignored.
 //    valueAnimator.setDuration(1000);
 //    valueAnimator.start();
+  }
+
+  @Override
+  public void onClick(View v) {
+    switch (v.getId()) {
+      case R.id.btnPlus:
+        zoomLevel += 1;
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
+        updatePixelPerZoom();
+        break;
+      case R.id.btnMinus:
+        zoomLevel -= 1;
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
+        updatePixelPerZoom();
+        break;
+      case R.id.btnPrint:
+        print();
+        break;
+      case R.id.btnOne:
+        findScreenPointForFirstLatLng();
+        break;
+      case R.id.btnMoveLeft:
+        moveSecondMarkerLeft();
+        break;
+      case R.id.btnMoveRight:
+        moveSecondMarkerRight();
+        break;
+      case R.id.btnMoveTop:
+        moveSecondMarkerTop();
+        break;
+      case R.id.btnMoveDown:
+        moveSecondMarkerDown();
+        break;
+    }
   }
 }
