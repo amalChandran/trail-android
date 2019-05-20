@@ -2,6 +2,7 @@ package com.amalbit.trail.marker;
 
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -28,6 +29,8 @@ public class OverlayMarkerOptim {
   private ValueAnimator translateValueAnimator;
 
   private ValueAnimator rotateValueAnimator;
+
+  private Matrix rotateMatrix = new Matrix();
 
   public LatLng getLatLng() {
     return latLng;
@@ -105,6 +108,14 @@ public class OverlayMarkerOptim {
 
   public void setOnMarkerUpdate(OnMarkerUpdate onMarkerUpdate) {
     this.onMarkerUpdate = onMarkerUpdate;
+  }
+
+  public Matrix getRotateMatrix() {
+    return rotateMatrix;
+  }
+
+  public void setRotateMatrix(Matrix rotateMatrix) {
+    this.rotateMatrix = rotateMatrix;
   }
 
   public interface MarkerRemoveListner {

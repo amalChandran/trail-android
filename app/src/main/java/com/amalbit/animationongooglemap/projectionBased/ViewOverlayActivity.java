@@ -29,12 +29,6 @@ import java.util.List;
 
 public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallback, OnClickListener, OnMarkerUpdate {
 
-  /**
-   * DONE : Draw one marker on the screen. DONE : Add second marker, move it based on first markers movement. TODO :
-   * Animate second marker just based on first marker position. TODO : Move it based on translate matrix if this
-   * approach works.
-   **/
-
   private GoogleMap mMap;
 
   private ViewOverlayView viewOverlayView;
@@ -70,6 +64,7 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 
     mMap.setOnMapLoadedCallback(() -> {
       initializeLatLngPerPixel();
+      updatePixelPerZoom();
       mMap.setOnCameraMoveListener(() -> {
         zoomLevel = mMap.getCameraPosition().zoom;
         viewOverlayView.onCameraMove(mMap);
@@ -77,7 +72,6 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
         updateMarkerPointsOnScreen();
       });
       setMapBoundsRow(map);
-//      viewOverlayView.setCenterLatlng(map);
       addCenterMarker();
       addSecondMarker();
       addNormalMarker();
@@ -87,9 +81,9 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
       ArrayList<Car> indiranagarRoutes = LatlngData.getIndiranagarRoutes();
       repeat = new Repeat(() -> addMarkerWithAnimation(indiranagarRoutes), 2000);
 
-      viewOverlayView.post(() -> {
-        repeat.startUpdates();
-      });
+      viewOverlayView.post(
+          () -> repeat.startUpdates()
+      );
     });
   }
 
@@ -138,7 +132,6 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
           final LatLng startLatLng = overlayMarker.getLatLng();
           final LatLng endLatLng = car.getLatLng();
           float bearing = 0;
-//          overlayMarker.setIcon(markerIcon);
           bearing = getBearing(startLatLng, endLatLng);
 //
           ValueAnimator valueAnimator = overlayMarker.getTranslateValueAnimator();
@@ -147,8 +140,6 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
             float v = animation.getAnimatedFraction();
             LatLng newPosition = new LatLngInterpolator.Linear().interpolate(v, startLatLng, endLatLng);
             moveToLatLngWithoutProjection(newPosition, overlayMarker);
-//            viewOverlayView.updateMarker(overlayMarker, mMap.getProjection());
-//            viewOverlayView.addTestMarker(mMap.getProjection().toScreenLocation(newPosition));
           });
           valueAnimator.setFloatValues(0, 1); // Ignored.
           valueAnimator.setDuration(2000);
@@ -156,21 +147,16 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 //
           overlayMarker.setLatLng(endLatLng);
           moveToLatLngWithoutProjection(endLatLng, overlayMarker);
-//          viewOverlayView.updateMarker(overlayMarker, mMap.getProjection());
 
           float lastBearing = overlayMarker.getBearing();
           ValueAnimator rotateValueAnimator = overlayMarker.getRotateValueAnimator();
           rotateValueAnimator.removeAllUpdateListeners();
           rotateValueAnimator.cancel();
 
-          final float brearingFinal = bearing;
-
           rotateValueAnimator = ValueAnimator.ofFloat(lastBearing, calcMinAngle(lastBearing, bearing));
           rotateValueAnimator.addUpdateListener(animation -> {
             float v = (float) animation.getAnimatedValue();
             overlayMarker.setBearing(v);
-//            overlayMarker.rotateIcon(v);
-//            U.log("rotation", "from " + lastBearing + "| to " + brearingFinal + " || " + "fraction : " + v);
             viewOverlayView.updateMarkerAngle(overlayMarker);
           });
           rotateValueAnimator.setDuration(500);
@@ -327,34 +313,6 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 
     U.log("updateMarkerPointsOnScreen", "dx, dy              : " + dx + ", " + dy);
     U.log("updateMarkerPointsOnScreen", "zoom,latPerPixel :" + zoomLevel + ", " + lngPerPixel);
-
-
-//    ValueAnimator valueAnimator = new ValueAnimator();
-//    valueAnimator.setInterpolator(new LinearInterpolator());
-//    valueAnimator.addUpdateListener(animation -> {
-//      float v = animation.getAnimatedFraction();
-//      LatLng newLatlng = new LatLngInterpolator.Linear().interpolate(v, viewOverlayView.getOverLayMarkers().getLatLng(), latLng);
-//
-//      int dx = (int) ((viewOverlayView.getAnchorMarker().getLatLng().longitude - newLatlng.longitude) / latPerPixel);
-//      //(Difference between lats / 0.00001252926886 )
-//      int dy = (int) ((viewOverlayView.getAnchorMarker().getLatLng().latitude - newLatlng.latitude) / latPerPixel);
-//
-//      U.log("updateMarkerPointsOnScreen", "dx, dy              : " + dx + ", " + dy);
-//      U.log("updateMarkerPointsOnScreen", "zoom,latPerPixel :" + zoomLevel + ", " + latPerPixel);
-//
-//      Point predictedPointOnScreen = new Point(
-//          viewOverlayView.getAnchorMarker().getScreenPoint().x - dx,
-//          viewOverlayView.getAnchorMarker().getScreenPoint().y + dy);
-//      viewOverlayView.getOverLayMarkers().setScreenPoint(predictedPointOnScreen);
-//      viewOverlayView.getOverLayMarkers().setLatLng(newLatlng);
-//      viewOverlayView.invalidate();
-//    });
-//    valueAnimator.setFloatValues(0, 1);
-//    valueAnimator.reverse();
-//    valueAnimator.setRepeatCount(10);
-//    valueAnimator.setDuration(1000);
-//    valueAnimator.start();
-
   }
 
   @Override
@@ -405,6 +363,19 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     return Math.abs(average1pixDistanceX/100);
   }
 
+  /**
+   * 1. Find latlng per pixel(LPP) in a particular zoomlevel(ZL).
+   * 2. Add an invisible anchor marker. Keep listening to get
+   * projection and update its screen co ordinate on each map movement.
+   * 3. For each new marker to be added, use this
+   * formula to find the co-ordinate on screen. (anchorLatLng - newLatlng) / LPP
+   * 4. For finding LPP. Take two screen points one pixel apart, using projection get the corresponding latLngs and find their difference. This gives us the LPP.
+   * P1(x, y)  = LatLng(lat, lng)
+   * P2(P1.x+1, P1.y) = LatLng1(lat, lng)
+   * 1Xpix = LatLng.lat - LatLng1.lat;
+   * 1Ypix =  LatLng.lng - LatLng1.lng;
+   *
+   **/
   private void printAverage1PixDistance() {
     U.log("printAverage1PixDistance", "-------------------------------------------------------------------------");
 //    double average1pixDistanceX = 0;
@@ -473,12 +444,5 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 //  }
 }
 
-/**
- * 1. Find latlng per pixel(LPP) in a particular zoomlevel(ZL). 2. Add an invisible anchor marker. Keep listening to get
- * projection and update its screen co ordinate on each map movement. 3. For each new marker to be added, use this
- * formula to find the co-ordinate on screen. (anchorLatLng - newLatlng) / LPP Now for finding new screen co ordinate
- *
- * //TODO complete this explanation
- **/
 
 

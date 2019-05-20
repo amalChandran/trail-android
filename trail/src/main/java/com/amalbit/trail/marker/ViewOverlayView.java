@@ -17,21 +17,16 @@ import java.util.List;
 
 public class ViewOverlayView extends View implements MarkerRemoveListner {
 
-  //Debug
-  Paint paint = new Paint();
-  Paint yellowPaint = new Paint();
-
   private final Object mSvgLock = new Object();
-
-  private float dx, dy;
 
   /**
    * The only marker that will consistently call get projection to update its screen coordinate.
    * Every other overlay marker will calculate its position relative to this.
+   * TODO: Solving marker off road issue. Make multiple anchor marker.
+   * TODO: a) On four corners of the map
+   * TODO: b) As a tripod stand base in the middle.
    * **/
   private OverlayMarkerOptim anchorMarker;
-
-//  private OverlayMarkerOptim secondMarker;
 
   private List<OverlayMarkerOptim> overlayMarkers = new ArrayList<>();
 
@@ -48,18 +43,7 @@ public class ViewOverlayView extends View implements MarkerRemoveListner {
 
   private void init() {
     setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-    paint.setStyle(Paint.Style.FILL);
-    paint.setColor(Color.RED);
-
-    yellowPaint.setStyle(Paint.Style.FILL);
-    yellowPaint.setColor(Color.BLUE);
   }
-
-
-//  public void setCenterLatlng(GoogleMap googleMap) {
-//    LatLng centerLatlng = googleMap.getCameraPosition().target;
-//    previousPoint = googleMap.getProjection().toScreenLocation(centerLatlng);
-//  }
 
   public void addCenterMarker(OverlayMarkerOptim overlayMarker, Projection projection) {
     overlayMarker.setScreenPoint(projection.toScreenLocation(overlayMarker.getLatLng()));
@@ -79,18 +63,9 @@ public class ViewOverlayView extends View implements MarkerRemoveListner {
     invalidate();
   }
 
-  public void updateMarker(OverlayMarkerOptim overlayMarker, Projection projection) {
-    OverlayMarkerOptim currentMarker  = findMarkerById(overlayMarker.getMarkerId());
-    currentMarker.setLatLng(overlayMarker.getLatLng());
-    currentMarker.setScreenPoint(projection.toScreenLocation(overlayMarker.getLatLng()));
-    currentMarker.setMarkerRemoveListner(this);
-    invalidate();
-  }
-
   public void updateMarkerAngle(OverlayMarkerOptim overlayMarker) {
     OverlayMarkerOptim currentMarker  = findMarkerById(overlayMarker.getMarkerId());
     currentMarker.setBearing(overlayMarker.getBearing());
-//    currentMarker.setLatLng(overlayMarker.getLatLng());
     overlayMarker.setMarkerRemoveListner(this);
     invalidate();
   }
@@ -108,12 +83,10 @@ public class ViewOverlayView extends View implements MarkerRemoveListner {
     return null;
   }
 
-
   @Override
   public void onRemove(OverlayMarkerOptim overlayMarker) {
     invalidate();
   }
-
 
   public void onCameraMove(GoogleMap googleMap) {
     if (anchorMarker != null) {
@@ -145,24 +118,18 @@ public class ViewOverlayView extends View implements MarkerRemoveListner {
     point.x = overlayMarkerOptim.getScreenPoint().x - overlayMarkerOptim.getIcon().getWidth() / 2;
     point.y = overlayMarkerOptim.getScreenPoint().y - overlayMarkerOptim.getIcon().getHeight() / 2;
 
+
+    Matrix matrix = overlayMarkerOptim.getRotateMatrix();
     Matrix rotateMatrix = new Matrix();
+
     int xRotatePoint = overlayMarkerOptim.getIcon().getWidth() / 2;
     int yRotatePoint = overlayMarkerOptim.getIcon().getHeight() / 2;
     rotateMatrix.postRotate(overlayMarkerOptim.getBearing(), xRotatePoint, yRotatePoint);
     rotateMatrix.postTranslate(point.x, point.y);
 
+    matrix.postConcat(rotateMatrix);
+
     canvas.drawBitmap(overlayMarkerOptim.getIcon(), rotateMatrix, null);
-
-//    canvas.drawCircle(point.x, point.y, 8, paint);
-//    canvas.drawCircle(overlayMarkerOptim.getScreenPoint().x, overlayMarkerOptim.getScreenPoint().y, 6, paint);
-//    canvas.drawCircle(this.point.x, this.point.y, 6, yellowPaint);
   }
-
-  Point point = new Point();
-
-  public void addTestMarker(Point point) {
-    this.point = point;
-  }
-
 }
 

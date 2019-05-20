@@ -287,13 +287,11 @@ public class OverlayPolyline {
     drawPath.transform(matrix);
   }
   void translatePathMatrix(float dx, float dy) {
-//    if (!routeOverlayView.isPathSetup()) return;
     translatePath(path, drawPath, matrix, dx, dy);
     routeOverlayView.invalidate();
   }
 
   void translateShadowPathMatrix(float dx, float dy) {
-//    if (!routeOverlayView.isPathSetup()) return;
     translatePath(shadowPath, shadowDrawPath, shadowMatrix, dx, dy);
     routeOverlayView.invalidate();
   }
