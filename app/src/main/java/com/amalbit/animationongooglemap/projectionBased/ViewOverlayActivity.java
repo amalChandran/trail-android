@@ -3,6 +3,7 @@ package com.amalbit.animationongooglemap.projectionBased;
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.View;
@@ -14,13 +15,19 @@ import com.amalbit.animationongooglemap.data.CarData.Car;
 import com.amalbit.animationongooglemap.data.LatlngData;
 import com.amalbit.animationongooglemap.marker.LatLngInterpolator;
 import com.amalbit.animationongooglemap.marker.Repeat;
+import com.amalbit.trail.OverlayLayout;
+import com.amalbit.trail.OverlayPolyline;
+import com.amalbit.trail.RouteOverlayView;
+import com.amalbit.trail.RouteOverlayView.RouteType;
 import com.amalbit.trail.marker.OverlayMarkerOptim;
 import com.amalbit.trail.marker.OverlayMarkerOptim.OnMarkerUpdate;
 import com.amalbit.trail.marker.ViewOverlayView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -31,7 +38,13 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 
   private GoogleMap mMap;
 
+  private OverlayLayout overlayLayout;
+
   private ViewOverlayView viewOverlayView;
+
+  private RouteOverlayView mRouteOverlayView;
+
+  private List<LatLng> route = LatlngData.getRoute();
 
   private Bitmap dotBitmap;
   private Bitmap yellowDotBitmap;
@@ -48,7 +61,10 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     yellowDotBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_dot_yellow);
     carBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.car);
 
-    viewOverlayView = findViewById(R.id.viewOverly);
+    overlayLayout = findViewById(R.id.viewOverLayView);
+    mRouteOverlayView = overlayLayout.getRouteOverlayView();
+    viewOverlayView = overlayLayout.getViewOverlayView();
+
     findViewById(R.id.btnPlus).setOnClickListener(this);
     findViewById(R.id.btnMinus).setOnClickListener(this);
     findViewById(R.id.btnPrint).setOnClickListener(this);
@@ -63,14 +79,11 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     mMap = map;
 
     mMap.setOnMapLoadedCallback(() -> {
-      initializeLatLngPerPixel();
-      updatePixelPerZoom();
-      mMap.setOnCameraMoveListener(() -> {
-        zoomLevel = mMap.getCameraPosition().zoom;
-        viewOverlayView.onCameraMove(mMap);
-        updatePixelPerZoom();
-        updateMarkerPointsOnScreen();
-      });
+      overlayLayout.addGoogleMap(mMap);
+//      initializeLatLngPerPixel();
+//      updatePixelPerZoom();
+
+      mMap.setOnCameraMoveListener(this::onCameraMove);
       setMapBoundsRow(map);
       addCenterMarker();
       addSecondMarker();
@@ -84,6 +97,16 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
       viewOverlayView.post(
           () -> repeat.startUpdates()
       );
+
+      OverlayPolyline normalOverlayPolyline = new OverlayPolyline.Builder(mRouteOverlayView)
+          .setRouteType(RouteType.PATH)
+          .setCameraPosition(mMap.getCameraPosition())
+          .setProjection(mMap.getProjection())
+          .setLatLngs(route)
+          .setBottomLayerColor(Color.YELLOW)
+          .setTopLayerColor(Color.RED)
+          .create();
+
     });
   }
 
@@ -101,6 +124,20 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     if (repeat!= null) {
       repeat.startUpdates();
     }
+  }
+
+  private void onCameraMove() {
+    Projection projection = mMap.getProjection();
+    CameraPosition cameraPosition = mMap.getCameraPosition();
+
+//    zoomLevel = mMap.getCameraPosition().zoom;
+//    viewOverlayView.onCameraMove(projection, cameraPosition);
+//    updatePixelPerZoom();
+//    updateMarkerPointsOnScreen();
+
+//    mRouteOverlayView.onCameraMove(projection, cameraPosition);
+
+    overlayLayout.onCameraMoved();
   }
 
   public void addMarkerWithAnimation(List<Car> cars) {
@@ -139,14 +176,14 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
           valueAnimator.addUpdateListener(animation -> {
             float v = animation.getAnimatedFraction();
             LatLng newPosition = new LatLngInterpolator.Linear().interpolate(v, startLatLng, endLatLng);
-            moveToLatLngWithoutProjection(newPosition, overlayMarker);
+            viewOverlayView.moveToLatLngWithoutProjection(newPosition, overlayMarker);
           });
           valueAnimator.setFloatValues(0, 1); // Ignored.
           valueAnimator.setDuration(2000);
           valueAnimator.start();
 //
           overlayMarker.setLatLng(endLatLng);
-          moveToLatLngWithoutProjection(endLatLng, overlayMarker);
+          viewOverlayView.moveToLatLngWithoutProjection(endLatLng, overlayMarker);
 
           float lastBearing = overlayMarker.getBearing();
           ValueAnimator rotateValueAnimator = overlayMarker.getRotateValueAnimator();
@@ -191,7 +228,7 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     }
     LatLngBounds latLngBounds = boundsBuilder.build();
 //    googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100));
-    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
+    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, 18f));
   }
 
   private void addNormalMarker() {
@@ -235,61 +272,6 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
   }
 
 
-  private void initializeLatLngPerPixel() {
-    lastZoomLevel = mMap.getCameraPosition().zoom;
-    lngPerPixel = average1PixDistanceX();
-  }
-
-  private double lngPerPixel = 0.00001404902103;
-  private float lastZoomLevel = 18;
-  private float zoomLevel = 18;
-
-  private void updatePixelPerZoom() {
-    //Pixel 2 xl phone
-    U.log("updatePixelPerZoom", "lastZoomLevel        " + lastZoomLevel);
-    U.log("updatePixelPerZoom", "zoomLevel            " + zoomLevel);
-    lngPerPixel = lngPerPixel * Math.pow(2, lastZoomLevel - zoomLevel);
-    U.log("updatePixelPerZoom", "lngPerPixel       " + lngPerPixel);
-    lastZoomLevel = zoomLevel;
-  }
-
-  private void updateMarkerPointsOnScreen() {
-    for (OverlayMarkerOptim overlayMarkerOptim : viewOverlayView.getOverLayMarkers()) {
-      int dx = (int) ((viewOverlayView.getAnchorMarker().getLatLng().longitude - overlayMarkerOptim
-          .getLatLng().longitude) / lngPerPixel);
-      int dy = (int) ((viewOverlayView.getAnchorMarker().getLatLng().latitude - overlayMarkerOptim
-          .getLatLng().latitude) / lngPerPixel);
-
-      U.log("updateMarkerPointsOnScreen", "dx, dy : " + dx + ", " + dy);
-      U.log("updateMarkerPointsOnScreen", "zoom,latPerPixel :" + zoomLevel + ", " + lngPerPixel);
-      Point predictedPointOnScreen = new Point(
-          viewOverlayView.getAnchorMarker().getScreenPoint().x - dx,
-          viewOverlayView.getAnchorMarker().getScreenPoint().y + dy);
-      overlayMarkerOptim.setScreenPoint(predictedPointOnScreen);
-      overlayMarkerOptim.setLatLng(overlayMarkerOptim.getLatLng());
-    }
-    viewOverlayView.invalidate();
-  }
-
-  private void moveToLatLngWithoutProjection(final LatLng latLng, OverlayMarkerOptim overlayMarker1) {
-    overlayMarker1.setLatLng(latLng);
-
-    //(Difference between longs / 0.00001252926886 )
-    int dx = (int) ((viewOverlayView.getAnchorMarker().getLatLng().longitude - latLng.longitude) / lngPerPixel);
-    //(Difference between lats / 0.00001252926886 )
-    int dy = (int) ((viewOverlayView.getAnchorMarker().getLatLng().latitude - latLng.latitude) / lngPerPixel);
-
-    Point predictedPointOnScreen = new Point(
-        viewOverlayView.getAnchorMarker().getScreenPoint().x - dx,
-        viewOverlayView.getAnchorMarker().getScreenPoint().y + dy);
-    overlayMarker1.setScreenPoint(predictedPointOnScreen);
-
-    viewOverlayView.invalidate();
-
-    U.log("updateMarkerPointsOnScreen", "dx, dy              : " + dx + ", " + dy);
-    U.log("updateMarkerPointsOnScreen", "zoom,latPerPixel :" + zoomLevel + ", " + lngPerPixel);
-  }
-
   private void moveToLatLngWithoutProjection(final LatLng latLng) {
 
     OverlayMarkerOptim overlayMarker1 = new OverlayMarkerOptim();
@@ -299,9 +281,9 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     overlayMarker1.setOnMarkerUpdate(ViewOverlayActivity.this);
 
     //(Difference between longs / 0.00001252926886 )
-    int dx = (int) ((viewOverlayView.getAnchorMarker().getLatLng().longitude - latLng.longitude) / lngPerPixel);
+    int dx = (int) ((viewOverlayView.getAnchorMarker().getLatLng().longitude - latLng.longitude) / viewOverlayView.getLngPerPixel());
     //(Difference between lats / 0.00001252926886 )
-    int dy = (int) ((viewOverlayView.getAnchorMarker().getLatLng().latitude - latLng.latitude) / lngPerPixel);
+    int dy = (int) ((viewOverlayView.getAnchorMarker().getLatLng().latitude - latLng.latitude) / viewOverlayView.getLngPerPixel());
 
     Point predictedPointOnScreen = new Point(
         viewOverlayView.getAnchorMarker().getScreenPoint().x - dx,
@@ -312,23 +294,23 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     viewOverlayView.invalidate();
 
     U.log("updateMarkerPointsOnScreen", "dx, dy              : " + dx + ", " + dy);
-    U.log("updateMarkerPointsOnScreen", "zoom,latPerPixel :" + zoomLevel + ", " + lngPerPixel);
+//    U.log("updateMarkerPointsOnScreen", "zoom,latPerPixel :" + zoomLevel + ", " + lngPerPixel);
   }
 
   @Override
   public void onClick(View v) {
     switch (v.getId()) {
       case R.id.btnPlus:
-        zoomLevel += 1;
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
-        updatePixelPerZoom();
-        updateMarkerPointsOnScreen();
+//        zoomLevel += 1;
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
+//        updatePixelPerZoom();
+//        updateMarkerPointsOnScreen();
         break;
       case R.id.btnMinus:
-        zoomLevel -= 1;
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
-        updatePixelPerZoom();
-        updateMarkerPointsOnScreen();
+//        zoomLevel -= 1;
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
+//        updatePixelPerZoom();
+//        updateMarkerPointsOnScreen();
         break;
       case R.id.btnPrint:
         printAverage1PixDistance();
@@ -337,45 +319,9 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
   }
 
 
-  private double average1PixDistanceX() {
-    U.log("average1PixDistanceX", "-------------------------------------------------------------------------");
-//    double average1pixDistanceY = 0;
-    double average1pixDistanceX = 0;
-    for ( int i = 0; i < 100; i++) {
-
-      LatLng centerLatlng = mMap.getCameraPosition().target;
-      Point centerPoint = mMap.getProjection().toScreenLocation(centerLatlng);
-      U.log("average1PixDistanceX", "centerPoint: " + centerPoint);
-      centerPoint.x = centerPoint.x + 1;
-      U.log("average1PixDistanceX", "next centerPoint: " + centerPoint);
-      LatLng nextCenterLatLng = mMap.getProjection().fromScreenLocation(centerPoint);
-
-//      average1pixDistanceY += nextCenterLatLng.latitude - centerLatlng.latitude;
-      average1pixDistanceX += nextCenterLatLng.longitude - centerLatlng.longitude;
-    }
-//    U.log("average1PixDistanceX", "average1pixDistanceY" + (average1pixDistanceY / 100));
-    U.log("average1PixDistanceX", "average1pixDistanceX" + (average1pixDistanceX / 100));
 
 
-    U.log("average1PixDistanceX", "zoomlevel" + zoomLevel);
 
-    U.log("average1PixDistanceX", "-------------------------------------------------------------------------");
-    return Math.abs(average1pixDistanceX/100);
-  }
-
-  /**
-   * 1. Find latlng per pixel(LPP) in a particular zoomlevel(ZL).
-   * 2. Add an invisible anchor marker. Keep listening to get
-   * projection and update its screen co ordinate on each map movement.
-   * 3. For each new marker to be added, use this
-   * formula to find the co-ordinate on screen. (anchorLatLng - newLatlng) / LPP
-   * 4. For finding LPP. Take two screen points one pixel apart, using projection get the corresponding latLngs and find their difference. This gives us the LPP.
-   * P1(x, y)  = LatLng(lat, lng)
-   * P2(P1.x+1, P1.y) = LatLng1(lat, lng)
-   * 1Xpix = LatLng.lat - LatLng1.lat;
-   * 1Ypix =  LatLng.lng - LatLng1.lng;
-   *
-   **/
   private void printAverage1PixDistance() {
     U.log("printAverage1PixDistance", "-------------------------------------------------------------------------");
 //    double average1pixDistanceX = 0;
@@ -390,14 +336,14 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
       U.log("printAverage1PixDistance", "next centerPoint: " + centerPoint);
       LatLng nextCenterLatLng = mMap.getProjection().fromScreenLocation(centerPoint);
       U.log("printAverage1PixDistance", "1pixDistanceY" + (average1pixDistanceY));
-      mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(nextCenterLatLng, zoomLevel));
+//      mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(nextCenterLatLng, zoomLevel));
 
 //      average1pixDistanceX += nextCenterLatLng.longitude - centerLatlng.longitude;
       average1pixDistanceY += nextCenterLatLng.latitude - centerLatlng.latitude;
     }
 //    U.log("point", "average1pixDistanceX" + (average1pixDistanceX / 100));
     U.log("printAverage1PixDistance", "average1pixDistanceY" + (average1pixDistanceY / 100));
-    U.log("printAverage1PixDistance", "zoomlevel" + zoomLevel);
+//    U.log("printAverage1PixDistance", "zoomlevel" + zoomLevel);
 
     U.log("printAverage1PixDistance", "-------------------------------------------------------------------------");
   }

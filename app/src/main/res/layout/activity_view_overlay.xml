@@ -13,10 +13,11 @@
     android:name="com.google.android.gms.maps.SupportMapFragment"
     tools:context="com.amalbit.animationongooglemap.polylineBased.MapsActivity"/>
 
-  <com.amalbit.trail.marker.ViewOverlayView
-    android:id="@+id/viewOverly"
+  <com.amalbit.trail.OverlayLayout
+    android:id="@+id/viewOverLayView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"/>
+
   <Button
     android:id="@+id/btnPlus"
     android:layout_width="wrap_content"

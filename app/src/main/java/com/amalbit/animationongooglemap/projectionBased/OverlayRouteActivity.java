@@ -78,9 +78,7 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
       zoomRoute(mRoute);
       drawRoutes();
       mMap.setOnCameraMoveListener(() -> {
-            Projection projection = mMap.getProjection();
-            CameraPosition cameraPosition = mMap.getCameraPosition();
-            mRouteOverlayView.onCameraMove(projection, cameraPosition);
+            mRouteOverlayView.onCameraMove();
 
           }
       );

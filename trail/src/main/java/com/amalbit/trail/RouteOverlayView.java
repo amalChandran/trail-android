@@ -8,12 +8,12 @@ import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
-import com.google.android.gms.maps.Projection;
-import com.google.android.gms.maps.model.CameraPosition;
+import com.amalbit.trail.contract.GooglemapProvider;
+import com.amalbit.trail.contract.OverlayView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RouteOverlayView extends View {
+public class RouteOverlayView extends View implements OverlayView {
 
   /**
    * Debug
@@ -23,6 +23,8 @@ public class RouteOverlayView extends View {
   private int debugCellWidth, debugCellHeight;
 
   private Paint debugGridPaing = new Paint();
+
+  private GooglemapProvider googleMapProvider;
 
   public enum RouteType {
     PATH,
@@ -70,14 +72,31 @@ public class RouteOverlayView extends View {
     calculateDimensionForDebugGrid();
   }
 
-  public void onCameraMove(Projection projection, CameraPosition cameraPosition) {
-    if (overlayPolylines == null) return;
+  @Override
+  public void addGoogleMapProvider(GooglemapProvider googleMapProvider) {
+    this.googleMapProvider = googleMapProvider;
+  }
+
+  @Override
+  public void onMapReady() {
+
+  }
+
+  @Override
+  public void onCameraMove() {
+    if (isGoogleMapNotNull() && overlayPolylines == null) return;
     for (OverlayPolyline overlayPolyline : overlayPolylines) {
       if (overlayPolyline.getProjectionHelper().getCenterLatLng() != null) {
-        overlayPolyline.getProjectionHelper().onCameraMove(projection, cameraPosition);
+        overlayPolyline.getProjectionHelper().onCameraMove(
+            googleMapProvider.getGoogleMapWeakReference().get().getProjection(),
+            googleMapProvider.getGoogleMapWeakReference().get().getCameraPosition()
+        );
       }
       if (overlayPolyline.getShadowProjectionHelper().getCenterLatLng() != null) {
-        overlayPolyline.getShadowProjectionHelper().onCameraMove(projection, cameraPosition);
+        overlayPolyline.getShadowProjectionHelper().onCameraMove(
+            googleMapProvider.getGoogleMapWeakReference().get().getProjection(),
+            googleMapProvider.getGoogleMapWeakReference().get().getCameraPosition()
+        );
       }
     }
   }
@@ -97,7 +116,7 @@ public class RouteOverlayView extends View {
   protected void addPath(OverlayPolyline overlayPolyline) {
     overlayPolylines.add(overlayPolyline);
     invalidate();
-    onCameraMove(overlayPolyline.getInitialProjection(), overlayPolyline.getInitialCameraPosition());
+    onCameraMove();
   }
 
   @Override
@@ -201,6 +220,12 @@ public class RouteOverlayView extends View {
 //    }
 //    canvas.drawBitmap(bitmap, point.x, point.y, null);
 //  }
+
+  private boolean isGoogleMapNotNull() {
+    return googleMapProvider != null &&
+        googleMapProvider.getGoogleMapWeakReference() != null &&
+        googleMapProvider.getGoogleMapWeakReference().get() != null;
+  }
 
 
   public void stopAllAnimation() {
