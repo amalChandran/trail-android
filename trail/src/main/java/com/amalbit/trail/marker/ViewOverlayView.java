@@ -12,7 +12,7 @@ import android.view.View;
 import com.amalbit.trail.R;
 import com.amalbit.trail.contract.GooglemapProvider;
 import com.amalbit.trail.contract.OverlayView;
-import com.amalbit.trail.marker.OverlayMarkerOptim.MarkerRemoveListner;
+import com.amalbit.trail.marker.OverlayMarkerOptim.MarkerRemoveListener;
 import com.amalbit.trail.util.U;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
@@ -21,7 +21,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ViewOverlayView extends View implements MarkerRemoveListner, OverlayView {
+public class ViewOverlayView extends View implements MarkerRemoveListener, OverlayView {
 
   //----------------------------------------------------- debug
   private Bitmap debugYellowDotBitmap;
@@ -104,6 +104,8 @@ public class ViewOverlayView extends View implements MarkerRemoveListner, Overla
 
   @Override
   public void onRemove(OverlayMarkerOptim overlayMarker) {
+//    OverlayMarkerOptim overlayMarkerOptim = findMarkerById(overlayMarker.getMarkerId());
+    overlayMarkers.remove(overlayMarker);
     invalidate();
   }
 

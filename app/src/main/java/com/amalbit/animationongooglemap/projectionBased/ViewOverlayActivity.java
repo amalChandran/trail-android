@@ -253,6 +253,8 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
   }
 
 
+  List<OverlayMarkerOptim> markers = new ArrayList<>();
+
   private void moveToLatLngWithoutProjection(final LatLng latLng) {
 
     OverlayMarkerOptim overlayMarker1 = new OverlayMarkerOptim();
@@ -275,10 +277,13 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 
     viewOverlayView.addOverlayMarker(overlayMarker1, mMap.getProjection());
     viewOverlayView.invalidate();
+    markers.add(overlayMarker1);
 
     U.log("updateMarkerPointsOnScreen", "dx, dy              : " + dx + ", " + dy);
 //    U.log("updateMarkerPointsOnScreen", "zoom,latPerPixel :" + zoomLevel + ", " + lngPerPixel);
   }
+
+
 
   @Override
   public void onClick(View v) {
@@ -290,6 +295,10 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 //        updateMarkerPointsOnScreen();
         break;
       case R.id.btnMinus:
+        if (markers.size() > 0) {
+          markers.get(0).remove();
+          markers.remove(0);
+        }
 //        zoomLevel -= 1;
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pointTwo, zoomLevel));
 //        updatePixelPerZoom();

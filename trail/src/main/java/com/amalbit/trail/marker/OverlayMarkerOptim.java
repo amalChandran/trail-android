@@ -22,7 +22,7 @@ public class OverlayMarkerOptim {
 
   private Point screenPoint;
 
-  private MarkerRemoveListner markerRemoveListner;
+  private MarkerRemoveListener markerRemoveListner;
 
   private OnMarkerUpdate onMarkerUpdate;
 
@@ -68,11 +68,11 @@ public class OverlayMarkerOptim {
     this.screenPoint = screenPoint;
   }
 
-  public MarkerRemoveListner getMarkerRemoveListner() {
+  public MarkerRemoveListener getMarkerRemoveListner() {
     return markerRemoveListner;
   }
 
-  public void setMarkerRemoveListner(MarkerRemoveListner markerRemoveListner) {
+  public void setMarkerRemoveListner(MarkerRemoveListener markerRemoveListner) {
     this.markerRemoveListner = markerRemoveListner;
   }
 
@@ -118,7 +118,7 @@ public class OverlayMarkerOptim {
     this.rotateMatrix = rotateMatrix;
   }
 
-  public interface MarkerRemoveListner {
+  public interface MarkerRemoveListener {
     void onRemove(OverlayMarkerOptim overlayMarker);
   }
 
