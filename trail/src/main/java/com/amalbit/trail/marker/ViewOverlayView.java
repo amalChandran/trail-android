@@ -112,18 +112,18 @@ public class ViewOverlayView extends View implements MarkerRemoveListner, Overla
 
   @Override
   public void onMapReady() {
-    initializeLatLngPerPixel();
-    updatePixelPerZoom();
+//    initializeLatLngPerPixel();
+//    updatePixelPerZoom();
   }
 
   @Override
   public void onCameraMove() {
     if (isGoogleMapNotNull() && anchorMarker != null) {
       GoogleMap googleMap = googleMapProvider.getGoogleMapWeakReference().get();
-      zoomLevel = googleMap.getCameraPosition().zoom;
-
-      updatePixelPerZoom();
-      updateMarkerPointsOnScreen();
+//      zoomLevel = googleMap.getCameraPosition().zoom;
+//
+//      updatePixelPerZoom();
+//      updateMarkerPointsOnScreen();
 
       anchorMarker.setLatLng(googleMap.getCameraPosition().target);
       anchorMarker.setScreenPoint(googleMap.getProjection()
@@ -161,7 +161,7 @@ public class ViewOverlayView extends View implements MarkerRemoveListner, Overla
     point.x = overlayMarkerOptim.getScreenPoint().x - overlayMarkerOptim.getIcon().getWidth() / 2;
     point.y = overlayMarkerOptim.getScreenPoint().y - overlayMarkerOptim.getIcon().getHeight() / 2;
 
-    Matrix matrix = overlayMarkerOptim.getRotateMatrix();
+    Matrix matrix = new Matrix();
     Matrix rotateMatrix = new Matrix();
 
     int xRotatePoint = overlayMarkerOptim.getIcon().getWidth() / 2;
