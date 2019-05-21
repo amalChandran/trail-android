@@ -25,9 +25,7 @@ import com.amalbit.trail.marker.ViewOverlayView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -47,7 +45,6 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
   private List<LatLng> route = LatlngData.getRoute();
 
   private Bitmap dotBitmap;
-  private Bitmap yellowDotBitmap;
   private Bitmap carBitmap;
 
   private Repeat repeat;
@@ -58,7 +55,6 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     setContentView(R.layout.activity_view_overlay);
 
     dotBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_dot);
-    yellowDotBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_dot_yellow);
     carBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.car);
 
     overlayLayout = findViewById(R.id.viewOverLayView);
@@ -80,14 +76,14 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
 
     mMap.setOnMapLoadedCallback(() -> {
       overlayLayout.addGoogleMap(mMap);
-//      initializeLatLngPerPixel();
-//      updatePixelPerZoom();
+      overlayLayout.onMapReady();
 
-      mMap.setOnCameraMoveListener(this::onCameraMove);
+      mMap.setOnCameraMoveListener(
+          () -> overlayLayout.onCameraMoved()
+      );
       setMapBoundsRow(map);
-      addCenterMarker();
-      addSecondMarker();
-      addNormalMarker();
+//      addSecondMarker();
+//      addNormalMarker();
 
       mMap.setOnMapClickListener(this::moveToLatLngWithoutProjection);
 
@@ -113,7 +109,7 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
   @Override
   protected void onPause() {
     super.onPause();
-    if (repeat!= null) {
+    if (repeat != null) {
       repeat.stopUpdates();
     }
   }
@@ -121,23 +117,9 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
   @Override
   protected void onResume() {
     super.onResume();
-    if (repeat!= null) {
+    if (repeat != null) {
       repeat.startUpdates();
     }
-  }
-
-  private void onCameraMove() {
-    Projection projection = mMap.getProjection();
-    CameraPosition cameraPosition = mMap.getCameraPosition();
-
-//    zoomLevel = mMap.getCameraPosition().zoom;
-//    viewOverlayView.onCameraMove(projection, cameraPosition);
-//    updatePixelPerZoom();
-//    updateMarkerPointsOnScreen();
-
-//    mRouteOverlayView.onCameraMove(projection, cameraPosition);
-
-    overlayLayout.onCameraMoved();
   }
 
   public void addMarkerWithAnimation(List<Car> cars) {
@@ -164,8 +146,7 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
           overlayMarker1.setRotateValueAnimator(rotateValueAnimator);
 
           viewOverlayView.addOverlayMarker(overlayMarker1, mMap.getProjection());
-        }
-        else {
+        } else {
           final LatLng startLatLng = overlayMarker.getLatLng();
           final LatLng endLatLng = car.getLatLng();
           float bearing = 0;
@@ -242,17 +223,17 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     mMap.addMarker(new MarkerOptions().position(pointEight));
   }
 
-  private void addCenterMarker() {
-    LatLng centerLatLng = mMap.getCameraPosition().target;
-
-    OverlayMarkerOptim overlayMarker1 = new OverlayMarkerOptim();
-    overlayMarker1.setIcon(yellowDotBitmap.copy(yellowDotBitmap.getConfig(), true));
-    overlayMarker1.setMarkerId(2323);
-    overlayMarker1.setLatLng(centerLatLng);
-    overlayMarker1.setOnMarkerUpdate(ViewOverlayActivity.this);
-
-    viewOverlayView.addCenterMarker(overlayMarker1, mMap.getProjection());
-  }
+//  private void addCenterMarker() {
+//    LatLng centerLatLng = mMap.getCameraPosition().target;
+//
+//    OverlayMarkerOptim overlayMarker1 = new OverlayMarkerOptim();
+//    overlayMarker1.setIcon(yellowDotBitmap.copy(yellowDotBitmap.getConfig(), true));
+//    overlayMarker1.setMarkerId(2323);
+//    overlayMarker1.setLatLng(centerLatLng);
+//    overlayMarker1.setOnMarkerUpdate(ViewOverlayActivity.this);
+//
+//    viewOverlayView.addCenterMarker(overlayMarker1, mMap.getProjection());
+//  }
 
   private void addSecondMarker() {
     LatLng centerLatLng = mMap.getCameraPosition().target;
@@ -281,9 +262,11 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
     overlayMarker1.setOnMarkerUpdate(ViewOverlayActivity.this);
 
     //(Difference between longs / 0.00001252926886 )
-    int dx = (int) ((viewOverlayView.getAnchorMarker().getLatLng().longitude - latLng.longitude) / viewOverlayView.getLngPerPixel());
+    int dx = (int) ((viewOverlayView.getAnchorMarker().getLatLng().longitude - latLng.longitude) / viewOverlayView
+        .getLngPerPixel());
     //(Difference between lats / 0.00001252926886 )
-    int dy = (int) ((viewOverlayView.getAnchorMarker().getLatLng().latitude - latLng.latitude) / viewOverlayView.getLngPerPixel());
+    int dy = (int) ((viewOverlayView.getAnchorMarker().getLatLng().latitude - latLng.latitude) / viewOverlayView
+        .getLngPerPixel());
 
     Point predictedPointOnScreen = new Point(
         viewOverlayView.getAnchorMarker().getScreenPoint().x - dx,
@@ -317,9 +300,6 @@ public class ViewOverlayActivity extends BaseActivity implements OnMapReadyCallb
         break;
     }
   }
-
-
-
 
 
   private void printAverage1PixDistance() {

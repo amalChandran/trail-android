@@ -52,6 +52,11 @@ public class OverlayLayout extends FrameLayout implements GooglemapProvider {
     this.googleMapWeakReference = new WeakReference<>(googleMap);
   }
 
+  public void onMapReady() {
+    viewOverlayView.onMapReady();
+    routeOverlayView.onMapReady();
+  }
+
   public RouteOverlayView getRouteOverlayView() {
     return routeOverlayView;
   }

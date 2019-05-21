@@ -9,8 +9,8 @@
     android:layout_height="match_parent"
     android:name="com.google.android.gms.maps.SupportMapFragment"
     tools:context="com.amalbit.animationongooglemap.polylineBased.MapsActivity"/>
-  <com.amalbit.trail.RouteOverlayView
-    android:id="@+id/mapOverlayView"
+  <com.amalbit.trail.OverlayLayout
+    android:id="@+id/mapOverlayLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"/>
   <include layout="@layout/layout_bottom_sheet"/>

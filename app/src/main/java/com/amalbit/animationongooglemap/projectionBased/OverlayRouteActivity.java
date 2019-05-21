@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import com.amalbit.animationongooglemap.R;
 import com.amalbit.animationongooglemap.data.LatlngData;
+import com.amalbit.trail.OverlayLayout;
 import com.amalbit.trail.OverlayPolyline;
 import com.amalbit.trail.RouteOverlayView;
 import com.amalbit.trail.RouteOverlayView.RouteType;
@@ -13,9 +14,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.CancelableCallback;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -30,6 +29,8 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
   private MapStyleOptions mapStyle;
 
   private List<LatLng> mRoute;
+
+  private OverlayLayout overlayLayout;
 
   private RouteOverlayView mRouteOverlayView;
 
@@ -60,7 +61,8 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
   }
 
   private void initUI() {
-    mRouteOverlayView = findViewById(R.id.mapOverlayView);
+    overlayLayout = findViewById(R.id.mapOverlayLayout);
+    mRouteOverlayView = overlayLayout.getRouteOverlayView();
     ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
         R.array.array_place, android.R.layout.simple_spinner_item);
     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -74,12 +76,12 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
     mMap.getUiSettings().setTiltGesturesEnabled(false);
 
     mMap.setOnMapLoadedCallback(() -> {
+      overlayLayout.addGoogleMap(mMap);
       mMap.setPadding(0, 0, 0, 250);
       zoomRoute(mRoute);
       drawRoutes();
       mMap.setOnCameraMoveListener(() -> {
-            mRouteOverlayView.onCameraMove();
-
+          overlayLayout.onCameraMoved();
           }
       );
     });

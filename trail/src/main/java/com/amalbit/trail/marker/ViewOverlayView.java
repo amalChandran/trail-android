@@ -1,12 +1,15 @@
 package com.amalbit.trail.marker;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
+import com.amalbit.trail.R;
 import com.amalbit.trail.contract.GooglemapProvider;
 import com.amalbit.trail.contract.OverlayView;
 import com.amalbit.trail.marker.OverlayMarkerOptim.MarkerRemoveListner;
@@ -19,6 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ViewOverlayView extends View implements MarkerRemoveListner, OverlayView {
+
+  //----------------------------------------------------- debug
+  private Bitmap debugYellowDotBitmap;
+
+  //-----------------------------------------------------
 
   private final Object mSvgLock = new Object();
 
@@ -60,13 +68,7 @@ public class ViewOverlayView extends View implements MarkerRemoveListner, Overla
 
   private void init() {
     setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-  }
-
-  public void addCenterMarker(OverlayMarkerOptim overlayMarker, Projection projection) {
-    overlayMarker.setScreenPoint(projection.toScreenLocation(overlayMarker.getLatLng()));
-    overlayMarker.setMarkerRemoveListner(this);
-    anchorMarker = overlayMarker;
-    invalidate();
+    debugYellowDotBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_dot_yellow);
   }
 
   public final OverlayMarkerOptim getAnchorMarker() {
@@ -74,7 +76,7 @@ public class ViewOverlayView extends View implements MarkerRemoveListner, Overla
   }
 
   public void addOverlayMarker(OverlayMarkerOptim overlayMarker, Projection projection) {
-    overlayMarker.setScreenPoint(projection.toScreenLocation(overlayMarker.getLatLng())); //TODO to be removed
+//    overlayMarker.setScreenPoint(projection.toScreenLocation(overlayMarker.getLatLng())); //TODO to be removed
     overlayMarker.setMarkerRemoveListner(this);
     overlayMarkers.add(overlayMarker);
     invalidate();
@@ -114,6 +116,7 @@ public class ViewOverlayView extends View implements MarkerRemoveListner, Overla
   public void onMapReady() {
     initializeLatLngPerPixel();
     updatePixelPerZoom();
+    addCenterMarker();
   }
 
   @Override
@@ -157,21 +160,41 @@ public class ViewOverlayView extends View implements MarkerRemoveListner, Overla
   }
 
   private void drawMarker(Canvas canvas, OverlayMarkerOptim overlayMarkerOptim) {
-    Point point = new Point();
-    point.x = overlayMarkerOptim.getScreenPoint().x - overlayMarkerOptim.getIcon().getWidth() / 2;
-    point.y = overlayMarkerOptim.getScreenPoint().y - overlayMarkerOptim.getIcon().getHeight() / 2;
+    if (overlayMarkerOptim.getScreenPoint()!= null) {
+      Point point = new Point();
+      point.x = overlayMarkerOptim.getScreenPoint().x - overlayMarkerOptim.getIcon().getWidth() / 2;
+      point.y = overlayMarkerOptim.getScreenPoint().y - overlayMarkerOptim.getIcon().getHeight() / 2;
 
-    Matrix matrix = overlayMarkerOptim.getRotateMatrix();
-    Matrix rotateMatrix = new Matrix();
+      Matrix matrix = overlayMarkerOptim.getRotateMatrix();
+      Matrix rotateMatrix = new Matrix();
 
-    int xRotatePoint = overlayMarkerOptim.getIcon().getWidth() / 2;
-    int yRotatePoint = overlayMarkerOptim.getIcon().getHeight() / 2;
-    rotateMatrix.postRotate(overlayMarkerOptim.getBearing(), xRotatePoint, yRotatePoint);
-    rotateMatrix.postTranslate(point.x, point.y);
+      int xRotatePoint = overlayMarkerOptim.getIcon().getWidth() / 2;
+      int yRotatePoint = overlayMarkerOptim.getIcon().getHeight() / 2;
+      rotateMatrix.postRotate(overlayMarkerOptim.getBearing(), xRotatePoint, yRotatePoint);
+      rotateMatrix.postTranslate(point.x, point.y);
 
-    matrix.postConcat(rotateMatrix);
+      matrix.postConcat(rotateMatrix);
 
-    canvas.drawBitmap(overlayMarkerOptim.getIcon(), rotateMatrix, null);
+      canvas.drawBitmap(overlayMarkerOptim.getIcon(), rotateMatrix, null);
+    }
+  }
+
+  private void addCenterMarker() {
+    if (isGoogleMapNotNull()) {
+      GoogleMap googleMap = googleMapProvider.getGoogleMapWeakReference().get();
+      LatLng centerLatLng = googleMap.getCameraPosition().target;
+
+      OverlayMarkerOptim overlayMarker1 = new OverlayMarkerOptim();
+      overlayMarker1.setIcon(debugYellowDotBitmap.copy(debugYellowDotBitmap.getConfig(), true));
+      overlayMarker1.setMarkerId(2323);
+      overlayMarker1.setLatLng(centerLatLng);
+      overlayMarker1.setOnMarkerUpdate(ViewOverlayView.this::invalidate);
+
+      overlayMarker1.setScreenPoint(googleMap.getProjection().toScreenLocation(overlayMarker1.getLatLng()));
+      overlayMarker1.setMarkerRemoveListner(this);
+      anchorMarker = overlayMarker1;
+      invalidate();
+    }
   }
 
   private boolean isGoogleMapNotNull() {
