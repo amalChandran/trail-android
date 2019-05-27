@@ -82,6 +82,17 @@ public class LatlngData {
     return mFinalRoute;
   }
 
+  public static List<LatLng> getClosedRouteB() {
+    List<LatLng> mFinalRoute = new ArrayList<>();
+    mFinalRoute.add(new LatLng(12.954646,77.6417013));
+    mFinalRoute.add(new LatLng(12.956664,77.6416803));
+    mFinalRoute.add(new LatLng(12.956769,77.6440943));
+    mFinalRoute.add(new LatLng(12.954113,77.6443513));
+    mFinalRoute.add(new LatLng(12.954646,77.6417013));
+
+    return mFinalRoute;
+  }
+
   public static List<LatLng> getTokyoRoute() {
     List<LatLng> mFinalRoute = new ArrayList<>();
     mFinalRoute.add(new LatLng(35.64719, 139.79163));

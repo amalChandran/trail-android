@@ -116,6 +116,17 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
   }
 
   private void drawRoutes() {
+
+    OverlayPolyline normalOverlayPolygon = new OverlayPolyline.Builder(mRouteOverlayView)
+        .setRouteType(RouteType.PATH)
+        .setCameraPosition(mMap.getCameraPosition())
+        .setProjection(mMap.getProjection())
+        .setLatLngs(LatlngData.getClosedRouteB())
+        .setBottomLayerColor(Color.DKGRAY)
+        .setTopLayerColor(Color.GREEN)
+        .create();
+
+
     OverlayPolyline normalOverlayPolyline = new OverlayPolyline.Builder(mRouteOverlayView)
         .setRouteType(RouteType.PATH)
         .setCameraPosition(mMap.getCameraPosition())
