@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import com.amalbit.animationongooglemap.R;
@@ -17,14 +18,16 @@ import com.amalbit.animationongooglemap.marker.Repeat;
 import com.amalbit.trail.marker.MarkerOverlayView;
 import com.amalbit.trail.marker.OverlayMarker;
 import com.amalbit.trail.marker.OverlayMarker.OnMarkerUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FromToActivity extends BaseActivity implements OnMapReadyCallback, OnMarkerUpdate {
+public class CabsActivity extends BaseActivity implements OnMapReadyCallback, OnMarkerUpdate {
 
   private GoogleMap mMap;
 
@@ -41,7 +44,7 @@ public class FromToActivity extends BaseActivity implements OnMapReadyCallback, 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_from_to);
+    setContentView(R.layout.activity_cabs);
     markerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.car);
 
     imgTest = findViewById(R.id.imgTest);
@@ -99,7 +102,7 @@ public class FromToActivity extends BaseActivity implements OnMapReadyCallback, 
           overlayMarker1.setIcon(markerIcon.copy(markerIcon.getConfig(), true));
           overlayMarker1.setMarkerId(car.getCarId());
           overlayMarker1.setLatLng(car.getLatLng());
-          overlayMarker1.setOnMarkerUpdate(FromToActivity.this);
+          overlayMarker1.setOnMarkerUpdate(CabsActivity.this);
 
           ValueAnimator translateValueAnimator = new ValueAnimator();
           translateValueAnimator.setInterpolator(new LinearInterpolator());

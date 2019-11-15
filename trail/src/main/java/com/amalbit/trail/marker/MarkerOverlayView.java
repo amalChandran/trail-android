@@ -96,6 +96,7 @@ public class MarkerOverlayView extends View implements MarkerRemoveListner {
   public void onCameraMove(GoogleMap googleMap) {
     for (OverlayMarker overlayMarker : overlayMarkers) {
       overlayMarker.setScreenPoint(googleMap.getProjection().toScreenLocation(overlayMarker.getLatLng()));
+      overlayMarker.setMapBearing(googleMap.getCameraPosition().bearing);
     }
     invalidate();
   }

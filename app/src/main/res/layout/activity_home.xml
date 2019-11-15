@@ -23,12 +23,12 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="4dp"
     android:text="@string/btn_polyline_based"
-    app:layout_constraintBottom_toTopOf="@+id/btn_fromto"
+    app:layout_constraintBottom_toTopOf="@+id/btn_cabs"
     app:layout_constraintHorizontal_bias="0.0"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"/>
   <android.support.v7.widget.AppCompatButton
-    android:id="@+id/btn_fromto"
+    android:id="@+id/btn_cabs"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginBottom="4dp"

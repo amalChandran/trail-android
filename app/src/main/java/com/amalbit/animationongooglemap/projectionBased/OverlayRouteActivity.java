@@ -72,7 +72,7 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
   public void onMapReady(final GoogleMap map) {
     mMap = map;
     mMap.setMapStyle(mapStyle);
-    mMap.getUiSettings().setRotateGesturesEnabled(false);
+//    mMap.getUiSettings().setRotateGesturesEnabled(false);
     mMap.getUiSettings().setTiltGesturesEnabled(false);
 
     mMap.setOnMapLoadedCallback(() -> {

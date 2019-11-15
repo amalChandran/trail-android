@@ -35,7 +35,7 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-    <activity android:name=".projectionBased.FromToActivity">
+    <activity android:name=".projectionBased.CabsActivity">
     </activity>
   </application>
 

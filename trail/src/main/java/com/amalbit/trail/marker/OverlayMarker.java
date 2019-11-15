@@ -15,6 +15,8 @@ public class OverlayMarker {
 
   private float bearing;
 
+  private float mapBearing;
+
   private Bitmap icon;
 
   private Point screenPoint;
@@ -114,11 +116,15 @@ public class OverlayMarker {
   }
 
   public float getBearing() {
-    return bearing;
+    return bearing - mapBearing;
   }
 
   public void setBearing(float bearing) {
     this.bearing = bearing;
+  }
+
+  public void setMapBearing(float mapBearing) {
+    this.mapBearing = mapBearing;
   }
 
   public ValueAnimator getTranslateValueAnimator() {
