@@ -13,6 +13,7 @@ import android.graphics.RectF;
 import android.util.Log;
 import com.amalbit.trail.RouteOverlayView.RouteType;
 import com.amalbit.trail.contract.Animator;
+import com.amalbit.trail.util.U;
 import com.amalbit.trail.util.Util;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -286,20 +287,22 @@ public class OverlayPolyline {
     drawPath.addPath(path);
     drawPath.transform(matrix);
   }
-  void translatePathMatrix(float dx, float dy) {
-    translatePath(path, drawPath, matrix, dx, dy);
+  void translatePathMatrix(float dx, float dy, float cameraBearing, Point centerPoint) {
+    U.log("Camera bearing" + cameraBearing);
+    translatePath(path, drawPath, matrix, dx, dy, cameraBearing, centerPoint);
     routeOverlayView.invalidate();
   }
 
-  void translateShadowPathMatrix(float dx, float dy) {
-    translatePath(shadowPath, shadowDrawPath, shadowMatrix, dx, dy);
+  void translateShadowPathMatrix(float dx, float dy, float cameraBearing, Point centerPoint) {
+    translatePath(shadowPath, shadowDrawPath, shadowMatrix, dx, dy, cameraBearing, centerPoint);
     routeOverlayView.invalidate();
   }
 
-  private void translatePath(Path path, Path drawPath, Matrix matrix, float dx, float dy) {
+  private void translatePath(Path path, Path drawPath, Matrix matrix, float dx, float dy, float cameraBearing, Point centerPoint) {
     drawPath.computeBounds(rectF, true);//Only for drawing debug path bounds.
     Matrix translateMatrix = new Matrix();
     translateMatrix.postTranslate(dx, dy);
+    translateMatrix.postRotate(cameraBearing, centerPoint.x, centerPoint.y);
     matrix.postConcat(translateMatrix);
     drawPath.rewind();
     drawPath.addPath(path);

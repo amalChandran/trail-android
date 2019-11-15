@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import com.amalbit.trail.contract.GooglemapProvider;
 import com.amalbit.trail.contract.OverlayView;
+import com.google.android.gms.maps.GoogleMap;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,18 +85,24 @@ public class RouteOverlayView extends View implements OverlayView {
 
   @Override
   public void onCameraMove() {
-    if (isGoogleMapNotNull() && overlayPolylines == null) return;
+    if (isGoogleMapNotNull() && overlayPolylines == null) {
+      return;
+    }
+    GoogleMap googleMap = googleMapProvider.getGoogleMapWeakReference().get();
+    float cameraBearing = googleMap.getCameraPosition().bearing;
     for (OverlayPolyline overlayPolyline : overlayPolylines) {
       if (overlayPolyline.getProjectionHelper().getCenterLatLng() != null) {
         overlayPolyline.getProjectionHelper().onCameraMove(
-            googleMapProvider.getGoogleMapWeakReference().get().getProjection(),
-            googleMapProvider.getGoogleMapWeakReference().get().getCameraPosition()
+            googleMap.getProjection(),
+            googleMap.getCameraPosition(),
+            cameraBearing
         );
       }
       if (overlayPolyline.getShadowProjectionHelper().getCenterLatLng() != null) {
         overlayPolyline.getShadowProjectionHelper().onCameraMove(
-            googleMapProvider.getGoogleMapWeakReference().get().getProjection(),
-            googleMapProvider.getGoogleMapWeakReference().get().getCameraPosition()
+            googleMap.getProjection(),
+            googleMap.getCameraPosition(),
+            cameraBearing
         );
       }
     }
@@ -123,7 +130,7 @@ public class RouteOverlayView extends View implements OverlayView {
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
     synchronized (mSvgLock) {
-//      drawPathBorder(canvas);
+      drawPathBorder(canvas);
       drawRoute(canvas);
     }
   }
@@ -141,27 +148,33 @@ public class RouteOverlayView extends View implements OverlayView {
   }
 
   private void drawPathBorder(Canvas canvas) {
-//    drawDebugDrid(canvas);
+    drawDebugDrid(canvas);
     int count = 0;
     for (OverlayPolyline overlayPolyline : overlayPolylines) {
       canvas.drawRect(overlayPolyline.getRectF(), overlayPolyline.getPaintDebug());
-      canvas.drawCircle(overlayPolyline.getRectF().centerX(), overlayPolyline.getRectF().centerY(), 20, overlayPolyline.getTopLayerPaint());
-      canvas.drawText("" + count, overlayPolyline.getRectF().centerX(), overlayPolyline.getRectF().centerY(), overlayPolyline
-          .getPaintDebug());
+      canvas.drawCircle(overlayPolyline.getRectF().centerX(), overlayPolyline.getRectF().centerY(), 20,
+          overlayPolyline.getTopLayerPaint());
+      canvas.drawText("" + count, overlayPolyline.getRectF().centerX(), overlayPolyline.getRectF().centerY(),
+          overlayPolyline
+              .getPaintDebug());
       if (overlayPolyline.getProjectionHelper() != null && overlayPolyline.getProjectionHelper().point != null) {
-        canvas.drawCircle(overlayPolyline.getProjectionHelper().point.x, overlayPolyline.getProjectionHelper().point.y, 10,
+        canvas.drawCircle(overlayPolyline.getProjectionHelper().point.x, overlayPolyline.getProjectionHelper().point.y,
+            10,
             overlayPolyline.getBottomLayerPaint());
         canvas
-            .drawText("" + count, overlayPolyline.getProjectionHelper().point.x, overlayPolyline.getProjectionHelper().point.y, overlayPolyline
-                .getPaintDebug());
+            .drawText("" + count, overlayPolyline.getProjectionHelper().point.x,
+                overlayPolyline.getProjectionHelper().point.y, overlayPolyline
+                    .getPaintDebug());
       }
       if (overlayPolyline.getShadowDrawPath() != null) {
         RectF rectF = new RectF();
         overlayPolyline.getShadowDrawPath().computeBounds(rectF, true);
         canvas.drawRect(rectF, overlayPolyline.getPaintDebug());
       }
-      if (overlayPolyline.getShadowProjectionHelper() != null && overlayPolyline.getShadowProjectionHelper().point != null) {
-        canvas.drawCircle(overlayPolyline.getShadowProjectionHelper().point.x, overlayPolyline.getShadowProjectionHelper().point.y, 20,
+      if (overlayPolyline.getShadowProjectionHelper() != null
+          && overlayPolyline.getShadowProjectionHelper().point != null) {
+        canvas.drawCircle(overlayPolyline.getShadowProjectionHelper().point.x,
+            overlayPolyline.getShadowProjectionHelper().point.y, 20,
             overlayPolyline.getPaintDebug());
       }
       count++;
