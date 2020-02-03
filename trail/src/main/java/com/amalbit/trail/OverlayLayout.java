@@ -1,10 +1,12 @@
 package com.amalbit.trail;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.amalbit.trail.contract.GooglemapProvider;
 import com.amalbit.trail.marker.ViewOverlayView;
 import com.google.android.gms.maps.GoogleMap;

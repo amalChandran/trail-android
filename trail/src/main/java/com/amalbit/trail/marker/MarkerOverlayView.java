@@ -4,9 +4,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.annotation.Nullable;
+
 import com.amalbit.trail.marker.OverlayMarker.MarkerRemoveListner;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
