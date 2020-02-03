@@ -1,42 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  package="com.amalbit.animationongooglemap">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.amalbit.animationongooglemap">
 
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-  <application
-    android:allowBackup="true"
-    android:icon="@drawable/ic_app"
-    android:label="@string/app_name"
-    android:supportsRtl="true"
-    android:theme="@style/AppTheme"
-    tools:ignore="AllowBackup">
-    <activity android:name=".projectionBased.ViewOverlayActivity">
-    </activity>
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_app"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+        <activity android:name=".projectionBased.ViewOverlayActivity"></activity>
 
-    <meta-data
-      android:name="com.google.android.geo.API_KEY"
-      android:value="@string/google_maps_key"/>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
 
-    <activity
-      android:label="@string/title_activity_maps"
-      android:name=".polylineBased.MapsActivity"/>
-    <activity
-      android:label="@string/title_activity_projection"
-      android:name=".projectionBased.OverlayRouteActivity"
-      android:theme="@style/OverlayActivityTheme">
-    </activity>
-    <activity android:name=".HomeActivity">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
+        <activity
+            android:name=".polylineBased.MapsActivity"
+            android:label="@string/title_activity_maps" />
+        <activity
+            android:name=".projectionBased.OverlayRouteActivity"
+            android:label="@string/title_activity_projection"
+            android:theme="@style/OverlayActivityTheme"></activity>
+        <activity android:name=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-        <category android:name="android.intent.category.LAUNCHER"/>
-      </intent-filter>
-    </activity>
-    <activity android:name=".projectionBased.FromToActivity">
-    </activity>
-  </application>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".projectionBased.FromToActivity"></activity>
+    </application>
 
 </manifest>
