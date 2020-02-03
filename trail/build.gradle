@@ -80,13 +80,13 @@ dependencies {
     // google maps 3 sdk integration
     // https://developers.google.com/maps/documentation/android-sdk/v3-client-migration
     // demo project: https://github.com/googlemaps/android-samples/tree/v3-beta/ApiDemos/kotlin
-    api name: 'maps-sdk-3.0.0-beta', ext: 'aar'
-    api 'com.google.maps.android:android-maps-utils-sdk-v3-compat:0.1'
+    compileOnly name: 'maps-sdk-3.0.0-beta', ext: 'aar'
+    compileOnly 'com.google.maps.android:android-maps-utils-sdk-v3-compat:0.1'
 
-    api 'com.google.android.gms:play-services-basement:17.1.1'
-    api 'com.google.android.gms:play-services-base:17.1.0'
-    api 'com.google.android.gms:play-services-gcm:17.0.0'
-    api 'com.google.android.gms:play-services-location:17.0.0'
+    compileOnly 'com.google.android.gms:play-services-basement:17.1.1'
+    compileOnly 'com.google.android.gms:play-services-base:17.1.0'
+    compileOnly 'com.google.android.gms:play-services-gcm:17.0.0'
+    compileOnly 'com.google.android.gms:play-services-location:17.0.0'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.annotation:annotation:1.1.0'
