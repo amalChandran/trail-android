@@ -1,19 +1,22 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
-  <fragment
-    android:id="@+id/map"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    tools:context="com.amalbit.animationongooglemap.polylineBased.MapsActivity"/>
-  <com.amalbit.trail.RouteOverlayView
-    android:id="@+id/mapOverlayView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
-  <include layout="@layout/layout_bottom_sheet"/>
+    android:layout_height="match_parent">
+
+    <fragment
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        tools:context="com.amalbit.animationongooglemap.polylineBased.MapsActivity" />
+
+    <com.amalbit.trail.RouteOverlayView
+        android:id="@+id/mapOverlayView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <include layout="@layout/layout_bottom_sheet" />
 </FrameLayout>
 
 

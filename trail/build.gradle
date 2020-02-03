@@ -8,64 +8,64 @@ version = '0.2.0'
 //group='com.github.amalChandran'
 
 ext {
-  bintrayRepo = 'Trail'
-  bintrayName = 'Trail'
+    bintrayRepo = 'Trail'
+    bintrayName = 'Trail'
 
-  publishedGroupId = 'com.amalbit.trail'
-  libraryName = 'trail'
-  artifact = 'trail'
+    publishedGroupId = 'com.amalbit.trail'
+    libraryName = 'trail'
+    artifact = 'trail'
 
-  libraryDescription = 'Projection based route animation on google maps.'
+    libraryDescription = 'Projection based route animation on google maps.'
 
-  siteUrl = 'https://github.com/amalChandran/google-maps-route-animation'
-  gitUrl = 'https://github.com/amalChandran/google-maps-route-animation.git'
+    siteUrl = 'https://github.com/amalChandran/google-maps-route-animation'
+    gitUrl = 'https://github.com/amalChandran/google-maps-route-animation.git'
 
-  libraryVersion = version
+    libraryVersion = version
 
-  developerId = 'developerId'
-  developerName = 'Amal'
-  developerEmail = 'precisely.amal@email.com'
+    developerId = 'developerId'
+    developerName = 'Amal'
+    developerEmail = 'precisely.amal@email.com'
 
-  licenseName = 'The Apache Software License, Version 2.0'
-  licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-  allLicenses = ["Apache-2.0"]
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
 }
 
 android {
-  compileSdkVersion 29
-  buildToolsVersion "29.0.3"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
 
-  defaultConfig {
-    minSdkVersion 16
-    targetSdkVersion 29
-    versionCode 4
-    versionName "1.53"
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 4
+        versionName "1.53"
 
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-  }
-
-  buildTypes {
-    release {
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-  }
 
-  compileOptions {
-      sourceCompatibility JavaVersion.VERSION_1_8
-      targetCompatibility JavaVersion.VERSION_1_8
-  }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
-  implementation fileTree(dir: 'libs', include: ['*.jar'])
-  implementation "com.google.android.gms:play-services-maps:17.0.0"
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.google.android.gms:play-services-maps:17.0.0"
 
-  testImplementation 'junit:junit:4.12'
-  androidTestImplementation 'com.android.support.test:runner:1.0.2'
-  androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.annotation:annotation:1.1.0'
 }
 
 bintray {

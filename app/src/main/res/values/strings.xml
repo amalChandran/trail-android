@@ -1,21 +1,21 @@
 <resources>
-  <string name="app_name">Trail</string>
-  <string name="title_activity_maps">Polyline based</string>
+    <string name="app_name">Trail</string>
+    <string name="title_activity_maps">Polyline based</string>
 
-  <string name="title_activity_projection">Projection based</string>
+    <string name="title_activity_projection">Projection based</string>
 
-  <string name="reset_anim">Reset</string>
+    <string name="reset_anim">Reset</string>
 
-  <string-array name="array_place">
-    <item>Bangalore</item>
-    <item>Tokyo</item>
-    <item>New York</item>
-  </string-array>
+    <string-array name="array_place">
+        <item>Bangalore</item>
+        <item>Tokyo</item>
+        <item>New York</item>
+    </string-array>
 
-  <string name="add_routes">Add Routes</string>
-  <string name="remove_routes">Remove Routes</string>
-  <string name="btn_projection_based">PROJECTION BASED ROUTE</string>
-  <string name="btn_polyline_based">Polyline based Route</string>
-  <string name="btn_markers">Markers (In Progress)</string>
+    <string name="add_routes">Add Routes</string>
+    <string name="remove_routes">Remove Routes</string>
+    <string name="btn_projection_based">PROJECTION BASED ROUTE</string>
+    <string name="btn_polyline_based">Polyline based Route</string>
+    <string name="btn_markers">Markers (In Progress)</string>
 
 </resources>
