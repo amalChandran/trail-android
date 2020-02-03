@@ -12,7 +12,7 @@
     android:label="@string/app_name"
     android:supportsRtl="true"
     android:theme="@style/AppTheme"
-    tools:ignore="AllowBackup">
+    tools:ignore="AllowBackup,GoogleAppIndexingWarning">
     <activity android:name=".projectionBased.ViewOverlayActivity">
     </activity>
 
