@@ -6,9 +6,9 @@ package com.amalbit.trail.contract;
 
 public interface Animator {
 
-  void play();
+    void play();
 
-  void stop(AnimationCallback callback);
+    void stop(AnimationCallback callback);
 
-  void onPathMeasureChange();
+    void onPathMeasureChange();
 }

@@ -42,7 +42,7 @@ Place RouteOverlayView over your google map layout in xml. Make sure that the ro
     android:id="@+id/map"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:name="com.google.android.gms.maps.SupportMapFragment"/>
+    android:name="com.google.android.libraries.maps.SupportMapFragment"/>
   <com.amalbit.trail.RouteOverlayView
     android:id="@+id/mapOverlayView"
     android:layout_width="match_parent"

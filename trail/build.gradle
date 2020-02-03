@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'org.jetbrains.dokka-android'
 
 group = 'com.amalbit.trail'
 version = '0.2.0'
@@ -8,47 +9,58 @@ version = '0.2.0'
 //group='com.github.amalChandran'
 
 ext {
-  bintrayRepo = 'Trail'
-  bintrayName = 'Trail'
+    bintrayRepo = 'Trail'
+    bintrayName = 'Trail'
 
-  publishedGroupId = 'com.amalbit.trail'
-  libraryName = 'trail'
-  artifact = 'trail'
+    publishedGroupId = 'com.amalbit.trail'
+    libraryName = 'trail'
+    artifact = 'trail'
 
-  libraryDescription = 'Projection based route animation on google maps.'
+    libraryDescription = 'Projection based route animation on google maps.'
 
-  siteUrl = 'https://github.com/amalChandran/google-maps-route-animation'
-  gitUrl = 'https://github.com/amalChandran/google-maps-route-animation.git'
+    siteUrl = 'https://github.com/amalChandran/google-maps-route-animation'
+    gitUrl = 'https://github.com/amalChandran/google-maps-route-animation.git'
 
-  libraryVersion = version
+    libraryVersion = version
 
-  developerId = 'developerId'
-  developerName = 'Amal'
-  developerEmail = 'precisely.amal@email.com'
+    developerId = 'developerId'
+    developerName = 'Amal'
+    developerEmail = 'precisely.amal@email.com'
 
-  licenseName = 'The Apache Software License, Version 2.0'
-  licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-  allLicenses = ["Apache-2.0"]
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
 }
 
 android {
-  compileSdkVersion 26
 
-  defaultConfig {
-    minSdkVersion 16
-    targetSdkVersion 26
-    versionCode 4
-    versionName "1.53"
-
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-  }
-
-  buildTypes {
-    release {
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    dokka {
+        outputFormat = 'html'
+        outputDirectory = "$buildDir/javadoc"
     }
-  }
+
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 4
+        versionName "1.53"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            pseudoLocalesEnabled false
+            debuggable false
+            minifyEnabled true
+            crunchPngs true
+            zipAlignEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -56,16 +68,28 @@ android {
     }
 }
 
-def playServicesVersion = '16.1.0'
-
 dependencies {
-  implementation fileTree(dir: 'libs', include: ['*.jar'])
-  api "com.google.android.gms:play-services-maps:$playServicesVersion"
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-  testImplementation 'junit:junit:4.12'
-  androidTestImplementation 'com.android.support.test:runner:1.0.2'
-  androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    testImplementation 'junit:junit:4.13'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+    // implementation "com.google.android.gms:play-services-maps:17.0.0"
+
+    // google maps 3 sdk integration
+    // https://developers.google.com/maps/documentation/android-sdk/v3-client-migration
+    // demo project: https://github.com/googlemaps/android-samples/tree/v3-beta/ApiDemos/kotlin
+    compileOnly name: 'maps-sdk-3.0.0-beta', ext: 'aar'
+    compileOnly 'com.google.maps.android:android-maps-utils-sdk-v3-compat:0.1'
+
+    compileOnly 'com.google.android.gms:play-services-basement:17.1.1'
+    compileOnly 'com.google.android.gms:play-services-base:17.1.0'
+    compileOnly 'com.google.android.gms:play-services-gcm:17.0.0'
+    compileOnly 'com.google.android.gms:play-services-location:17.0.0'
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.annotation:annotation:1.1.0'
 }
 
 bintray {

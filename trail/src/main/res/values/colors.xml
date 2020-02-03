@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="routePrimaryColor">#63c495</color>
-  <color name="routeSecondaryColor">#4e487c</color>
-  <color name="routeShadowColor">#db949494</color>
+    <color name="routePrimaryColor">#63c495</color>
+    <color name="routeSecondaryColor">#4e487c</color>
+    <color name="routeShadowColor">#db949494</color>
 </resources>

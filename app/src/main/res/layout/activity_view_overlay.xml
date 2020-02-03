@@ -1,54 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  tools:context=".projectionBased.ViewOverlayActivity">
-  <fragment
-    android:id="@+id/map"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    tools:context="com.amalbit.animationongooglemap.polylineBased.MapsActivity"/>
+    tools:context=".projectionBased.ViewOverlayActivity">
 
-  <com.amalbit.trail.OverlayLayout
-    android:id="@+id/viewOverLayView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+    <fragment
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.google.android.libraries.maps.SupportMapFragment"
+        tools:context="com.amalbit.animationongooglemap.polylineBased.MapsActivity" />
 
-  <Button
-    android:id="@+id/btnPlus"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="24dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginLeft="8dp"
-    android:text="+"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"/>
-  <Button
-    android:id="@+id/btnMinus"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="24dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginRight="8dp"
-    android:text="-"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="parent"/>
-  <Button
-    android:id="@+id/btnPrint"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginLeft="8dp"
-    android:layout_marginRight="8dp"
-    android:text="Print"
-    app:layout_constraintBottom_toBottomOf="@+id/btnPlus"
-    app:layout_constraintEnd_toStartOf="@+id/btnMinus"
-    app:layout_constraintStart_toEndOf="@+id/btnPlus"
-    app:layout_constraintTop_toTopOf="@+id/btnPlus"/>
-</android.support.constraint.ConstraintLayout>
+    <com.amalbit.trail.OverlayLayout
+        android:id="@+id/viewOverLayView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/btnPlus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:text="+"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnMinus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:text="-"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnPrint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:text="Print"
+        app:layout_constraintBottom_toBottomOf="@+id/btnPlus"
+        app:layout_constraintEnd_toStartOf="@+id/btnMinus"
+        app:layout_constraintStart_toEndOf="@+id/btnPlus"
+        app:layout_constraintTop_toTopOf="@+id/btnPlus" />
+</androidx.constraintlayout.widget.ConstraintLayout>

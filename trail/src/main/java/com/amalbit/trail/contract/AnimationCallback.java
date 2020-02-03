@@ -6,5 +6,5 @@ package com.amalbit.trail.contract;
 
 public interface AnimationCallback {
 
-  void onFinish();
+    void onFinish();
 }

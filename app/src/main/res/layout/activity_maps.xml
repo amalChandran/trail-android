@@ -1,23 +1,26 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
-  <fragment
-    android:id="@+id/map"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    tools:context="com.amalbit.animationongooglemap.polylineBased.MapsActivity"/>
-  <Button
-    android:id="@+id/btn_resetAnimation"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    android:layout_gravity="center_horizontal|bottom"
-    android:background="#000"
-    android:onClick="resetAnimation"
-    android:text="@string/reset_anim"
-    android:textColor="#fff"
-    android:visibility="visible"/>
+    android:layout_height="match_parent">
+
+    <fragment
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.google.android.libraries.maps.SupportMapFragment"
+        tools:context="com.amalbit.animationongooglemap.polylineBased.MapsActivity" />
+
+    <Button
+        android:id="@+id/btn_resetAnimation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:background="#000"
+        android:onClick="resetAnimation"
+        android:text="@string/reset_anim"
+        android:textColor="#fff"
+        android:visibility="visible" />
 </FrameLayout>
 
