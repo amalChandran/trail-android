@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'org.jetbrains.dokka-android'
 
 group = 'com.amalbit.trail'
 version = '0.2.0'
@@ -32,6 +33,12 @@ ext {
 }
 
 android {
+
+    dokka {
+        outputFormat = 'html'
+        outputDirectory = "$buildDir/javadoc"
+    }
+
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
@@ -46,7 +53,11 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            pseudoLocalesEnabled false
+            debuggable false
+            minifyEnabled true
+            crunchPngs true
+            zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
