@@ -5,9 +5,10 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Point;
 
-import com.google.android.gms.maps.Projection;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.maps.Projection;
+import com.google.android.libraries.maps.model.CameraPosition;
+import com.google.android.libraries.maps.model.LatLng;
+
 
 public class OverlayMarkerOptim {
 

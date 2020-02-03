@@ -2,7 +2,8 @@ package com.amalbit.animationongooglemap.polylineBased;
 
 import android.animation.TypeEvaluator;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.maps.model.LatLng;
+
 
 /**
  * Created by amal.chandran on 22/12/16.

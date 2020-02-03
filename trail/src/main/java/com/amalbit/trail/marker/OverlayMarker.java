@@ -4,7 +4,7 @@ import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.maps.model.LatLng;
 
 public class OverlayMarker {
 

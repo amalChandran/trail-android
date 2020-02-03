@@ -10,14 +10,13 @@ import com.amalbit.animationongooglemap.data.LatlngData;
 import com.amalbit.trail.OverlayPolyline;
 import com.amalbit.trail.RouteOverlayView;
 import com.amalbit.trail.RouteOverlayView.RouteType;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.CancelableCallback;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.libraries.maps.CameraUpdateFactory;
+import com.google.android.libraries.maps.GoogleMap;
+import com.google.android.libraries.maps.OnMapReadyCallback;
+import com.google.android.libraries.maps.SupportMapFragment;
+import com.google.android.libraries.maps.model.LatLng;
+import com.google.android.libraries.maps.model.LatLngBounds;
+import com.google.android.libraries.maps.model.MapStyleOptions;
 
 import java.util.List;
 
@@ -100,7 +99,7 @@ public class OverlayRouteActivity extends BaseActivity implements OnMapReadyCall
 
         LatLngBounds latLngBounds = boundsBuilder.build();
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100), 200, new CancelableCallback() {
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100), 200, new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
                 drawRoutes();

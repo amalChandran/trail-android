@@ -1,7 +1,7 @@
 package com.amalbit.animationongooglemap.data;
 
 import com.amalbit.animationongooglemap.data.CarData.Car;
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;

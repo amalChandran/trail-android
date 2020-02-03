@@ -25,11 +25,14 @@ allprojects {
         jcenter()
         maven { url 'https://maven.google.com' }
         maven { url "http://jcenter.bintray.com" }
+
+        // google map 3 sdk
+        flatDir {
+            dirs 'libs'
+        }
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
-
-

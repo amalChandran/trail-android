@@ -2,9 +2,10 @@ package com.amalbit.trail;
 
 import android.graphics.Point;
 
-import com.google.android.gms.maps.Projection;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.maps.Projection;
+import com.google.android.libraries.maps.model.CameraPosition;
+import com.google.android.libraries.maps.model.LatLng;
+
 
 /**
  * Created by amal.chandran on 04/11/17.

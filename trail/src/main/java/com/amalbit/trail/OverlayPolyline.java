@@ -15,9 +15,9 @@ import android.util.Log;
 import com.amalbit.trail.RouteOverlayView.RouteType;
 import com.amalbit.trail.contract.Animator;
 import com.amalbit.trail.util.Util;
-import com.google.android.gms.maps.Projection;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.maps.Projection;
+import com.google.android.libraries.maps.model.CameraPosition;
+import com.google.android.libraries.maps.model.LatLng;
 
 import java.util.List;
 

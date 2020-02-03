@@ -10,10 +10,10 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.libraries.maps.GoogleMap;
+import com.google.android.libraries.maps.model.LatLng;
+import com.google.android.libraries.maps.model.Polyline;
+import com.google.android.libraries.maps.model.PolylineOptions;
 
 import java.util.List;
 

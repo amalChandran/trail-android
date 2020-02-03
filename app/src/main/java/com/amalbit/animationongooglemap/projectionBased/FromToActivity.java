@@ -18,10 +18,10 @@ import com.amalbit.animationongooglemap.marker.Repeat;
 import com.amalbit.trail.marker.MarkerOverlayView;
 import com.amalbit.trail.marker.OverlayMarker;
 import com.amalbit.trail.marker.OverlayMarker.OnMarkerUpdate;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.maps.GoogleMap;
+import com.google.android.libraries.maps.OnMapReadyCallback;
+import com.google.android.libraries.maps.SupportMapFragment;
+import com.google.android.libraries.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;

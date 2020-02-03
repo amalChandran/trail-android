@@ -13,10 +13,10 @@ import com.amalbit.trail.contract.GooglemapProvider;
 import com.amalbit.trail.contract.OverlayView;
 import com.amalbit.trail.marker.OverlayMarkerOptim.MarkerRemoveListner;
 import com.amalbit.trail.util.U;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.Projection;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.maps.GoogleMap;
+import com.google.android.libraries.maps.Projection;
+import com.google.android.libraries.maps.model.CameraPosition;
+import com.google.android.libraries.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;

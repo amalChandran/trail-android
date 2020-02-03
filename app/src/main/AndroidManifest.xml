@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <activity android:name=".projectionBased.ViewOverlayActivity"></activity>
+        <activity android:name=".projectionBased.ViewOverlayActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -26,7 +26,7 @@
         <activity
             android:name=".projectionBased.OverlayRouteActivity"
             android:label="@string/title_activity_projection"
-            android:theme="@style/OverlayActivityTheme"></activity>
+            android:theme="@style/OverlayActivityTheme" />
         <activity android:name=".HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,7 +34,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".projectionBased.FromToActivity"></activity>
+        <activity android:name=".projectionBased.FromToActivity" />
     </application>
 
 </manifest>

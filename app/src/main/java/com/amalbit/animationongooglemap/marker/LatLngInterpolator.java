@@ -1,6 +1,7 @@
 package com.amalbit.animationongooglemap.marker;
 
-import com.google.android.gms.maps.model.LatLng;
+
+import com.google.android.libraries.maps.model.LatLng;
 
 public interface LatLngInterpolator {
 

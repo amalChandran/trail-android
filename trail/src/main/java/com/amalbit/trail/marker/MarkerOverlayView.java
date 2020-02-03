@@ -10,8 +10,8 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.amalbit.trail.marker.OverlayMarker.MarkerRemoveListner;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.Projection;
+import com.google.android.libraries.maps.GoogleMap;
+import com.google.android.libraries.maps.Projection;
 
 import java.util.ArrayList;
 import java.util.List;

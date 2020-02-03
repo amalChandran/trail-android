@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.amalbit.trail.contract.GooglemapProvider;
 import com.amalbit.trail.marker.ViewOverlayView;
-import com.google.android.gms.maps.GoogleMap;
+import com.google.android.libraries.maps.GoogleMap;
 
 import java.lang.ref.WeakReference;
 
