@@ -6,6 +6,9 @@ import re
 import sys
 
 kind, filename = sys.argv[1:]
+output = Path(filename).with_suffix(".json")
+# A failed rerun must not leave an earlier green report beside the new failed log.
+output.unlink(missing_ok=True)
 log = Path(filename).read_text()
 if kind in ("swift", "ios"):
     summary = re.search(r"✔ Test run with (\d+) tests in \d+ suites passed", log)
@@ -29,6 +32,5 @@ elif kind == "android":
         raise SystemExit("No individual passing instrumentation results found.")
 else:
     raise SystemExit("Expected swift, ios or android")
-output = Path(filename).with_suffix(".json")
 output.write_text(json.dumps(result, indent=2)+"\n")
 print(f"{kind}: {json.dumps(result)}; report: {output}")

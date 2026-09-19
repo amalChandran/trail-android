@@ -112,9 +112,14 @@ private val drawingModes=linkedMapOf("route" to "Full route", "direct" to "Two p
     }
 }
 
-@Composable private fun GoogleJourneyMap(route: TrailRoute, journey: Journey, effect: TrailEffect, playback: TrailPlayback, reduced: Boolean) {
+@Composable internal fun GoogleJourneyMap(
+    route: TrailRoute, journey: Journey, effect: TrailEffect, playback: TrailPlayback, reduced: Boolean,
+    camera: CameraPositionState = rememberCameraPositionState {
+        val center=checkNotNull(route.bounds).center
+        position=CameraPosition.fromLatLngZoom(LatLng(center.latitude,center.longitude),3f)
+    },
+) {
     val bounds=checkNotNull(route.bounds)
-    val camera=rememberCameraPositionState { position=CameraPosition.fromLatLngZoom(LatLng(bounds.center.latitude,bounds.center.longitude),3f) }
     var loaded by remember { mutableStateOf(false) }
     var projected by remember(route.key) { mutableStateOf<TrailPath?>(null) }
     val padding=with(LocalDensity.current) { 44.dp.roundToPx() }
@@ -125,6 +130,8 @@ private val drawingModes=linkedMapOf("route" to "Full route", "direct" to "Two p
     }
     Box(Modifier.fillMaxSize()) {
         GoogleMap(Modifier.matchParentSize(),cameraPositionState=camera,onMapLoaded={ loaded=true },
+            // Maps Compose defaults to a minimum zoom of 3, which clips a transatlantic fit.
+            properties=MapProperties(minZoomPreference=0f),
             uiSettings=MapUiSettings(zoomControlsEnabled=false,mapToolbarEnabled=false)) {
             Marker(state=rememberUpdatedMarkerState(LatLng(route.coordinates.first().latitude,route.coordinates.first().longitude)),title=journey.origin)
             Marker(state=rememberUpdatedMarkerState(LatLng(route.coordinates.last().latitude,route.coordinates.last().longitude)),title=journey.destination)
