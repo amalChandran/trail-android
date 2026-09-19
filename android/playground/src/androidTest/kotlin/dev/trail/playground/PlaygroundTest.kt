@@ -4,6 +4,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.SemanticsActions
 import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -15,6 +16,47 @@ import org.junit.Test
 
 class PlaygroundTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+    @Test fun journeysUseRealCoordinatesAndSwitchBetweenRouteDirectArcAndGreatCircle() {
+        compose.mainClock.autoAdvance=false
+        compose.mainClock.advanceTimeBy(300)
+        compose.onNodeWithTag("openJourneys").performClick()
+        compose.mainClock.advanceTimeBy(300)
+        // Freeze the route clock while allowing scrolling/menu animations to settle.
+        compose.onNodeWithTag("journeyReduced").performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.mainClock.advanceTimeBy(100)
+        compose.mainClock.autoAdvance=true
+        fun tap(tag: String) {
+            compose.onNodeWithTag(tag).performScrollTo().performClick()
+            compose.mainClock.advanceTimeBy(300)
+        }
+        fun choose(mode: String, points: Int) {
+            tap("journeyDrawing")
+            compose.onAllNodesWithText(mode).onLast().performClick()
+            compose.mainClock.advanceTimeBy(300)
+            compose.onNodeWithTag("journeyGeometry").assertTextContains("$mode · $points points",substring=true)
+        }
+        compose.onNodeWithTag("journeyGeometry").assertTextContains("129 points",substring=true)
+        tap("journey-cab")
+        compose.onNodeWithTag("journeyGeometry").assertTextContains("119 points",substring=true)
+        choose("Two points",2); choose("Arc",129); choose("Great circle",129); choose("Full route",119)
+        tap("journey-ferry")
+        compose.onNodeWithTag("journeyGeometry").assertTextContains("13 points",substring=true)
+        choose("Two points",2); choose("Arc",129)
+        tap("journeyPlayPause")
+        compose.onNodeWithTag("journeyProgress").performScrollTo().performTouchInput { click(center) }
+        compose.mainClock.advanceTimeBy(100)
+        compose.onNodeWithTag("journeyPlayPause").assertTextContains("Play")
+        tap("journeyReplay")
+        compose.onNodeWithTag("journeyPlayPause").assertTextContains("Pause")
+        tap("journeyPlayPause")
+        tap("journeyStyle"); compose.onNodeWithText("Dashed").performClick(); compose.mainClock.advanceTimeBy(300)
+        tap("journeyMotion"); compose.onNodeWithText("Comet").performClick(); compose.mainClock.advanceTimeBy(300)
+        compose.onNodeWithTag("journeyReduced").assertIsOn()
+        compose.onNodeWithTag("journeysBack").performScrollTo()
+        compose.mainClock.autoAdvance=false
+        compose.onNodeWithTag("journeysBack").performClick(); compose.mainClock.advanceTimeBy(100)
+        compose.onNodeWithTag("preview").assertExists()
+    }
     @Test fun nativeViewConfigurationPreservesPositionAndPauseIntent() {
         compose.activityRule.scenario.onActivity { activity ->
             val view = TrailView(activity)

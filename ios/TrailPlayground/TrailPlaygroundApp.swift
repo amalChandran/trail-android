@@ -33,6 +33,7 @@ private let mapRoute = try! TrailRoute(id: "san-francisco", coordinates: [
     @State private var plugin = false
     @State private var showMap = false
     @State private var showExamples = false
+    @State private var showJourneys = false
     @State private var playback = TrailPlayback(effect: TrailMotionPreset.reveal.effect(style: TrailStylePreset.cased.style()))
     private var configuration: String { "\(style.rawValue)|\(motion.rawValue)|\(duration)|\(repeats)|\(plugin)" }
 
@@ -46,7 +47,11 @@ private let mapRoute = try! TrailRoute(id: "san-francisco", coordinates: [
                 }
                 Text("A little motion.\nA clear direction.").font(.system(size: 29, weight: .medium)).lineSpacing(1)
                 Text("Native Swift · public plugins · live preview").font(.system(size: 12)).foregroundStyle(muted)
-                Button("API examples →") { showExamples = true }.accessibilityIdentifier("openExamples")
+                HStack {
+                    Button("Map journeys →") { showJourneys = true }.accessibilityIdentifier("openJourneys")
+                    Spacer()
+                    Button("API examples →") { showExamples = true }.accessibilityIdentifier("openExamples")
+                }
                 preview
                 PlaybackControls(playback: playback)
                 HStack {
@@ -83,6 +88,7 @@ private let mapRoute = try! TrailRoute(id: "san-francisco", coordinates: [
         }
         .background(ink).foregroundStyle(Color(red: 0.89, green: 0.94, blue: 0.95)).tint(mint).preferredColorScheme(.dark)
         .sheet(isPresented: $showExamples) { ExamplesBrowser() }
+        .sheet(isPresented: $showJourneys) { JourneyExamples() }
         .onChange(of: configuration) { _, _ in
             let effect = plugin
                 ? TrailEffect { Style(MetroStyle()); Animate(TrailAnimations.custom(QuadraticReveal(), duration: .seconds(duration), repeats: repeats)) }

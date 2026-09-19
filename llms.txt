@@ -12,6 +12,12 @@ typed Kotlin trailEffect { } and Swift TrailEffect { }, with named effect values
 - Plugins implement public TrailLineStyle / TrailAnimation, depend on TrailCore,
   and require no registry, reflection, annotations or macros.
 - Share effects; give each visible binding its own playback controller.
+- Google Maps Android and Apple MapKit are the first adapters. Read docs/MAPS.md.
+- TrailRoute supports complete waypoints, direct, arc, greatCircle and encodedPolyline.
+- A provider implements TrailProjection and camera/layout invalidation; TrailProjectedOverlay
+  shares readiness/rendering/playback behavior. Keep SDK types out of plugins and core.
+- Supplied controllers own route resets on both platforms. Camera changes never replay.
+- spec/fixtures/contracts.json is shared across languages; sync with scripts/sync-fixtures.py.
 - Repeated declarations are invalid. Use explicit sequence or layer blocks.
 - Fluent/generated APIs in docs/archive are unimplemented historical proposals.
 - No Maven or remote Swift package release has been published for this alpha.

@@ -35,6 +35,23 @@ targets:
         product: TrailMapKit
       - package: Trail
         product: TrailSamplePlugin
+  TrailMapKitTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [TrailMapKitTests]
+    dependencies:
+      - target: TrailPlayground
+      - package: Trail
+        product: TrailMapKit
+      - package: Trail
+        product: TrailCore
+      - package: Trail
+        product: TrailUI
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TrailPlayground.app/TrailPlayground"
+        BUNDLE_LOADER: "$(TEST_HOST)"
   TrailPlaygroundUITests:
     type: bundle.ui-testing
     platform: iOS
@@ -49,6 +66,7 @@ schemes:
     build:
       targets:
         TrailPlayground: all
+        TrailMapKitTests: [test]
         TrailPlaygroundUITests: [test]
     test:
-      targets: [TrailPlaygroundUITests]
+      targets: [TrailMapKitTests, TrailPlaygroundUITests]

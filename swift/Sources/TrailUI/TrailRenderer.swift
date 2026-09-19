@@ -20,14 +20,15 @@ public enum TrailRenderer {
                     for window in state.windows {
                         let start = max(stroke.start, window.start), end = min(stroke.end, window.end)
                         guard start < end else { continue }
-                        let points = path.slice(from: start, to: end)
-                        guard let first = points.first else { continue }
                         context.setStrokeColor(stroke.color.cgColor)
                         context.setAlpha(state.opacity * window.opacity)
-                        context.setLineDash(phase: cycle == 0 ? 0 : (start * path.length - state.dashPhase * cycle).truncatingRemainder(dividingBy: cycle), lengths: stroke.dash.map { CGFloat($0) })
-                        context.beginPath(); context.move(to: CGPoint(x: first.x, y: first.y))
-                        for point in points.dropFirst() { context.addLine(to: CGPoint(x: point.x, y: point.y)) }
-                        context.strokePath()
+                        for section in path.slices(from: start, to: end) {
+                            guard let first = section.points.first else { continue }
+                            context.setLineDash(phase: cycle == 0 ? 0 : (section.distanceFromStart - state.dashPhase * cycle).truncatingRemainder(dividingBy: cycle), lengths: stroke.dash.map { CGFloat($0) })
+                            context.beginPath(); context.move(to: CGPoint(x: first.x, y: first.y))
+                            for point in section.points.dropFirst() { context.addLine(to: CGPoint(x: point.x, y: point.y)) }
+                            context.strokePath()
+                        }
                     }
                 case .chevrons(let stamp):
                     let count = min(2048, Int(min(2048, floor(path.length / stamp.spacing))))
@@ -50,5 +51,7 @@ public enum TrailRenderer {
 }
 
 private extension TrailColor {
-    var cgColor: CGColor { CGColor(red: Double((argb >> 16) & 255) / 255, green: Double((argb >> 8) & 255) / 255, blue: Double(argb & 255) / 255, alpha: Double((argb >> 24) & 255) / 255) }
+    // ARGB values have sRGB components on both platforms; do not depend on the device profile.
+    static let colorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
+    var cgColor: CGColor { CGColor(colorSpace: Self.colorSpace, components: [Double((argb >> 16) & 255) / 255, Double((argb >> 8) & 255) / 255, Double(argb & 255) / 255, Double((argb >> 24) & 255) / 255])! }
 }

@@ -26,35 +26,84 @@ public struct TrailRoute: Sendable {
     public let id: String
     public let revision: Int
     public let coordinates: [TrailCoordinate]
+    public let segments: [[TrailCoordinate]]
+    public let distanceMeters: Double
+    public let bounds: TrailGeoBounds?
+    public var key: TrailRouteKey { TrailRouteKey(id: id, revision: revision) }
     public init(id: String, coordinates: [TrailCoordinate], revision: Int = 0) throws {
         guard !id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw TrailError.invalidRoute("ID must not be blank") }
+        guard revision >= 0 else { throw TrailError.invalidRoute("Revision must not be negative") }
+        guard coordinates.count <= 100_000 else { throw TrailError.invalidRoute("A route supports at most 100,000 coordinates") }
         self.id = id; self.coordinates = coordinates; self.revision = revision
+        self.segments = TrailGeography.splitAtDateLine(coordinates)
+        self.distanceMeters = zip(coordinates, coordinates.dropFirst()).reduce(0) { $0 + TrailGeography.distance($1.0, $1.1) }
+        self.bounds = TrailGeography.bounds(coordinates)
     }
-    public func project(_ projection: (TrailCoordinate) -> TrailPoint) -> TrailPath { TrailPath(coordinates.map(projection)) }
+    public func project(_ projection: (TrailCoordinate) -> TrailPoint) -> TrailPath {
+        var points: [TrailPoint] = [], breaks: Set<Int> = []
+        for segment in segments {
+            if !points.isEmpty { breaks.insert(points.count) }
+            points.append(contentsOf: segment.map(projection))
+        }
+        return TrailPath(points, breakBefore: breaks)
+    }
+    /// All-or-nothing: missing projection must never bridge unrelated visible coordinates.
+    public func projectIfReady(_ projection: TrailProjection) -> TrailPath? {
+        var points: [TrailPoint] = [], breaks: Set<Int> = []
+        for segment in segments {
+            if !points.isEmpty { breaks.insert(points.count) }
+            for coordinate in segment {
+                guard let point = projection.project(coordinate) else { return nil }
+                points.append(point)
+            }
+        }
+        return TrailPath(points, breakBefore: breaks)
+    }
+}
+
+public struct TrailRouteKey: Sendable, Hashable {
+    public let id: String
+    public let revision: Int
+    public init(id: String, revision: Int) { self.id = id; self.revision = revision }
+}
+/// SDK boundary: return local logical units, or nil until the map is ready.
+public struct TrailProjection {
+    private let body: (TrailCoordinate) -> TrailPoint?
+    public init(_ body: @escaping (TrailCoordinate) -> TrailPoint?) { self.body = body }
+    public func project(_ coordinate: TrailCoordinate) -> TrailPoint? { body(coordinate) }
+}
+public struct TrailPathSlice: Sendable {
+    public let points: [TrailPoint]
+    public let distanceFromStart: Double
 }
 
 /// Immutable, measured local geometry. Logical units are points on Apple platforms.
 public struct TrailPath: Sendable, Equatable {
     public let identity = UUID()
     public let points: [TrailPoint]
+    public let breakBefore: Set<Int>
     private let distances: [Double]
+    private let contours: [ClosedRange<Int>]
     public let length: Double
-    public static func == (lhs: Self, rhs: Self) -> Bool { lhs.identity == rhs.identity || lhs.points == rhs.points }
-    public init(_ points: [TrailPoint]) {
-        self.points = points
+    public static func == (lhs: Self, rhs: Self) -> Bool { lhs.identity == rhs.identity || (lhs.points == rhs.points && lhs.breakBefore == rhs.breakBefore) }
+    public init(_ points: [TrailPoint], breakBefore: Set<Int> = []) {
+        precondition(breakBefore.allSatisfy { $0 > 0 && $0 < points.count }, "Break indices must refer to a point after the first")
+        self.points = points; self.breakBefore = breakBefore
         var distances = [Double](repeating: 0, count: points.count)
         if points.count > 1 {
             for i in 1..<points.count {
-                distances[i] = distances[i - 1] + hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y)
+                distances[i] = distances[i - 1] + (breakBefore.contains(i) ? 0 : hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y))
                 precondition(distances[i].isFinite, "Path length overflow")
             }
         }
         self.distances = distances; self.length = distances.last ?? 0
+        let starts = [0] + breakBefore.sorted()
+        self.contours = points.isEmpty ? [] : starts.enumerated().map { i, start in start...(i + 1 < starts.count ? starts[i+1]-1 : points.count-1) }
     }
     public func point(at fraction: Double) -> TrailPoint? {
         fractionCheck(fraction)
         guard let first = points.first else { return nil }
-        if length == 0 { return first }
+        if length == 0 || fraction == 0 { return first }
         if fraction == 1 { return points.last }
         let distance = length * fraction
         let end = max(1, min(points.count - 1, upperBound(distance)))
@@ -67,17 +116,35 @@ public struct TrailPath: Sendable, Equatable {
     public func tangent(at fraction: Double) -> Double {
         fractionCheck(fraction)
         if length == 0 { return 0 }
-        let end = max(1, min(points.count - 1, upperBound(length * fraction)))
-        var start = end - 1
-        while start > 0 && points[start] == points[end] { start -= 1 }
+        var end = max(1, min(points.count - 1, upperBound(length * fraction)))
+        while end > 1 && distances[end] == distances[end-1] { end -= 1 }
+        let start = end - 1
         return atan2(points[end].y - points[start].y, points[end].x - points[start].x)
     }
     public func slice(from start: Double, to end: Double) -> [TrailPoint] {
+        precondition(breakBefore.isEmpty, "Use slices() for a path with disconnected contours")
+        return slices(from: start, to: end).flatMap(\.points)
+    }
+    public func slices(from start: Double, to end: Double) -> [TrailPathSlice] {
         fractionCheck(start); fractionCheck(end); precondition(start <= end)
-        guard length > 0, start < end, let first = point(at: start), let last = point(at: end) else { return [] }
-        var result = [first]; var i = upperBound(start * length)
-        while i < points.count && distances[i] < end * length { result.append(points[i]); i += 1 }
-        result.append(last); return result
+        guard length > 0, start < end else { return [] }
+        var result: [TrailPathSlice] = []
+        for range in contours {
+            let a = max(start * length, distances[range.lowerBound]), b = min(end * length, distances[range.upperBound])
+            guard a < b else { continue }
+            func point(_ distance: Double) -> TrailPoint {
+                if distance <= distances[range.lowerBound] { return points[range.lowerBound] }
+                if distance >= distances[range.upperBound] { return points[range.upperBound] }
+                let right = max(range.lowerBound+1, min(range.upperBound, upperBound(distance)))
+                let t = max(0, min(1, (distance-distances[right-1])/(distances[right]-distances[right-1])))
+                return TrailPoint(points[right-1].x+(points[right].x-points[right-1].x)*t,
+                                  points[right-1].y+(points[right].y-points[right-1].y)*t)
+            }
+            var section = [point(a)], i = upperBound(a)
+            while i <= range.upperBound && distances[i] < b { section.append(points[i]); i += 1 }
+            section.append(point(b)); result.append(TrailPathSlice(points: section, distanceFromStart: a))
+        }
+        return result
     }
     public func fitted(width: Double, height: Double, padding: Double = 16) -> TrailPath {
         precondition(width.isFinite && height.isFinite && width >= 0 && height >= 0 && padding.isFinite && padding >= 0)
@@ -87,7 +154,7 @@ public struct TrailPath: Sendable, Equatable {
         let w = max(0, width - padding * 2), h = max(0, height - padding * 2)
         let rawScale = min(maxX == minX ? .infinity : w / (maxX - minX), maxY == minY ? .infinity : h / (maxY - minY))
         let scale = rawScale.isFinite ? rawScale : 1
-        return TrailPath(points.map { TrailPoint(($0.x - (minX + maxX) / 2) * scale + width / 2, ($0.y - (minY + maxY) / 2) * scale + height / 2) })
+        return TrailPath(points.map { TrailPoint(($0.x - (minX + maxX) / 2) * scale + width / 2, ($0.y - (minY + maxY) / 2) * scale + height / 2) }, breakBefore: breakBefore)
     }
     private func upperBound(_ value: Double) -> Int {
         var low = 0, high = distances.count

@@ -15,8 +15,8 @@ let package = Package(
         .target(name: "TrailCore"),
         .target(name: "TrailEffects", dependencies: ["TrailCore"]),
         .target(name: "TrailUI", dependencies: ["TrailCore"]),
-        .target(name: "TrailMapKit", dependencies: ["TrailUI"]),
+        .target(name: "TrailMapKit", dependencies: ["TrailCore", "TrailUI"]),
         .target(name: "TrailSamplePlugin", dependencies: ["TrailCore"]),
-        .testTarget(name: "TrailCoreTests", dependencies: ["TrailCore", "TrailEffects", "TrailSamplePlugin"]),
+        .testTarget(name: "TrailCoreTests", dependencies: ["TrailCore", "TrailEffects", "TrailSamplePlugin", "TrailUI"], resources: [.copy("Fixtures")]),
     ]
 )

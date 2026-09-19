@@ -10,6 +10,7 @@ import TrailCore
     public func pause() { player.pause() }
     public func replay() { player.replay() }
     public func seek(to fraction: Double) { player.seek(to: fraction) }
+    public func frame(layer: Int = 0, reducedMotion: Bool = false) -> TrailVisualState { player.frame(layer: layer, reducedMotion: reducedMotion) }
     public func configure(_ effect: TrailEffect, reset: Bool = false) { player.configure(effect, reset: reset) }
     public func advance(by seconds: Double) { player.advance(by: seconds) }
 }

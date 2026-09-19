@@ -25,6 +25,25 @@ enum ExampleGeometry {
 }
 // example:end setup
 
+// example:start geographic-routes
+func flightConnections() throws -> [TrailRoute] {
+    let jfk = try TrailCoordinate(latitude: 40.6413, longitude: -73.7781)
+    let heathrow = try TrailCoordinate(latitude: 51.4706, longitude: -0.461941)
+    return try [
+        .arc(id: "JFK-LHR/arc", from: jfk, to: heathrow),
+        .greatCircle(id: "JFK-LHR/great-circle", from: jfk, to: heathrow),
+        .direct(id: "JFK-LHR/direct", from: jfk, to: heathrow),
+    ]
+}
+// Pass every waypoint from your directions service, in order. Trail does not fetch directions.
+func cabRoute(waypoints: [TrailCoordinate], revision: Int) throws -> TrailRoute {
+    try TrailRoute(id: "cab/current-trip", coordinates: waypoints, revision: revision)
+}
+func decodedCabRoute(encoded: String) throws -> TrailRoute {
+    try TrailRoute.encodedPolyline(id: "cab/decoded", encoded: encoded, precision: 5)
+}
+// example:end geographic-routes
+
 // example:start preset
 let deliveryTrail = TrailEffect {
     Stroke(.blue, width: 6)
@@ -147,6 +166,17 @@ struct ExistingSwiftUIMapExample: View {
 }
 // example:end existing-swiftui-map
 
+// example:start custom-map-adapter
+// An adapter supplies local points, or nil until ready, and increments cameraRevision on camera/inset changes.
+// Place this above your map with identical bounds; no SDK types enter the route or effect.
+struct CustomMapOverlayExample: View {
+    let route: TrailRoute, projection: TrailProjection?, cameraRevision: Int
+    var body: some View {
+        TrailProjectedOverlay(route: route, projection: projection, projectionRevision: cameraRevision, effect: deliveryTrail)
+    }
+}
+// example:end custom-map-adapter
+
 // example:start existing-mkmapview
 #if canImport(UIKit)
 @MainActor final class ExistingMapController: UIViewController, MKMapViewDelegate {
@@ -165,8 +195,7 @@ struct ExistingSwiftUIMapExample: View {
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        // This fixed route is supported; handle a thrown validation error for external routes.
-        attachment = try! TrailMapAttachment(mapView: map, parent: self, route: ExampleGeometry.route, playback: playback)
+        attachment = TrailMapAttachment(mapView: map, parent: self, route: ExampleGeometry.route, playback: playback)
     }
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) { attachment?.updateProjection() }
     override func viewDidLayoutSubviews() { super.viewDidLayoutSubviews(); attachment?.updateProjection() }

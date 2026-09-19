@@ -26,6 +26,7 @@ import dev.trail.effects.*
 import dev.trail.googlemaps.GoogleMapsTrailOverlay
 import dev.trail.plugin.*
 import dev.trail.playground.examples.ExamplesScreen
+import dev.trail.playground.examples.JourneyExamples
 import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : ComponentActivity() {
@@ -47,6 +48,11 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
 
 @Composable fun TrailStudio() {
     var showExamples by remember { mutableStateOf(false) }
+    var showJourneys by remember { mutableStateOf(false) }
+    if (showJourneys) {
+        JourneyExamples(BuildConfig.HAS_MAPS_KEY,onBack={ showJourneys=false })
+        return
+    }
     if (showExamples) {
         ExamplesScreen(BuildConfig.HAS_MAPS_KEY, onBack = { showExamples = false })
         return
@@ -74,7 +80,10 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
             }
             Text("A little motion.\nA clear direction.", fontSize = 26.sp, fontWeight = FontWeight.Medium, lineHeight = 31.sp)
             Text("Native Kotlin · public plugins · live preview", color = Color(0xFF93A9B4), fontSize = 12.sp)
-            TextButton(onClick = { showExamples = true }, modifier = Modifier.testTag("openExamples")) { Text("API examples →") }
+            Row {
+                TextButton(onClick = { showJourneys = true }, modifier = Modifier.testTag("openJourneys")) { Text("Map journeys →") }
+                TextButton(onClick = { showExamples = true }, modifier = Modifier.testTag("openExamples")) { Text("API examples →") }
+            }
             Surface(shape = RoundedCornerShape(22.dp), color = Surface) {
                 Box(Modifier.fillMaxWidth().height(235.dp).testTag("preview")) {
                     if (showMap && BuildConfig.HAS_MAPS_KEY) {

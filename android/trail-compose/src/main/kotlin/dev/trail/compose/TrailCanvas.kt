@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Stable class TrailPlayback internal constructor(effect: TrailEffect, autoPlay: Boolean) {
     internal val player = TrailPlayer(effect, autoPlay)
+    // Observed only while drawing, so configuration invalidates pixels without a composition loop.
+    internal var renderingEffect by mutableStateOf(effect); private set
     internal var tick by mutableLongStateOf(0); private set
     val progress: Double get() { tick; return player.progress }
     val isPlaying: Boolean get() { tick; return player.status == TrailPlaybackStatus.Playing }
@@ -33,11 +35,14 @@ import kotlinx.coroutines.flow.collectLatest
     fun pause() { player.pause(); changed() }
     fun replay() { player.replay(); changed() }
     fun seek(progress: Double) { player.seek(progress); changed() }
+    /** Read-only visual state for decorations that follow the same animation clock. */
+    fun frame(layer: Int = 0, reducedMotion: Boolean = false): TrailVisualState { tick; return player.frame(layer, reducedMotion) }
     internal fun changed() { tick++ }
     internal fun configure(effect: TrailEffect) {
         if (player.effect === effect) return
         val previousStatus = player.status
         player.configure(effect)
+        renderingEffect = effect
         // Inline DSL construction may produce a new value on recomposition. Only notify a
         // changed playback state, avoiding an effect-construction/recomposition feedback loop.
         if (player.status != previousStatus) changed()
@@ -67,13 +72,13 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable fun TrailCanvas(
     path: TrailPath,
     modifier: Modifier = Modifier,
-    effect: TrailEffect = remember { TrailEffect() },
-    playback: TrailPlayback = rememberTrailPlayback(effect, path),
+    effect: TrailEffect? = null,
+    playback: TrailPlayback = rememberTrailPlayback(effect ?: remember { TrailEffect() }, path),
     fit: Boolean = true,
     reducedMotion: Boolean = rememberSystemReducedMotion(),
     active: Boolean = true,
 ) {
-    SideEffect { playback.configure(effect) }
+    if (effect != null) SideEffect { playback.configure(effect) }
     var size by remember { mutableStateOf(IntSize.Zero) }
     var visible by remember { mutableStateOf(false) }
     val hostView = LocalView.current
@@ -106,7 +111,7 @@ import kotlinx.coroutines.flow.collectLatest
         drawIntoCanvas { canvas ->
             val native = canvas.nativeCanvas; val saved = native.save()
             native.scale(density, density)
-            renderer.draw(native, effect) { playback.player.frame(it, reducedMotion) }
+            renderer.draw(native, effect ?: playback.renderingEffect) { playback.player.frame(it, reducedMotion) }
             native.restoreToCount(saved)
         }
     }

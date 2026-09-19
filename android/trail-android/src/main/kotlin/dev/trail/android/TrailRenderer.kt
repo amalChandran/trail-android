@@ -6,11 +6,14 @@ import kotlin.math.*
 
 /** UI-thread renderer. Geometry and Paint/Path buffers are reused between frames. */
 class TrailRenderer(val path: TrailPath) {
-    private val fullPath = Path().apply {
-        path.points.firstOrNull()?.let { moveTo(it.x.toFloat(), it.y.toFloat()) }
-        path.points.drop(1).forEach { lineTo(it.x.toFloat(), it.y.toFloat()) }
+    private data class Contour(val offset: Double, val length: Double, val measure: PathMeasure)
+    private val contours = path.slices(0.0, 1.0).map { section ->
+        val fullPath = Path().apply {
+            moveTo(section.points.first().x.toFloat(), section.points.first().y.toFloat())
+            section.points.drop(1).forEach { lineTo(it.x.toFloat(), it.y.toFloat()) }
+        }
+        Contour(section.distanceFromStart, TrailPath(section.points).length, PathMeasure(fullPath, false))
     }
-    private val measure = PathMeasure(fullPath, false)
     private val segment = Path()
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeJoin = Paint.Join.ROUND }
     private val dashCache = HashMap<TrailStroke, Pair<Double, DashPathEffect>>()
@@ -35,18 +38,24 @@ class TrailRenderer(val path: TrailPath) {
             val start = max(stroke.start, window.start); val end = min(stroke.end, window.end)
             if (start >= end) continue
             paint.color = stroke.color.withOpacity(state.opacity * window.opacity).argb
-            // Offset by the clipped distance so dashes stay anchored to the original route.
-            paint.pathEffect = if (cycle == 0.0) null else {
-                val phase = (start * measure.length - state.dashPhase * cycle) % cycle
-                val cached = dashCache[stroke]
-                if (cached?.first == phase) cached.second else DashPathEffect(stroke.dash.map { it.toFloat() }.toFloatArray(), phase.toFloat()).also {
-                    if (dashCache.size > 512) dashCache.clear()
-                    dashCache[stroke] = phase to it
+            for (contour in contours) {
+                val a = max(start * path.length, contour.offset)
+                val b = min(end * path.length, contour.offset + contour.length)
+                if (a >= b) continue
+                // Clip each continuous contour separately; never bridge a world-wrap seam.
+                paint.pathEffect = if (cycle == 0.0) null else {
+                    val phase = (a - state.dashPhase * cycle) % cycle
+                    val cached = dashCache[stroke]
+                    if (cached?.first == phase) cached.second else DashPathEffect(stroke.dash.map { it.toFloat() }.toFloatArray(), phase.toFloat()).also {
+                        if (dashCache.size > 512) dashCache.clear()
+                        dashCache[stroke] = phase to it
+                    }
                 }
+                segment.rewind()
+                contour.measure.getSegment(((a-contour.offset)/contour.length*contour.measure.length).toFloat(),
+                    ((b-contour.offset)/contour.length*contour.measure.length).toFloat(), segment, true)
+                canvas.drawPath(segment, paint)
             }
-            segment.rewind()
-            measure.getSegment((start * measure.length).toFloat(), (end * measure.length).toFloat(), segment, true)
-            canvas.drawPath(segment, paint)
         }
     }
     private fun drawChevrons(canvas: Canvas, command: TrailChevrons, state: TrailVisualState) {

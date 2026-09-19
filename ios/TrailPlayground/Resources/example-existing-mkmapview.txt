@@ -22,8 +22,7 @@ let deliveryTrail = TrailEffect {
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        // This fixed route is supported; handle a thrown validation error for external routes.
-        attachment = try! TrailMapAttachment(mapView: map, parent: self, route: ExampleGeometry.route, playback: playback)
+        attachment = TrailMapAttachment(mapView: map, parent: self, route: ExampleGeometry.route, playback: playback)
     }
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) { attachment?.updateProjection() }
     override func viewDidLayoutSubviews() { super.viewDidLayoutSubviews(); attachment?.updateProjection() }

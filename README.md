@@ -17,7 +17,9 @@ Android needs Java 17, Android SDK 36, and an emulator. The script selects an em
 
 iOS needs Xcode with an iOS simulator runtime. Open [`ios/TrailPlayground.xcodeproj`](ios/TrailPlayground.xcodeproj) and run `TrailPlayground`, or use the script. The Xcode project is checked in; XcodeGen is only needed when changing `ios/project.yml`. Set `TRAIL_IOS_SIMULATOR` to choose a simulator UDID.
 
-The Canvas playground works offline with no credentials. Google Maps is enabled by adding `MAPS_API_KEY=your-key` to `android/local.properties`, alongside `sdk.dir=...`, then rebuilding. MapKit is available in the iOS playground without a key. No location permission is requested; both demos use a fixed route.
+The Canvas playground works offline with no credentials. Google Maps is enabled by adding `MAPS_API_KEY=your-key` to `android/local.properties`, alongside `sdk.dir=...`, then rebuilding. MapKit is available in the iOS playground without a key. No location permission is requested; journeys use bundled coordinates.
+
+**Google and Apple Maps first:** open **Map journeys** for JFK → Heathrow, a 119-point Times Square → Grand Central cab route, and a Circular Quay → Manly ferry illustration. Compare Full route, Two points, Arc and Great circle, then change styles/motions and scrub the moving vehicle. Read the [map architecture and adapter contract](docs/MAPS.md) and [fixture provenance](samples/README.md).
 
 ## Try this flow
 
@@ -87,15 +89,17 @@ Add the local `swift` directory as a Swift package in Xcode and select only the 
 ./scripts/check.sh
 # Android UI flows, after starting an emulator:
 ./scripts/test-android-ui.sh
+# MapKit contracts and native iOS UI flows:
+./scripts/test-ios.sh
 # Verify documentation and in-app code panels match compiled sources:
 python3 scripts/sync-examples.py --check
 ```
 
-In Xcode use Product > Test for the iOS playground UI flows. Core tests cover geometry, degenerate inputs, validation, pause/resume, exact loop and seek boundaries, effect replacement, sequences, independent bindings, reduced motion, DSL errors, public consumer plugins, and deterministic sampling across all 96 style/motion combinations. UI tests exercise actual controls and integration examples. See [verification notes](docs/VERIFICATION.md) for what has actually been run. Regenerate example documentation after editing source with `python3 scripts/sync-examples.py`.
+In Xcode use Product > Test for MapKit contracts and UI flows. Both languages consume 544 named shared fixtures, plus preset/plugin tests and a 144-case native pixel matrix per renderer. UI and lifecycle tests exercise controls and real bindings. Counts distinguish parameterized cases from test functions; see [verification notes](docs/VERIFICATION.md) for executed results. Regenerate documentation with `python3 scripts/sync-examples.py` and fixture copies with `python3 scripts/sync-fixtures.py`.
 
 ## Alpha boundaries
 
-This is a working foundation for testing the approved integration API, not a production-release claim. [The relaunch plan](docs/DESIGN.md) lists consumer testing, geographic/map hardening, raster goldens, device profiling, application-size measurements and compatibility/publishing gates. Antimeridian-crossing map routes are explicitly unsupported; split them into supported bindings first. Large-route simplification and expensive gradient/comet combinations need profiling. Swift offers recoverable structural builder validation; numeric/plugin programmer errors still use preconditions. External geographic input uses throwing validation. Annotation/macro tooling is deferred and is not required for adoption or release.
+This is a working foundation for testing the approved integration API, not a production-release claim. [The relaunch plan](docs/DESIGN.md) lists consumer testing, additional camera/world-copy stress, visual goldens, device profiling, application-size measurements and compatibility/publishing gates. Date-line splitting and discontinuous rendering are implemented; provider-specific globe/extreme-pitch behavior still needs acceptance testing. Large-route simplification and expensive gradient/comet combinations need profiling. Swift offers recoverable structural builder validation; numeric/plugin programmer errors still use preconditions. External geographic input uses throwing validation. Annotation/macro tooling is deferred.
 
 Build pins: Kotlin 2.3.20, AGP 8.13.2, Gradle 8.13, Compose BOM 2026.03.00; Swift tools 6.0, iOS 17+. These are working compatibility pins, not a claim that every dependency is the newest available release. Google Maps and Material are excluded from the lean core/Canvas products.
 

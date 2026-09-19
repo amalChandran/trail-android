@@ -14,36 +14,24 @@ import TrailUI
     @State private var ownedPlayback: TrailPlayback
     private var playback: TrailPlayback { externalPlayback ?? ownedPlayback }
     public let reducedMotion: Bool
-    @State private var projected = TrailPath([])
-    @State private var ready = false
-    public init(route: TrailRoute, map: MapProxy, cameraRevision: Int, playback: TrailPlayback, reducedMotion: Bool = false) {
+    private var onProjected: (TrailPath?) -> Void = { _ in }
+    public init(route: TrailRoute, map: MapProxy, cameraRevision: Int, playback: TrailPlayback, reducedMotion: Bool = false, onProjected: @escaping (TrailPath?) -> Void = { _ in }) {
         self.route = route; self.map = map; self.cameraRevision = cameraRevision; self.reducedMotion = reducedMotion
         externalPlayback = playback; suppliedEffect = nil; _ownedPlayback = State(initialValue: playback)
+        self.onProjected = onProjected
     }
     public init(route: TrailRoute, map: MapProxy, cameraRevision: Int, effect: TrailEffect = TrailEffect(), reducedMotion: Bool = false) {
         self.route = route; self.map = map; self.cameraRevision = cameraRevision; self.reducedMotion = reducedMotion
         externalPlayback = nil; suppliedEffect = effect; _ownedPlayback = State(initialValue: TrailPlayback(effect: effect))
     }
     public var body: some View {
-        let crossesDateLine = zip(route.coordinates, route.coordinates.dropFirst()).contains { abs($0.longitude - $1.longitude) > 180 }
-        TrailCanvas(path: projected, playback: playback, fit: false, reducedMotion: reducedMotion, active: ready)
-            .allowsHitTesting(false)
-            .onChange(of: "\(route.id):\(route.revision):\(cameraRevision)", initial: true) { _, _ in updateProjection() }
-            .onChange(of: "\(route.id):\(route.revision)") { _, _ in playback.replay() }
-            .onChange(of: suppliedEffect?.id) { _, _ in if let suppliedEffect { playback.configure(suppliedEffect) } }
-            .onGeometryChange(for: CGSize.self) { $0.size } action: { _ in updateProjection() }
-            .overlay(alignment: .bottom) {
-                if crossesDateLine { Text("Split antimeridian routes before rendering with this alpha.").font(.caption).padding().background(.regularMaterial) }
-            }
-    }
-    private func updateProjection() {
-        let points = route.coordinates.compactMap { coordinate -> TrailPoint? in
-            guard let point = map.convert(CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude), to: .local), point.x.isFinite, point.y.isFinite else { return nil }
+        TrailProjectedOverlay(route: route, projection: TrailProjection { coordinate in
+            let longitude = max(-180 + 1e-7, min(180 - 1e-7, coordinate.longitude))
+            guard let point = map.convert(CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: longitude), to: .local), point.x.isFinite, point.y.isFinite else { return nil }
             return TrailPoint(point.x, point.y)
-        }
-        let crosses = zip(route.coordinates, route.coordinates.dropFirst()).contains { abs($0.longitude - $1.longitude) > 180 }
-        ready = points.count == route.coordinates.count && !crosses
-        projected = TrailPath(ready ? points : [])
+        }, projectionRevision: cameraRevision, playback: playback, reducedMotion: reducedMotion, onProjected: onProjected)
+            .onChange(of: route.key) { _, _ in if externalPlayback == nil { playback.replay() } }
+            .onChange(of: suppliedEffect?.id) { _, _ in if let suppliedEffect { playback.configure(suppliedEffect) } }
     }
 }
 
@@ -75,14 +63,15 @@ import TrailUI
                 .onMapCameraChange(frequency: .continuous) { _ in cameraRevision &+= 1 }
                 .overlay { TrailMapOverlay(route: route, map: proxy, cameraRevision: cameraRevision, playback: playback, reducedMotion: reducedMotion) }
         }
-        .onChange(of: route.id + ":" + String(route.revision)) { _, _ in position = .region(Self.region(for: route)) }
+        .onChange(of: route.key) { _, _ in
+            position = .region(Self.region(for: route))
+            if externalPlayback == nil { playback.replay() }
+        }
         .onChange(of: suppliedEffect?.id) { _, _ in if let suppliedEffect { playback.configure(suppliedEffect) } }
     }
     private static func region(for route: TrailRoute) -> MKCoordinateRegion {
-        let lats = route.coordinates.map(\.latitude), lons = route.coordinates.map(\.longitude)
-        let minLat = lats.min() ?? 37.78, maxLat = lats.max() ?? 37.79
-        let minLon = lons.min() ?? -122.42, maxLon = lons.max() ?? -122.41
-        return MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: (minLat + maxLat) / 2, longitude: (minLon + maxLon) / 2),
-                                  span: MKCoordinateSpan(latitudeDelta: max(0.01, (maxLat - minLat) * 1.5), longitudeDelta: max(0.01, (maxLon - minLon) * 1.5)))
+        guard let bounds = route.bounds else { return MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 0, longitude: 0), span: MKCoordinateSpan(latitudeDelta: 60, longitudeDelta: 60)) }
+        return MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: bounds.center.latitude, longitude: bounds.center.longitude),
+                                  span: MKCoordinateSpan(latitudeDelta: min(170,max(0.01,bounds.latitudeSpan*1.5)), longitudeDelta: min(359,max(0.01,bounds.longitudeSpan*1.5))))
     }
 }

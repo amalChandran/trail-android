@@ -12,13 +12,15 @@ The public extension contracts are `TrailLineStyle` and `TrailAnimation`. Styles
 
 Eight styles and twelve motion presets are implemented. All 96 combinations are tested for deterministic bounded output; that does not imply all combinations communicate equally useful motion. Ordered finite sequences and independently timed layers are explicit. Default rendering is static, and infinite repetition must be requested.
 
+Google Maps Android and Apple MapKit are the first map targets. `TrailProjection` isolates SDK coordinate conversion; `TrailProjectedOverlay` shares readiness, invalidation and rendering behavior. Routes support complete waypoints, direct connections, decorative arcs, spherical great circles and encoded polylines. Date-line splitting and discontinuous contours preserve geometry without drawing a world-spanning gap. The [map contract](MAPS.md) defines what a future adapter must implement and test.
+
 ## Delivery gates
 
 | Stage | Work | Exit evidence |
 | --- | --- | --- |
 | Native alpha — implemented | Selected API, Canvas/View/Compose and SwiftUI hosts, Maps adapters, catalog, external plugin, playback controls, executable integration examples | Native builds and current test results in [VERIFICATION.md](VERIFICATION.md) |
 | Consumer beta | Integrate into three independent apps; stage artifacts for external-only plugin tests; finish migration from Java; review diagnostics and naming | First route within ten minutes and custom two-stroke style within thirty minutes, measured with developers who did not design Trail |
-| Map hardening | Camera bearing/tilt/zoom tests, layout/safe-area changes, projection readiness, attach/detach/background lifecycle, attribution/hit testing; antimeridian splitting and route simplification | Camera and lifecycle regression suite on Android and iOS; documented geographic accuracy limits |
+| Map hardening — in progress | Shared geography/seam fixtures, Apple camera/attachment contracts and Android binding lifecycle checks implemented; finish key-backed Google checks, larger camera/layout/device matrix, globe/world copies, repeated teardown stress and route simplification | Provider-specific native tests and documented accuracy limits; Google needs a configured key |
 | Rendering and performance | Golden images for endpoints, alpha, gradient, joins and dashes; measure 100/1,000/10,000 vertices with 1/10/50 routes; profile simple and expensive effect combinations | Repeatable frame-time, allocation, memory, power and idle-clock reports on representative 60/120 Hz devices |
 | Footprint | Shrunk release host baseline; add Canvas core, then Compose, effects and maps separately; equivalent iOS product comparisons | Compressed download and installed-size deltas, dependency graph and build times; no debug-playground size used as library overhead |
 | Compatibility and release | Public API dumps, Kotlin plugin compatibility, older Swift consumer rebuilds, deployment-target matrix, provenance review, signed packages, changelog and migration guide | Versioned alpha/beta artifacts accepted by external consumers before stable publishing |
@@ -27,11 +29,11 @@ The historical 90–130 engineering-day estimate covered a coordinated productio
 
 ## Test strategy
 
-Core tests cover distance-based geometry, invalid/degenerate input, immutable data, pause/seek/replay/completion, exact loop boundaries, sequence transitions, layer order, runtime replacement, independent players, reduced motion, plugin output validation, and deterministic sampling. Both implementations use matching reference expectations for the same scenarios. Shared machine-readable cross-language fixtures are a remaining release gate.
+Core tests cover distance-based geometry, invalid/degenerate input, immutable data, pause/seek/replay/completion, exact loop boundaries, sequence transitions, layer order, runtime replacement, independent players, reduced motion, plugin output validation, and deterministic sampling. Both implementations now consume 544 machine-readable shared cases. Independent linear geometry references check the binary-search implementation. Native Android Canvas and Core Graphics each run a 144-case pixel matrix for clipping, width, color and alpha, plus disconnected-contour regressions.
 
-Native builds compile the integration examples with real SDKs. A synchronization check generates documentation and in-app code panels from those same files. UI flows cover controls, runtime configuration and plugin adoption. Camera accuracy, visual goldens, detach/leak stress, and real-device performance require additional suites. Core coverage percentages alone are not a release criterion.
+Native builds compile the integration examples with real SDKs. Synchronization checks guard example documentation and shared fixtures. UI flows cover controls, runtime configuration, plugin adoption and geographic journeys. MapKit tests exercise real conversion across cameras and attachment lifetime; Android tests exercise the shared binding's lifecycle and a key-gated Google SDK flow. Broader visual goldens, teardown stress, oldest OS versions and real-device performance remain additional gates. Core coverage percentages alone are not a release criterion.
 
-Each fix should add a focused regression test where useful. Release CI should build pinned tools plus the oldest supported platforms, exercise actual external consumers, and store comparable measurements. Current CI compiles both native apps, builds Android UI tests and runs pure tests/lint; simulator UI tests are currently run locally.
+Each fix should add a focused regression test where useful. Release CI should build pinned tools plus the oldest supported platforms, exercise actual external consumers, and store comparable measurements. The workflow now includes native emulator/simulator tests and report artifacts as well as pure tests/lint; it has not been run remotely. The live Google test skips without credentials. A larger supported-OS/device matrix is still release work.
 
 ## Performance decisions and open work
 

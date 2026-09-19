@@ -31,6 +31,21 @@ val exampleRoute = TrailRoute("demo", listOf(
 ))
 // example:end setup
 
+// example:start geographic-routes
+val jfk = TrailCoordinate(40.6413, -73.7781)
+val heathrow = TrailCoordinate(51.4706, -0.461941)
+val flightArc = TrailRoute.arc("JFK-LHR/arc", jfk, heathrow)
+val flightGeodesic = TrailRoute.greatCircle("JFK-LHR/great-circle", jfk, heathrow)
+val flightDirect = TrailRoute.direct("JFK-LHR/direct", jfk, heathrow)
+
+// Pass every waypoint from your directions service, in order. Trail does not fetch directions.
+fun cabRoute(waypoints: List<TrailCoordinate>, revision: Long) =
+    TrailRoute("cab/current-trip", waypoints, revision)
+
+// The same model works with an encoded route response; precision must match the service.
+fun decodedCabRoute(encoded: String) = TrailRoute.encodedPolyline("cab/decoded", encoded, precision = 5)
+// example:end geographic-routes
+
 // example:start preset
 val deliveryTrail = trailEffect {
     stroke(TrailColor.Blue, width = 6.0)
@@ -128,6 +143,14 @@ val highlightedRoute = trailEffect {
     }
 }
 // example:end google-maps
+
+// example:start custom-map-adapter
+// An adapter supplies local dp, or null until ready, and changes cameraRevision on camera/inset changes.
+// Place this above your map with identical bounds; no SDK types enter the route or effect.
+@Composable fun CustomMapOverlayExample(route: TrailRoute, projection: TrailProjection?, cameraRevision: Int) {
+    TrailProjectedOverlay(route, projection, cameraRevision, Modifier.fillMaxSize(), effect = deliveryTrail)
+}
+// example:end custom-map-adapter
 
 // example:start android-view
 // In an existing Activity, use setContentView(createTrailView(this)).

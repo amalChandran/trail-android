@@ -15,6 +15,8 @@ TITLES = {
     "sequence": "Ordered animation steps", "layers": "Independent layers", "google-maps": "Google Maps Compose",
     "android-view": "Android View", "mapkit": "MapKit convenience host",
     "existing-swiftui-map": "Existing SwiftUI Map", "existing-mkmapview": "Existing MKMapView",
+    "geographic-routes": "Real coordinates: route, direct, arc and great circle",
+    "custom-map-adapter": "Provider-neutral overlay contract",
 }
 
 def regions(source):
@@ -34,7 +36,7 @@ def outputs():
         document += f"## Imports\n\n```{language}\n{imports}```\n\n"
         for name, content in parts.items():
             document += f"## {TITLES[name]}\n\n```{language}\n{content}```\n\n"
-            if name in ("setup", "preset"):
+            if name in ("setup", "preset", "geographic-routes", "custom-map-adapter"):
                 continue
             code = parts["preset"] + "\n" + content if name in ("basic", "playback", "google-maps", "android-view", "mapkit", "existing-swiftui-map", "existing-mkmapview") else content
             note = "// Shared demo geometry and imports: see the compiled IntegrationExamples source.\n\n"

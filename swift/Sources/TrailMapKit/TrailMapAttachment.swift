@@ -11,10 +11,7 @@ import TrailUI
     private weak var mapView: MKMapView?
     private var host: UIHostingController<AttachmentContent>?
     private let model: AttachmentModel
-    public init(mapView: MKMapView, parent: UIViewController, route: TrailRoute, playback: TrailPlayback) throws {
-        if zip(route.coordinates, route.coordinates.dropFirst()).contains(where: { abs($0.longitude - $1.longitude) > 180 }) {
-            throw TrailError.invalidRoute("Split antimeridian routes before attaching in this alpha")
-        }
+    public init(mapView: MKMapView, parent: UIViewController, route: TrailRoute, playback: TrailPlayback) {
         self.mapView = mapView
         model = AttachmentModel(route: route, playback: playback)
         let controller = UIHostingController(rootView: AttachmentContent(model: model))
@@ -28,10 +25,16 @@ import TrailUI
     public func updateProjection() {
         guard let mapView, let host else { return }
         host.view.frame = mapView.bounds
-        model.path = model.route.project {
-            let point = mapView.convert(CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude), toPointTo: host.view)
-            return TrailPoint(point.x, point.y)
-        }
+        let path = model.route.projectIfReady(.appleMaps(mapView, in: host.view))
+        model.path = path ?? TrailPath([]); model.ready = path != nil
+    }
+    public var isAttached: Bool { host != nil }
+    public func updateRoute(_ route: TrailRoute, replay: Bool = false) {
+        guard host != nil else { return }
+        let changed = model.route.key != route.key
+        model.route = route
+        if changed && replay { model.playback.replay() }
+        updateProjection()
     }
     /// Removes the view and its frame driver. Call from the owning screen's teardown.
     public func detach() {
@@ -39,13 +42,14 @@ import TrailUI
     }
 }
 @MainActor @Observable private final class AttachmentModel {
-    let route: TrailRoute
+    var route: TrailRoute
     let playback: TrailPlayback
     var path = TrailPath([])
+    var ready = false
     init(route: TrailRoute, playback: TrailPlayback) { self.route = route; self.playback = playback }
 }
 @MainActor private struct AttachmentContent: View {
     let model: AttachmentModel
-    var body: some View { TrailCanvas(path: model.path, playback: model.playback, fit: false) }
+    var body: some View { TrailCanvas(path: model.path, playback: model.playback, fit: false, active: model.ready) }
 }
 #endif

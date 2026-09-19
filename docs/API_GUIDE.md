@@ -50,12 +50,14 @@ Kotlin reports structural mistakes with `IllegalArgumentException` and an action
 
 The simple effect overload owns its controller. Create an explicit controller only for controls: `rememberTrailPlayback(effect)` on Android, or `@State private var playback = TrailPlayback(effect: ...)` in SwiftUI. The compiled playback examples show the binding and slider code. `TrailPlayer` is the deterministic core for tests and custom hosts.
 
+With an explicit controller, Kotlin can omit the effect argument: `TrailCanvas(path, playback = playback)` and `GoogleMapsTrailOverlay(route, camera, playback = playback)` use the controller's configured effect. Supplying an effect explicitly updates that controller. Swift's playback overload likewise uses the controller's effect.
+
 - `play` resumes; a completed one-shot starts again. `pause` holds position. `replay` starts at zero.
 - `seek` accepts 0 through 1 and pauses. For a single animation or sequence, explicit seek to 1 displays its terminal frame even when repeating. Independent layers retain their own time domains. Ordinary loop boundaries begin the next cycle at zero.
 - Effect changes preserve normalized progress and play/pause intent. New colors do not replay a finished reveal. Static-to-animated changes honor the original autoplay request unless explicitly paused.
 - Use stable path/effect values where possible. Kotlin's runtime-color example uses `remember(brandColor)`. Rebuild an effect when its configuration changes, not on each frame.
 - A controller belongs to **one visible binding**. Share immutable effects across bindings, not controllers.
-- Automatically owned map bindings replay when route ID/revision changes; camera changes only reproject. If you supply an Android controller, also own its route-replacement/reset policy. Swift map bindings replay on route changes even with a supplied controller.
+- Automatically owned map bindings replay when route ID/revision changes; camera changes only reproject. If you supply a controller, own its route-replacement/reset policy on both platforms. `TrailMapAttachment.updateRoute` preserves position by default; opt into a restart with `replay: true`.
 - Background/inactive/reduced-motion surfaces do not accrue elapsed time. Reduced motion draws a full reveal route or a hidden terminal erase; resume continues the held logical position.
 
 ## Write a plugin
@@ -74,4 +76,6 @@ Android: place `GoogleMapsTrailOverlay` in the same `Box` as the existing `Googl
 
 iOS: use `TrailMap(route:effect:)` for a convenience host. For an existing SwiftUI map, use `MapReader` and `TrailMapOverlay`, advancing `cameraRevision` from continuous camera callbacks. For an existing `MKMapView`, use `TrailMapAttachment`, forward camera/layout changes to `updateProjection()`, and call `detach()` on teardown. Your screen continues to own the map delegate. All three have [compiled examples](examples/iOS.md).
 
-These are overlays above map content; they cannot interleave with native labels. Antimeridian-crossing routes are explicitly unsupported. Camera-transform accuracy and broader lifecycle stress remain release work; see [verification limits](VERIFICATION.md).
+Use `TrailRoute` for complete waypoints, or its `direct`, `arc`, `greatCircle` and `encodedPolyline` factories. The flight/cab/ferry playground demonstrates their different meanings using real coordinates. A complete guide to geometry, provider swapping, projection units, ownership and current limits is in [MAPS.md](MAPS.md).
+
+`TrailProjection` is the SDK boundary; `TrailProjectedOverlay` owns shared readiness and camera/layout invalidation. Neither plugins nor core geometry know the map provider. Date-line crossings become separate contours. These overlays draw above map content and cannot interleave with native labels. See [executed verification and remaining limits](VERIFICATION.md).
