@@ -1,0 +1,469 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0708C865516A8DF8DD214E2A /* TrailCore in Frameworks */ = {isa = PBXBuildFile; productRef = A8767A355C705A9D73BE8EC4 /* TrailCore */; };
+		2CA1B93EB466AC667C27F648 /* PlaygroundTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE448F6C04130D21FE408C3 /* PlaygroundTests.swift */; };
+		4A03EA6CBD72027404FD29B2 /* TrailPlaygroundApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79B4B42B4BD84936CD111CD3 /* TrailPlaygroundApp.swift */; };
+		708D4A867DEC99D4A3581765 /* TrailEffects in Frameworks */ = {isa = PBXBuildFile; productRef = 1369EBDA6461B2C6AA77F663 /* TrailEffects */; };
+		CAC1467DCB886B3028C8E8C9 /* TrailUI in Frameworks */ = {isa = PBXBuildFile; productRef = 298F92BCC1CFEDDBBBEEA9E6 /* TrailUI */; };
+		DBA2915ED4E4804F92BF3453 /* TrailMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 39D4F25FFFE99EA87F19E6C0 /* TrailMapKit */; };
+		E479C823494B2F1690E1FECF /* TrailSamplePlugin in Frameworks */ = {isa = PBXBuildFile; productRef = 3796C7EF07562E47D5EB44C1 /* TrailSamplePlugin */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B7A8A480F8B2D361FC7F0197 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A40099257F7FB4F997C62F48 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D19504089DF92951ACD8075C;
+			remoteInfo = TrailPlayground;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		4B3957B617D61C0CE5F0E065 /* TrailPlaygroundUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TrailPlaygroundUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B5E2C3B0F2219600920BCA1 /* swift */ = {isa = PBXFileReference; lastKnownFileType = folder; name = swift; path = ../swift; sourceTree = SOURCE_ROOT; };
+		4F6A9A7DF6C1F88ECC97FDF2 /* TrailPlayground.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TrailPlayground.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		79B4B42B4BD84936CD111CD3 /* TrailPlaygroundApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailPlaygroundApp.swift; sourceTree = "<group>"; };
+		CCE448F6C04130D21FE408C3 /* PlaygroundTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaygroundTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		290DEE4BEF236516606EF787 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0708C865516A8DF8DD214E2A /* TrailCore in Frameworks */,
+				708D4A867DEC99D4A3581765 /* TrailEffects in Frameworks */,
+				CAC1467DCB886B3028C8E8C9 /* TrailUI in Frameworks */,
+				DBA2915ED4E4804F92BF3453 /* TrailMapKit in Frameworks */,
+				E479C823494B2F1690E1FECF /* TrailSamplePlugin in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		14E3CA8E7F140EC31B4EAE06 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				4B5E2C3B0F2219600920BCA1 /* swift */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		4DBEA6CE101F0A683342AFE2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4F6A9A7DF6C1F88ECC97FDF2 /* TrailPlayground.app */,
+				4B3957B617D61C0CE5F0E065 /* TrailPlaygroundUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6E65CE5EE9B1A388A1831C5B = {
+			isa = PBXGroup;
+			children = (
+				14E3CA8E7F140EC31B4EAE06 /* Packages */,
+				A42F84D53616F7EA62AF91F9 /* TrailPlayground */,
+				A1A06F3248DE1CBB7987E5F8 /* TrailPlaygroundUITests */,
+				4DBEA6CE101F0A683342AFE2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A1A06F3248DE1CBB7987E5F8 /* TrailPlaygroundUITests */ = {
+			isa = PBXGroup;
+			children = (
+				CCE448F6C04130D21FE408C3 /* PlaygroundTests.swift */,
+			);
+			path = TrailPlaygroundUITests;
+			sourceTree = "<group>";
+		};
+		A42F84D53616F7EA62AF91F9 /* TrailPlayground */ = {
+			isa = PBXGroup;
+			children = (
+				79B4B42B4BD84936CD111CD3 /* TrailPlaygroundApp.swift */,
+			);
+			path = TrailPlayground;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2C6576FFCEEBB414D43A4333 /* TrailPlaygroundUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AE02BCDD0165681325814195 /* Build configuration list for PBXNativeTarget "TrailPlaygroundUITests" */;
+			buildPhases = (
+				A1E4A129F6E981FA6D742B29 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5A5E64B8DC83EA67155789A6 /* PBXTargetDependency */,
+			);
+			name = TrailPlaygroundUITests;
+			packageProductDependencies = (
+			);
+			productName = TrailPlaygroundUITests;
+			productReference = 4B3957B617D61C0CE5F0E065 /* TrailPlaygroundUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		D19504089DF92951ACD8075C /* TrailPlayground */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CFEBE4165C9A7E3992A980FE /* Build configuration list for PBXNativeTarget "TrailPlayground" */;
+			buildPhases = (
+				61106890644BDFA0E9CB5D85 /* Sources */,
+				290DEE4BEF236516606EF787 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TrailPlayground;
+			packageProductDependencies = (
+				A8767A355C705A9D73BE8EC4 /* TrailCore */,
+				1369EBDA6461B2C6AA77F663 /* TrailEffects */,
+				298F92BCC1CFEDDBBBEEA9E6 /* TrailUI */,
+				39D4F25FFFE99EA87F19E6C0 /* TrailMapKit */,
+				3796C7EF07562E47D5EB44C1 /* TrailSamplePlugin */,
+			);
+			productName = TrailPlayground;
+			productReference = 4F6A9A7DF6C1F88ECC97FDF2 /* TrailPlayground.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A40099257F7FB4F997C62F48 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					2C6576FFCEEBB414D43A4333 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+						TestTargetID = D19504089DF92951ACD8075C;
+					};
+					D19504089DF92951ACD8075C = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 208990B3574A64DD3250D93B /* Build configuration list for PBXProject "TrailPlayground" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 6E65CE5EE9B1A388A1831C5B;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2D3FD3C401A2B70B396E6F8E /* XCLocalSwiftPackageReference "../swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4DBEA6CE101F0A683342AFE2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D19504089DF92951ACD8075C /* TrailPlayground */,
+				2C6576FFCEEBB414D43A4333 /* TrailPlaygroundUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		61106890644BDFA0E9CB5D85 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A03EA6CBD72027404FD29B2 /* TrailPlaygroundApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1E4A129F6E981FA6D742B29 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2CA1B93EB466AC667C27F648 /* PlaygroundTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5A5E64B8DC83EA67155789A6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D19504089DF92951ACD8075C /* TrailPlayground */;
+			targetProxy = B7A8A480F8B2D361FC7F0197 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		102EDC678B7B469812054741 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.trail.TrailPlaygroundUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = TrailPlayground;
+			};
+			name = Release;
+		};
+		1312248C0B34B0E9CD4B56EA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Trail Studio";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.trail.playground;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		486DF9410C40DAA4DE5FDD0E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		593AA2BEAF751D7F6C722938 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.trail.TrailPlaygroundUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = TrailPlayground;
+			};
+			name = Debug;
+		};
+		73199F390A9C8D9A234A0EB9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Trail Studio";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.trail.playground;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D83ABA09D96249F80C5F551F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		208990B3574A64DD3250D93B /* Build configuration list for PBXProject "TrailPlayground" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D83ABA09D96249F80C5F551F /* Debug */,
+				486DF9410C40DAA4DE5FDD0E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AE02BCDD0165681325814195 /* Build configuration list for PBXNativeTarget "TrailPlaygroundUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				593AA2BEAF751D7F6C722938 /* Debug */,
+				102EDC678B7B469812054741 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CFEBE4165C9A7E3992A980FE /* Build configuration list for PBXNativeTarget "TrailPlayground" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1312248C0B34B0E9CD4B56EA /* Debug */,
+				73199F390A9C8D9A234A0EB9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		2D3FD3C401A2B70B396E6F8E /* XCLocalSwiftPackageReference "../swift" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../swift;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1369EBDA6461B2C6AA77F663 /* TrailEffects */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TrailEffects;
+		};
+		298F92BCC1CFEDDBBBEEA9E6 /* TrailUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TrailUI;
+		};
+		3796C7EF07562E47D5EB44C1 /* TrailSamplePlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TrailSamplePlugin;
+		};
+		39D4F25FFFE99EA87F19E6C0 /* TrailMapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TrailMapKit;
+		};
+		A8767A355C705A9D73BE8EC4 /* TrailCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TrailCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A40099257F7FB4F997C62F48 /* Project object */;
+}

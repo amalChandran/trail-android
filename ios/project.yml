@@ -1,0 +1,54 @@
+name: TrailPlayground
+options:
+  bundleIdPrefix: dev.trail
+  deploymentTarget:
+    iOS: "17.0"
+packages:
+  Trail:
+    path: ../swift
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ""
+targets:
+  TrailPlayground:
+    type: application
+    platform: iOS
+    sources: [TrailPlayground]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.trail.playground
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Trail Studio
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+    dependencies:
+      - package: Trail
+        product: TrailCore
+      - package: Trail
+        product: TrailEffects
+      - package: Trail
+        product: TrailUI
+      - package: Trail
+        product: TrailMapKit
+      - package: Trail
+        product: TrailSamplePlugin
+  TrailPlaygroundUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [TrailPlaygroundUITests]
+    dependencies:
+      - target: TrailPlayground
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  TrailPlayground:
+    build:
+      targets:
+        TrailPlayground: all
+        TrailPlaygroundUITests: [test]
+    test:
+      targets: [TrailPlaygroundUITests]
