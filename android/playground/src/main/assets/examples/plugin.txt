@@ -1,0 +1,11 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+@Composable fun PluginExample(brandColor: TrailColor) {
+    val effect = remember(brandColor) {
+        trailEffect {
+            style(MetroStyle(color = brandColor))
+            animation(TrailAnimations.custom(QuadraticReveal(), duration = 2.seconds))
+        }
+    }
+    TrailCanvas(examplePath, Modifier.fillMaxSize(), effect = effect)
+}

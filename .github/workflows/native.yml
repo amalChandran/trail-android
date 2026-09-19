@@ -10,6 +10,7 @@ jobs:
         working-directory: android
     steps:
       - uses: actions/checkout@v4
+      - run: python3 ../scripts/sync-examples.py --check
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -17,7 +18,7 @@ jobs:
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
       - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
-      - run: ./gradlew :trail-core:test :trail-effects:test :sample-plugin:test :playground:assembleDebug :playground:lintDebug --console=plain
+      - run: ./gradlew :trail-core:test :trail-effects:test :sample-plugin:test :playground:assembleDebug :playground:assembleDebugAndroidTest :playground:lintDebug --console=plain
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -27,5 +28,6 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+      - run: python3 scripts/sync-examples.py --check
       - run: swift test --package-path swift --enable-code-coverage
       - run: xcodebuild -project ios/TrailPlayground.xcodeproj -scheme TrailPlayground -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build

@@ -1,0 +1,13 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+val highlightedRoute = trailEffect {
+    layer { stroke(TrailColor.White, width = 10.0) }
+    layer {
+        stroke(TrailColor.Blue, width = 6.0)
+        reveal(duration = 2.seconds)
+    }
+}
+
+@Composable fun LayersExample() {
+    TrailCanvas(examplePath, Modifier.fillMaxSize(), effect = highlightedRoute)
+}

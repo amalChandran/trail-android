@@ -1,0 +1,186 @@
+import SwiftUI
+import MapKit
+import TrailCore
+import TrailUI
+import TrailMapKit
+import TrailSamplePlugin
+#if canImport(UIKit)
+import UIKit
+#endif
+
+// example:start setup
+enum ExampleGeometry {
+    static let path = TrailPath([
+        TrailPoint(0, 90), TrailPoint(60, 90), TrailPoint(100, 30),
+        TrailPoint(180, 30), TrailPoint(220, 0), TrailPoint(280, 0),
+    ])
+    // Fixed demo coordinates. Validate external data with do/try/catch in your app.
+    static let route = try! TrailRoute(id: "demo", coordinates: [
+        TrailCoordinate(latitude: 37.779, longitude: -122.423),
+        TrailCoordinate(latitude: 37.779, longitude: -122.418),
+        TrailCoordinate(latitude: 37.783, longitude: -122.418),
+        TrailCoordinate(latitude: 37.783, longitude: -122.412),
+        TrailCoordinate(latitude: 37.787, longitude: -122.412),
+    ])
+}
+// example:end setup
+
+// example:start preset
+let deliveryTrail = TrailEffect {
+    Stroke(.blue, width: 6)
+    Reveal(duration: .seconds(2))
+}
+// example:end preset
+
+// example:start basic
+struct BasicRouteExample: View {
+    var body: some View {
+        TrailCanvas(path: ExampleGeometry.path, effect: deliveryTrail)
+    }
+}
+// example:end basic
+
+// example:start runtime-color
+struct RuntimeColorExample: View {
+    let brandColor: TrailColor
+    var body: some View {
+        let effect = TrailEffect {
+            Stroke(brandColor, width: 6)
+            Reveal(duration: .seconds(2))
+        }
+        TrailCanvas(path: ExampleGeometry.path, effect: effect)
+    }
+}
+// example:end runtime-color
+
+// example:start plugin
+struct PluginExample: View {
+    let brandColor: TrailColor
+    var body: some View {
+        let effect = TrailEffect {
+            Style(MetroStyle(color: brandColor))
+            Animate(TrailAnimations.custom(QuadraticReveal(), duration: .seconds(2)))
+        }
+        TrailCanvas(path: ExampleGeometry.path, effect: effect)
+    }
+}
+// example:end plugin
+
+// example:start playback
+struct PlaybackExample: View {
+    @State private var playback = TrailPlayback(effect: deliveryTrail)
+    var body: some View {
+        VStack {
+            TrailCanvas(path: ExampleGeometry.path, playback: playback)
+            Slider(value: Binding(get: { playback.progress }, set: { playback.seek(to: $0) }), in: 0...1)
+                .accessibilityIdentifier("exampleProgress")
+            HStack {
+                Button(playback.isPlaying ? "Pause" : "Play") {
+                    playback.isPlaying ? playback.pause() : playback.play()
+                }.accessibilityIdentifier("examplePlayPause")
+                Button("Replay") { playback.replay() }.accessibilityIdentifier("exampleReplay")
+            }.buttonStyle(.bordered)
+        }
+    }
+}
+// example:end playback
+
+// example:start sequence
+let revealThenErase = TrailEffect {
+    Stroke(.mint, width: 6)
+    Sequence {
+        Reveal(duration: .seconds(2))
+        Erase(duration: .seconds(1))
+    }
+}
+
+struct SequenceExample: View {
+    var body: some View {
+        TrailCanvas(path: ExampleGeometry.path, effect: revealThenErase)
+    }
+}
+// example:end sequence
+
+// example:start layers
+let highlightedRoute = TrailEffect {
+    Layer { Stroke(.white, width: 10) }
+    Layer {
+        Stroke(.blue, width: 6)
+        Reveal(duration: .seconds(2))
+    }
+}
+
+struct LayersExample: View {
+    var body: some View {
+        TrailCanvas(path: ExampleGeometry.path, effect: highlightedRoute)
+    }
+}
+// example:end layers
+
+// example:start mapkit
+struct MapKitExample: View {
+    var body: some View {
+        TrailMap(route: ExampleGeometry.route, effect: deliveryTrail)
+    }
+}
+// example:end mapkit
+
+// example:start existing-swiftui-map
+struct ExistingSwiftUIMapExample: View {
+    @State private var cameraRevision = 0
+    private let region = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 37.783, longitude: -122.417),
+        span: MKCoordinateSpan(latitudeDelta: 0.015, longitudeDelta: 0.015)
+    )
+    var body: some View {
+        MapReader { map in
+            Map(initialPosition: .region(region))
+                .onMapCameraChange(frequency: .continuous) { _ in cameraRevision &+= 1 }
+                .overlay {
+                    TrailMapOverlay(
+                        route: ExampleGeometry.route, map: map, cameraRevision: cameraRevision,
+                        effect: deliveryTrail
+                    )
+                }
+        }
+    }
+}
+// example:end existing-swiftui-map
+
+// example:start existing-mkmapview
+#if canImport(UIKit)
+@MainActor final class ExistingMapController: UIViewController, MKMapViewDelegate {
+    private let map = MKMapView()
+    private let playback = TrailPlayback(effect: deliveryTrail)
+    private var attachment: TrailMapAttachment?
+
+    override func loadView() { view = map }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        map.delegate = self // Your screen continues to own its delegate.
+        map.setRegion(MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 37.783, longitude: -122.417),
+            span: MKCoordinateSpan(latitudeDelta: 0.015, longitudeDelta: 0.015)
+        ), animated: false)
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // This fixed route is supported; handle a thrown validation error for external routes.
+        attachment = try! TrailMapAttachment(mapView: map, parent: self, route: ExampleGeometry.route, playback: playback)
+    }
+    func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) { attachment?.updateProjection() }
+    override func viewDidLayoutSubviews() { super.viewDidLayoutSubviews(); attachment?.updateProjection() }
+    override func viewDidDisappear(_ animated: Bool) {
+        attachment?.detach(); attachment = nil
+        super.viewDidDisappear(animated)
+    }
+}
+#endif
+// example:end existing-mkmapview
+
+#if canImport(UIKit)
+struct ExistingMKMapViewExample: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> ExistingMapController { ExistingMapController() }
+    func updateUIViewController(_ controller: ExistingMapController, context: Context) {}
+}
+#endif

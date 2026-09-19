@@ -1,6 +1,37 @@
 import XCTest
 
 final class PlaygroundTests: XCTestCase {
+    @MainActor func testCompiledIntegrationExamples() throws {
+        let app = XCUIApplication(); app.launch()
+        XCTAssertTrue(app.buttons["openExamples"].waitForExistence(timeout: 10))
+        app.buttons["playPause"].tap()
+        app.buttons["openExamples"].tap()
+        XCTAssertTrue(app.buttons["examplePicker"].waitForExistence(timeout: 5))
+        func choose(_ title: String) {
+            app.buttons["examplePicker"].tap()
+            app.buttons[title].tap()
+            XCTAssertTrue(app.staticTexts["exampleCode"].exists)
+            XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Example source missing")).firstMatch.exists)
+        }
+        choose("Runtime color")
+        app.buttons["changeBrandColor"].tap()
+        let exampleScreenshot = XCTAttachment(screenshot: app.screenshot())
+        exampleScreenshot.name = "Runtime color and compiled source"
+        exampleScreenshot.lifetime = .keepAlways
+        add(exampleScreenshot)
+        choose("Custom plugin")
+        app.buttons["changeBrandColor"].tap()
+        choose("Playback controls")
+        app.sliders["exampleProgress"].adjust(toNormalizedSliderPosition: 0.4)
+        XCTAssertEqual(app.buttons["examplePlayPause"].label, "Play")
+        app.buttons["exampleReplay"].tap()
+        app.sliders["exampleProgress"].adjust(toNormalizedSliderPosition: 0.7)
+        XCTAssertEqual(app.buttons["examplePlayPause"].label, "Play")
+        for title in ["Sequence", "Layers", "MapKit", "Existing SwiftUI Map", "Existing MKMapView"] { choose(title) }
+        app.buttons["examplesDone"].tap()
+        XCTAssertTrue(app.buttons["playPause"].waitForExistence(timeout: 5))
+    }
+
     @MainActor func testPlaybackAndPluginFlow() throws {
         let app = XCUIApplication(); app.launch()
         let play = app.buttons["playPause"]

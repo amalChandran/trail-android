@@ -1,0 +1,23 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+let deliveryTrail = TrailEffect {
+    Stroke(.blue, width: 6)
+    Reveal(duration: .seconds(2))
+}
+
+struct PlaybackExample: View {
+    @State private var playback = TrailPlayback(effect: deliveryTrail)
+    var body: some View {
+        VStack {
+            TrailCanvas(path: ExampleGeometry.path, playback: playback)
+            Slider(value: Binding(get: { playback.progress }, set: { playback.seek(to: $0) }), in: 0...1)
+                .accessibilityIdentifier("exampleProgress")
+            HStack {
+                Button(playback.isPlaying ? "Pause" : "Play") {
+                    playback.isPlaying ? playback.pause() : playback.play()
+                }.accessibilityIdentifier("examplePlayPause")
+                Button("Replay") { playback.replay() }.accessibilityIdentifier("exampleReplay")
+            }.buttonStyle(.bordered)
+        }
+    }
+}

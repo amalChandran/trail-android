@@ -7,13 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		048E7E193D6158951AE4BFEF /* example-plugin.txt in Resources */ = {isa = PBXBuildFile; fileRef = 342643551534168017302DAE /* example-plugin.txt */; };
 		0708C865516A8DF8DD214E2A /* TrailCore in Frameworks */ = {isa = PBXBuildFile; productRef = A8767A355C705A9D73BE8EC4 /* TrailCore */; };
+		1881B41C38701AE79924BACA /* example-runtime-color.txt in Resources */ = {isa = PBXBuildFile; fileRef = 66F016EC6E5C81A2019C2605 /* example-runtime-color.txt */; };
 		2CA1B93EB466AC667C27F648 /* PlaygroundTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE448F6C04130D21FE408C3 /* PlaygroundTests.swift */; };
+		3489A207E755FD6A095B07B1 /* example-playback.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4BD08075E9DEDFB8C659935D /* example-playback.txt */; };
+		368A10345A032366DAE6D2E8 /* example-existing-mkmapview.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7C7D6DC5F20B63915D9ED4EB /* example-existing-mkmapview.txt */; };
+		3EB693CD867A48C8DFF155CC /* example-mapkit.txt in Resources */ = {isa = PBXBuildFile; fileRef = C2CF29F89164AA82AFA5203C /* example-mapkit.txt */; };
 		4A03EA6CBD72027404FD29B2 /* TrailPlaygroundApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79B4B42B4BD84936CD111CD3 /* TrailPlaygroundApp.swift */; };
+		5124FD8F23CC18C06DD1A325 /* example-layers.txt in Resources */ = {isa = PBXBuildFile; fileRef = 65256349DE236FD7C8BD726E /* example-layers.txt */; };
+		644B50E5A54C620DAD33D992 /* ExamplesBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825987E3DF6F107ABDEDB00F /* ExamplesBrowser.swift */; };
 		708D4A867DEC99D4A3581765 /* TrailEffects in Frameworks */ = {isa = PBXBuildFile; productRef = 1369EBDA6461B2C6AA77F663 /* TrailEffects */; };
+		79EDF14B3011537B83A33C5A /* IntegrationExamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F77675DA0A96699A297818 /* IntegrationExamples.swift */; };
+		7AAF25CD89241A158D92A573 /* example-existing-swiftui-map.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9B00C22EE92A57B74D1BE293 /* example-existing-swiftui-map.txt */; };
+		9EB738B398B6222740B05A6C /* example-sequence.txt in Resources */ = {isa = PBXBuildFile; fileRef = A686114511A31A2B5450C3DB /* example-sequence.txt */; };
 		CAC1467DCB886B3028C8E8C9 /* TrailUI in Frameworks */ = {isa = PBXBuildFile; productRef = 298F92BCC1CFEDDBBBEEA9E6 /* TrailUI */; };
 		DBA2915ED4E4804F92BF3453 /* TrailMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 39D4F25FFFE99EA87F19E6C0 /* TrailMapKit */; };
 		E479C823494B2F1690E1FECF /* TrailSamplePlugin in Frameworks */ = {isa = PBXBuildFile; productRef = 3796C7EF07562E47D5EB44C1 /* TrailSamplePlugin */; };
+		F5D40E62CCE73E5AD77B4C1F /* example-basic.txt in Resources */ = {isa = PBXBuildFile; fileRef = 603EABA6C0B2042C565F4D7A /* example-basic.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,10 +38,21 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		342643551534168017302DAE /* example-plugin.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-plugin.txt"; sourceTree = "<group>"; };
 		4B3957B617D61C0CE5F0E065 /* TrailPlaygroundUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TrailPlaygroundUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B5E2C3B0F2219600920BCA1 /* swift */ = {isa = PBXFileReference; lastKnownFileType = folder; name = swift; path = ../swift; sourceTree = SOURCE_ROOT; };
+		4BD08075E9DEDFB8C659935D /* example-playback.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-playback.txt"; sourceTree = "<group>"; };
 		4F6A9A7DF6C1F88ECC97FDF2 /* TrailPlayground.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TrailPlayground.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		603EABA6C0B2042C565F4D7A /* example-basic.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-basic.txt"; sourceTree = "<group>"; };
+		65256349DE236FD7C8BD726E /* example-layers.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-layers.txt"; sourceTree = "<group>"; };
+		66F016EC6E5C81A2019C2605 /* example-runtime-color.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-runtime-color.txt"; sourceTree = "<group>"; };
 		79B4B42B4BD84936CD111CD3 /* TrailPlaygroundApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailPlaygroundApp.swift; sourceTree = "<group>"; };
+		7C7D6DC5F20B63915D9ED4EB /* example-existing-mkmapview.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-existing-mkmapview.txt"; sourceTree = "<group>"; };
+		825987E3DF6F107ABDEDB00F /* ExamplesBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamplesBrowser.swift; sourceTree = "<group>"; };
+		96F77675DA0A96699A297818 /* IntegrationExamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationExamples.swift; sourceTree = "<group>"; };
+		9B00C22EE92A57B74D1BE293 /* example-existing-swiftui-map.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-existing-swiftui-map.txt"; sourceTree = "<group>"; };
+		A686114511A31A2B5450C3DB /* example-sequence.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-sequence.txt"; sourceTree = "<group>"; };
+		C2CF29F89164AA82AFA5203C /* example-mapkit.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-mapkit.txt"; sourceTree = "<group>"; };
 		CCE448F6C04130D21FE408C3 /* PlaygroundTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaygroundTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -77,6 +99,22 @@
 			);
 			sourceTree = "<group>";
 		};
+		702481D43282C50517A04AB2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				603EABA6C0B2042C565F4D7A /* example-basic.txt */,
+				7C7D6DC5F20B63915D9ED4EB /* example-existing-mkmapview.txt */,
+				9B00C22EE92A57B74D1BE293 /* example-existing-swiftui-map.txt */,
+				65256349DE236FD7C8BD726E /* example-layers.txt */,
+				C2CF29F89164AA82AFA5203C /* example-mapkit.txt */,
+				4BD08075E9DEDFB8C659935D /* example-playback.txt */,
+				342643551534168017302DAE /* example-plugin.txt */,
+				66F016EC6E5C81A2019C2605 /* example-runtime-color.txt */,
+				A686114511A31A2B5450C3DB /* example-sequence.txt */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		A1A06F3248DE1CBB7987E5F8 /* TrailPlaygroundUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -88,7 +126,10 @@
 		A42F84D53616F7EA62AF91F9 /* TrailPlayground */ = {
 			isa = PBXGroup;
 			children = (
+				825987E3DF6F107ABDEDB00F /* ExamplesBrowser.swift */,
+				96F77675DA0A96699A297818 /* IntegrationExamples.swift */,
 				79B4B42B4BD84936CD111CD3 /* TrailPlaygroundApp.swift */,
+				702481D43282C50517A04AB2 /* Resources */,
 			);
 			path = TrailPlayground;
 			sourceTree = "<group>";
@@ -119,6 +160,7 @@
 			buildConfigurationList = CFEBE4165C9A7E3992A980FE /* Build configuration list for PBXNativeTarget "TrailPlayground" */;
 			buildPhases = (
 				61106890644BDFA0E9CB5D85 /* Sources */,
+				2335C14C7ABEF9EB88FAFA16 /* Resources */,
 				290DEE4BEF236516606EF787 /* Frameworks */,
 			);
 			buildRules = (
@@ -180,11 +222,32 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		2335C14C7ABEF9EB88FAFA16 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F5D40E62CCE73E5AD77B4C1F /* example-basic.txt in Resources */,
+				368A10345A032366DAE6D2E8 /* example-existing-mkmapview.txt in Resources */,
+				7AAF25CD89241A158D92A573 /* example-existing-swiftui-map.txt in Resources */,
+				5124FD8F23CC18C06DD1A325 /* example-layers.txt in Resources */,
+				3EB693CD867A48C8DFF155CC /* example-mapkit.txt in Resources */,
+				3489A207E755FD6A095B07B1 /* example-playback.txt in Resources */,
+				048E7E193D6158951AE4BFEF /* example-plugin.txt in Resources */,
+				1881B41C38701AE79924BACA /* example-runtime-color.txt in Resources */,
+				9EB738B398B6222740B05A6C /* example-sequence.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		61106890644BDFA0E9CB5D85 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				644B50E5A54C620DAD33D992 /* ExamplesBrowser.swift in Sources */,
+				79EDF14B3011537B83A33C5A /* IntegrationExamples.swift in Sources */,
 				4A03EA6CBD72027404FD29B2 /* TrailPlaygroundApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

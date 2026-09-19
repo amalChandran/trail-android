@@ -34,12 +34,20 @@ import kotlinx.coroutines.flow.collectLatest
     fun replay() { player.replay(); changed() }
     fun seek(progress: Double) { player.seek(progress); changed() }
     internal fun changed() { tick++ }
+    internal fun configure(effect: TrailEffect) {
+        if (player.effect === effect) return
+        val previousStatus = player.status
+        player.configure(effect)
+        // Inline DSL construction may produce a new value on recomposition. Only notify a
+        // changed playback state, avoiding an effect-construction/recomposition feedback loop.
+        if (player.status != previousStatus) changed()
+    }
 }
 
 /** Reuse one controller for one visible binding. Configuration updates preserve normalized time. */
 @Composable fun rememberTrailPlayback(effect: TrailEffect, routeKey: Any? = Unit, autoPlay: Boolean = true): TrailPlayback {
     val playback = remember(routeKey) { TrailPlayback(effect, autoPlay) }
-    SideEffect { if (playback.player.effect !== effect) playback.player.configure(effect) }
+    SideEffect { playback.configure(effect) }
     return playback
 }
 
@@ -65,6 +73,7 @@ import kotlinx.coroutines.flow.collectLatest
     reducedMotion: Boolean = rememberSystemReducedMotion(),
     active: Boolean = true,
 ) {
+    SideEffect { playback.configure(effect) }
     var size by remember { mutableStateOf(IntSize.Zero) }
     var visible by remember { mutableStateOf(false) }
     val hostView = LocalView.current
@@ -73,8 +82,9 @@ import kotlinx.coroutines.flow.collectLatest
         TrailRenderer(if (fit) path.fitted(size.width / density.toDouble(), size.height / density.toDouble(), 24.0) else path)
     }
     val owner = LocalLifecycleOwner.current
-    LaunchedEffect(playback, owner, reducedMotion, active, size, visible) {
-        if (!active || !visible || reducedMotion || size.width == 0 || size.height == 0) return@LaunchedEffect
+    val drawable = renderer.path.length > 0
+    LaunchedEffect(playback, owner, reducedMotion, active, size, visible, drawable) {
+        if (!drawable || !active || !visible || reducedMotion || size.width == 0 || size.height == 0) return@LaunchedEffect
         owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             snapshotFlow { playback.isPlaying }.collectLatest { playing ->
                 if (playing) {

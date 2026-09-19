@@ -2,7 +2,7 @@
 
 Local alpha prototype for the Kotlin / Swift relaunch of [trail-android](https://github.com/amalChandran/trail-android). The original Java project is preserved in [`legacy/android`](legacy/android/README.md). Work is on branch `trail-2-native`; nothing has been published.
 
-**Public API selection is open.** The prototype uses a Kotlin DSL and Swift result builder. See [three API choices with examples](docs/API_CHOICES.md) before choosing the final integration syntax. Fluent and generated annotation/macro APIs in that document are proposals.
+**Selected API: typed Kotlin DSL / Swift result builder with named presets.** Read the [API guide](docs/API_GUIDE.md), or start from the compiler-checked [Android](docs/examples/Android.md) and [iOS](docs/examples/iOS.md) integration examples. [Decision record](docs/API_CHOICES.md).
 
 ## Run the playgrounds
 
@@ -27,6 +27,7 @@ The Canvas playground works offline with no credentials. Google Maps is enabled 
 4. Enable **Reduced motion**. System Reduce Motion / disabled Android animations are also respected.
 5. On iOS enable **MapKit preview**, then pan and zoom. Android's equivalent requires a Maps key.
 6. Background and return to the app. Playback holds while inactive.
+7. Open **API examples**. Try named presets, runtime color, custom plugins, playback controls, sequences, layers, and native adapters. The visible code is extracted from the same source files the apps compile.
 
 Eight styles: solid, cased, dashed, dotted, along-route gradient, layered glow, chevrons, tapered. Twelve motion presets: reveal, erase, ping pong, comet, multi-comet, dash flow, pulse, breathe, spotlight, segment chase, reveal + flow, draw + erase. Dash flow is visually meaningful on dashed, dotted, and chevron styles.
 
@@ -54,15 +55,15 @@ import dev.trail.compose.TrailCanvas
 import kotlin.time.Duration.Companion.seconds
 
 // Keep immutable geometry and reusable effects outside per-frame work.
-val delivery = trailEffect {
+val deliveryTrail = trailEffect {
     stroke(TrailColor.Blue, width = 6.0)
     reveal(duration = 2.seconds)
 }
 // Inside Compose:
-TrailCanvas(path, effect = delivery)
+TrailCanvas(path, effect = deliveryTrail)
 ```
 
-For an existing Google Maps Compose map, place `GoogleMapsTrailOverlay(route, cameraPositionState, effect = delivery)` above `GoogleMap` in a `Box`, with identical bounds. Keep map controls and attribution unobscured. Route ID/revision controls replacement; SDK projection accounts for camera bearing and tilt. This surface draws over map content and cannot interleave with native map labels.
+For an existing Google Maps Compose map, place `GoogleMapsTrailOverlay(route, cameraPositionState, effect = deliveryTrail)` above `GoogleMap` in a `Box`, with identical bounds. Keep map controls and attribution unobscured. Route ID/revision controls replacement; projection comes from the map SDK. This surface draws over map content and cannot interleave with native map labels.
 
 ### Small Swift integration
 
@@ -70,33 +71,31 @@ For an existing Google Maps Compose map, place `GoogleMapsTrailOverlay(route, ca
 import TrailCore
 import TrailUI
 
-let delivery = TrailEffect {
+let deliveryTrail = TrailEffect {
     Stroke(.blue, width: 6)
     Reveal(duration: .seconds(2))
 }
 // Inside a SwiftUI View:
-TrailCanvas(path: path, effect: delivery)
+TrailCanvas(path: path, effect: deliveryTrail)
 ```
 
-Add the local `swift` directory as a Swift package in Xcode and select only the products your app needs. `TrailMap(route:playback:)` is the MapKit convenience host. `TrailMapOverlay(route:map:cameraRevision:playback:)` attaches to an existing SwiftUI `MapReader`/`Map`; increment `cameraRevision` in `onMapCameraChange(frequency: .continuous)`. `TrailMapAttachment` attaches to an existing `MKMapView` without replacing its delegate: forward camera/layout changes to `updateProjection()` and call `detach()` on teardown.
+Add the local `swift` directory as a Swift package in Xcode and select only the products your app needs. `TrailMap(route:effect:)` is the MapKit convenience host. `TrailMapOverlay(route:map:cameraRevision:effect:)` attaches to an existing SwiftUI `MapReader`/`Map`; increment `cameraRevision` in `onMapCameraChange(frequency: .continuous)`. Both offer controller overloads. `TrailMapAttachment` attaches to an existing `MKMapView` without replacing its delegate: forward camera/layout changes to `updateProjection()` and call `detach()` on teardown.
 
 ## Verify
 
 ```sh
 ./scripts/check.sh
-# Android UI flow, after selecting an emulator:
-cd android
-./gradlew :playground:connectedDebugAndroidTest -Pandroid.injected.device.serial=emulator-5554
-# Swift core + catalog:
-cd ../swift
-swift test --enable-code-coverage
+# Android UI flows, after starting an emulator:
+./scripts/test-android-ui.sh
+# Verify documentation and in-app code panels match compiled sources:
+python3 scripts/sync-examples.py --check
 ```
 
-In Xcode use Product > Test for the iOS playground UI flow. Core tests cover geometry, degenerate inputs, validation, pause/resume, exact loop and seek boundaries, effect replacement, reduced motion, DSL rules, public consumer plugins, and deterministic sampling across all 96 style/motion combinations. UI tests exercise actual controls. See [verification notes](docs/VERIFICATION.md) for what has actually been run.
+In Xcode use Product > Test for the iOS playground UI flows. Core tests cover geometry, degenerate inputs, validation, pause/resume, exact loop and seek boundaries, effect replacement, sequences, independent bindings, reduced motion, DSL errors, public consumer plugins, and deterministic sampling across all 96 style/motion combinations. UI tests exercise actual controls and integration examples. See [verification notes](docs/VERIFICATION.md) for what has actually been run. Regenerate example documentation after editing source with `python3 scripts/sync-examples.py`.
 
 ## Alpha boundaries
 
-This is a working foundation for testing the integration flow, not a production-release claim. Final API selection, annotation/macro tooling, general timeline composition, prepared GPU resource sessions, geodesic/antimeridian route handling, raster goldens, device performance profiling, incremental application-size reports, publishing credentials, and ABI release gates remain work before a stable relaunch. Antimeridian-crossing map routes are explicitly unsupported in this alpha; split them into supported bindings first. Large-route simplification and expensive gradient/comet combinations need profiling. Swift plugin configuration errors are precondition failures; externally supplied geographic coordinates use throwing validation.
+This is a working foundation for testing the approved integration API, not a production-release claim. [The relaunch plan](docs/DESIGN.md) lists consumer testing, geographic/map hardening, raster goldens, device profiling, application-size measurements and compatibility/publishing gates. Antimeridian-crossing map routes are explicitly unsupported; split them into supported bindings first. Large-route simplification and expensive gradient/comet combinations need profiling. Swift offers recoverable structural builder validation; numeric/plugin programmer errors still use preconditions. External geographic input uses throwing validation. Annotation/macro tooling is deferred and is not required for adoption or release.
 
 Build pins: Kotlin 2.3.20, AGP 8.13.2, Gradle 8.13, Compose BOM 2026.03.00; Swift tools 6.0, iOS 17+. These are working compatibility pins, not a claim that every dependency is the newest available release. Google Maps and Material are excluded from the lean core/Canvas products.
 

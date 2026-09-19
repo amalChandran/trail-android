@@ -54,4 +54,40 @@ object TrailAnimations {
     fun erase(duration: Duration = 2.seconds, repeat: Boolean = false) = custom(TrailAnimation {
         TrailVisualState(listOf(TrailWindow(it.progress, 1.0)))
     }, duration, repeat, TrailVisualState.Hidden)
+
+    /** Finite steps play in order. Repeat belongs to the whole sequence, never an inner step. */
+    fun sequence(clips: List<TrailAnimationSpec>, repeat: Boolean = false): TrailAnimationSpec {
+        require(clips.isNotEmpty() && clips.size <= 64) { "A sequence needs 1–64 animation steps" }
+        require(clips.none { it.repeat }) { "A sequence step cannot repeat. Set repeat = true on sequence { } instead." }
+        val steps = clips.toList()
+        val duration = steps.fold(Duration.ZERO) { total, clip -> total + clip.duration }
+        require(duration.isFinite()) { "The total sequence duration must be finite" }
+        val totalSeconds = duration.toDouble(kotlin.time.DurationUnit.SECONDS)
+        val sampler = TrailAnimation { time ->
+            if (time.progress == 1.0) {
+                val last = steps.last()
+                last.sampler.sample(TrailTime(1.0, time.cycle, last.durationSeconds))
+            } else {
+                val position = time.progress * totalSeconds
+                var start = 0.0
+                val index = steps.indexOfFirst { step ->
+                    if (position < start + step.durationSeconds) true else { start += step.durationSeconds; false }
+                }
+                // Floating-point sums may round to the final endpoint.
+                val step = steps.getOrElse(index) { steps.last() }
+                val local = if (index < 0) step.durationSeconds else (position - start).coerceIn(0.0, step.durationSeconds)
+                step.sampler.sample(TrailTime(local / step.durationSeconds, time.cycle, local))
+            }
+        }
+        return custom(sampler, duration, repeat, steps.last().reducedMotion)
+    }
+}
+
+/** Explicit ordered animation steps. No implicit chaining inside the effect scope. */
+@TrailDsl class TrailSequenceScope internal constructor() {
+    private val clips = ArrayList<TrailAnimationSpec>()
+    fun animation(spec: TrailAnimationSpec) { clips.add(spec) }
+    fun reveal(duration: Duration = 2.seconds) = animation(TrailAnimations.reveal(duration))
+    fun erase(duration: Duration = 2.seconds) = animation(TrailAnimations.erase(duration))
+    internal fun build(repeat: Boolean) = TrailAnimations.sequence(clips, repeat)
 }

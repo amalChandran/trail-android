@@ -32,7 +32,8 @@ enum class TrailMotionPreset(val label: String) {
     DashFlow("Dash flow"), Pulse("Pulse"), Breathe("Breathe"), Spotlight("Spotlight"),
     SegmentedChase("Segment chase"), RevealThenFlow("Reveal + flow"), DrawAndErase("Draw + erase");
 
-    fun effect(style: TrailLineStyle = TrailStyles.solid(), duration: Duration = 3.seconds, repeat: Boolean = true): TrailEffect {
+    /** Sampler for use inside animation(...). Spotlight's static base belongs in a separate layer. */
+    fun animation(duration: Duration = 3.seconds, repeat: Boolean = true): TrailAnimationSpec {
         val sampler = TrailAnimation { time ->
             val p = time.progress
             when (this) {
@@ -52,11 +53,16 @@ enum class TrailMotionPreset(val label: String) {
                 DrawAndErase -> if (p < 0.5) TrailVisualState.reveal(p * 2) else TrailVisualState(listOf(TrailWindow((p - 0.5) * 2, 1.0)))
             }
         }
-        val animation = TrailAnimations.custom(sampler, duration, repeat, if (this == Erase || this == DrawAndErase) TrailVisualState.Hidden else TrailVisualState.Full)
-        return if (this == Spotlight) TrailEffect(listOf(
-            TrailLayer(TrailLineStyle { it.stroke(TrailColor(0xFF344D5B.toInt()), 6.0) }),
-            TrailLayer(style, animation),
-        )) else TrailEffect(style, animation)
+        return TrailAnimations.custom(sampler, duration, repeat, if (this == Erase || this == DrawAndErase) TrailVisualState.Hidden else TrailVisualState.Full)
+    }
+    fun effect(style: TrailLineStyle = TrailStyles.solid(), duration: Duration = 3.seconds, repeat: Boolean = true): TrailEffect {
+        val spec = animation(duration, repeat)
+        return trailEffect {
+            if (this@TrailMotionPreset == Spotlight) {
+                layer { stroke(TrailColor(0xFF344D5B.toInt()), 6.0) }
+                layer { style(style); animation(spec) }
+            } else { style(style); animation(spec) }
+        }
     }
 }
 

@@ -66,4 +66,29 @@ public enum TrailAnimations {
     public static func erase(duration: Duration = .seconds(2), repeats: Bool = false) -> TrailAnimationSpec {
         custom(TrailSampler { TrailVisualState(windows: [TrailWindow($0.progress, 1)]) }, duration: duration, repeats: repeats, reducedMotion: .hidden)
     }
+
+    /// Finite steps play in order; looping applies to the entire sequence.
+    public static func sequence(_ clips: [TrailAnimationSpec], repeats: Bool = false) throws -> TrailAnimationSpec {
+        guard (1...64).contains(clips.count) else { throw TrailConfigurationError.sequenceCount }
+        guard clips.allSatisfy({ !$0.repeats }) else { throw TrailConfigurationError.repeatingSequenceStep }
+        let total = clips.reduce(0.0) { $0 + $1.durationSeconds }
+        guard total.isFinite && total < Double(Int64.max / 2) else { throw TrailConfigurationError.sequenceDuration }
+        let sampler = TrailSampler { time in
+            if time.progress == 1, let last = clips.last {
+                return last.sampler.sample(at: TrailTime(progress: 1, cycle: time.cycle, elapsedSeconds: last.durationSeconds))
+            }
+            let position = time.progress * total
+            var start = 0.0
+            for clip in clips {
+                if position < start + clip.durationSeconds {
+                    let local = min(clip.durationSeconds, max(0, position - start))
+                    return clip.sampler.sample(at: TrailTime(progress: local / clip.durationSeconds, cycle: time.cycle, elapsedSeconds: local))
+                }
+                start += clip.durationSeconds
+            }
+            let last = clips[clips.count - 1]
+            return last.sampler.sample(at: TrailTime(progress: 1, cycle: time.cycle, elapsedSeconds: last.durationSeconds))
+        }
+        return custom(sampler, duration: .seconds(total), repeats: repeats, reducedMotion: clips[clips.count - 1].reducedMotion)
+    }
 }

@@ -1,0 +1,15 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+let highlightedRoute = TrailEffect {
+    Layer { Stroke(.white, width: 10) }
+    Layer {
+        Stroke(.blue, width: 6)
+        Reveal(duration: .seconds(2))
+    }
+}
+
+struct LayersExample: View {
+    var body: some View {
+        TrailCanvas(path: ExampleGeometry.path, effect: highlightedRoute)
+    }
+}

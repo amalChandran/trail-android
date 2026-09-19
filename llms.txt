@@ -1,0 +1,19 @@
+# Trail 2
+
+Native Kotlin and Swift route-animation alpha. The canonical integration API is
+typed Kotlin trailEffect { } and Swift TrailEffect { }, with named effect values.
+
+- Read docs/API_GUIDE.md for implemented syntax, ownership and composition rules.
+- Copy verified examples from docs/examples/Android.md or docs/examples/iOS.md.
+- Source of truth: android/playground/src/main/kotlin/dev/trail/playground/examples/IntegrationExamples.kt
+  and ios/TrailPlayground/IntegrationExamples.swift. They compile with the apps.
+- Run python3 scripts/sync-examples.py after changing example regions; --check
+  verifies that documentation and app source panels match the compiled files.
+- Plugins implement public TrailLineStyle / TrailAnimation, depend on TrailCore,
+  and require no registry, reflection, annotations or macros.
+- Share effects; give each visible binding its own playback controller.
+- Repeated declarations are invalid. Use explicit sequence or layer blocks.
+- Fluent/generated APIs in docs/archive are unimplemented historical proposals.
+- No Maven or remote Swift package release has been published for this alpha.
+- Tests and limits: docs/VERIFICATION.md. Relaunch gates: docs/DESIGN.md.
+- Legacy Java code is preserved under legacy/android; it is not the new API.

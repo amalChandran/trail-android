@@ -1,0 +1,15 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+let revealThenErase = TrailEffect {
+    Stroke(.mint, width: 6)
+    Sequence {
+        Reveal(duration: .seconds(2))
+        Erase(duration: .seconds(1))
+    }
+}
+
+struct SequenceExample: View {
+    var body: some View {
+        TrailCanvas(path: ExampleGeometry.path, effect: revealThenErase)
+    }
+}

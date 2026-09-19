@@ -1,0 +1,20 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+val deliveryTrail = trailEffect {
+    stroke(TrailColor.Blue, width = 6.0)
+    reveal(duration = 2.seconds)
+}
+
+@Composable fun PlaybackExample() {
+    val playback = rememberTrailPlayback(deliveryTrail)
+    Column {
+        TrailCanvas(examplePath, Modifier.weight(1f).fillMaxWidth(), deliveryTrail, playback)
+        Slider(playback.progress.toFloat(), onValueChange = { playback.seek(it.toDouble()) }, modifier = Modifier.testTag("exampleProgress"))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { if (playback.isPlaying) playback.pause() else playback.play() }, modifier = Modifier.testTag("examplePlayPause")) {
+                Text(if (playback.isPlaying) "Pause" else "Play")
+            }
+            OutlinedButton(onClick = playback::replay, modifier = Modifier.testTag("exampleReplay")) { Text("Replay") }
+        }
+    }
+}

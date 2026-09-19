@@ -25,6 +25,7 @@ import dev.trail.core.*
 import dev.trail.effects.*
 import dev.trail.googlemaps.GoogleMapsTrailOverlay
 import dev.trail.plugin.*
+import dev.trail.playground.examples.ExamplesScreen
 import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : ComponentActivity() {
@@ -45,6 +46,11 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
 ))
 
 @Composable fun TrailStudio() {
+    var showExamples by remember { mutableStateOf(false) }
+    if (showExamples) {
+        ExamplesScreen(BuildConfig.HAS_MAPS_KEY, onBack = { showExamples = false })
+        return
+    }
     var style by remember { mutableStateOf(TrailStylePreset.Cased) }
     var motion by remember { mutableStateOf(TrailMotionPreset.Reveal) }
     var duration by remember { mutableFloatStateOf(3f) }
@@ -68,6 +74,7 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
             }
             Text("A little motion.\nA clear direction.", fontSize = 26.sp, fontWeight = FontWeight.Medium, lineHeight = 31.sp)
             Text("Native Kotlin · public plugins · live preview", color = Color(0xFF93A9B4), fontSize = 12.sp)
+            TextButton(onClick = { showExamples = true }, modifier = Modifier.testTag("openExamples")) { Text("API examples →") }
             Surface(shape = RoundedCornerShape(22.dp), color = Surface) {
                 Box(Modifier.fillMaxWidth().height(235.dp).testTag("preview")) {
                     if (showMap && BuildConfig.HAS_MAPS_KEY) {
@@ -116,13 +123,23 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
             Surface(shape = RoundedCornerShape(16.dp), color = Surface) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("MAKE IT YOURS", color = Mint, fontSize = 10.sp, letterSpacing = 2.sp)
-                    Text(if (plugin) "trailEffect {\n    metro()\n}" else "TrailCanvas(path, effect =\n    TrailMotionPreset.${motion.name}.effect(\n        TrailStylePreset.${style.name}.style()\n    )\n)", fontSize = 12.sp, lineHeight = 19.sp, fontFamily = FontFamily.Monospace)
+                    Text(effectSource(style, motion, duration, repeat, plugin), fontSize = 12.sp, lineHeight = 19.sp, fontFamily = FontFamily.Monospace)
                 }
             }
             Text("Built for your next route.  /  alpha 01", color = Color(0xFF698591), fontSize = 11.sp)
         }
         }
     }
+}
+
+private fun effectSource(style: TrailStylePreset, motion: TrailMotionPreset, duration: Float, repeat: Boolean, plugin: Boolean): String {
+    val stroke = if (plugin) "style(MetroStyle())" else "style(TrailStylePreset.${style.name}.style())"
+    val animation = if (plugin) "animation(TrailAnimations.custom(QuadraticReveal(), ${duration}.seconds, repeat = $repeat))"
+        else "animation(TrailMotionPreset.${motion.name}.animation(${duration}.seconds, repeat = $repeat))"
+    val body = if (!plugin && motion == TrailMotionPreset.Spotlight)
+        "    layer { stroke(TrailColor(0xFF344D5B.toInt()), 6.0) }\n    layer {\n        $stroke\n        $animation\n    }"
+        else "    $stroke\n    $animation"
+    return "val effect = trailEffect {\n$body\n}\nTrailCanvas(path, effect = effect)"
 }
 
 @Composable private fun Toggle(title: String, value: Boolean, change: (Boolean) -> Unit) {

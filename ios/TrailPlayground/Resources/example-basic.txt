@@ -1,0 +1,12 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+let deliveryTrail = TrailEffect {
+    Stroke(.blue, width: 6)
+    Reveal(duration: .seconds(2))
+}
+
+struct BasicRouteExample: View {
+    var body: some View {
+        TrailCanvas(path: ExampleGeometry.path, effect: deliveryTrail)
+    }
+}

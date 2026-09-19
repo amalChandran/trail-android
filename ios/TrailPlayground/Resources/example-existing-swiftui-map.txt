@@ -1,0 +1,26 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+let deliveryTrail = TrailEffect {
+    Stroke(.blue, width: 6)
+    Reveal(duration: .seconds(2))
+}
+
+struct ExistingSwiftUIMapExample: View {
+    @State private var cameraRevision = 0
+    private let region = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 37.783, longitude: -122.417),
+        span: MKCoordinateSpan(latitudeDelta: 0.015, longitudeDelta: 0.015)
+    )
+    var body: some View {
+        MapReader { map in
+            Map(initialPosition: .region(region))
+                .onMapCameraChange(frequency: .continuous) { _ in cameraRevision &+= 1 }
+                .overlay {
+                    TrailMapOverlay(
+                        route: ExampleGeometry.route, map: map, cameraRevision: cameraRevision,
+                        effect: deliveryTrail
+                    )
+                }
+        }
+    }
+}

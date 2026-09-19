@@ -71,8 +71,8 @@ class TrailEffect(layers: List<TrailLayer>) {
     val layers: List<TrailLayer> = java.util.Collections.unmodifiableList(layers.toList())
     init { require(layers.isNotEmpty() && layers.size <= 16) { "An effect needs 1–16 layers" } }
     constructor(style: TrailLineStyle = TrailStyles.solid(), animation: TrailAnimationSpec? = null) : this(listOf(TrailLayer(style, animation)))
-    val durationSeconds: Double get() = layers.maxOf { it.animation?.durationSeconds ?: 0.0 }
-    val repeats: Boolean get() = layers.any { it.animation?.repeat == true }
+    val durationSeconds: Double = this.layers.maxOf { it.animation?.durationSeconds ?: 0.0 }
+    val repeats: Boolean = this.layers.any { it.animation?.repeat == true }
     fun sample(layer: Int, elapsed: Double, reducedMotion: Boolean = false): TrailVisualState {
         require(elapsed.isFinite() && elapsed >= 0)
         val spec = layers[layer].animation ?: return TrailVisualState.Full
@@ -91,14 +91,32 @@ class TrailEffect(layers: List<TrailLayer>) {
     private var currentAnimation: TrailAnimationSpec? = null
     private var hasStyle = false; private var hasAnimation = false
     private val layers = ArrayList<TrailLayer>()
-    fun style(style: TrailLineStyle) { require(!hasStyle) { "Use layer { } for multiple styles" }; hasStyle = true; currentStyle = style }
+    fun style(style: TrailLineStyle) {
+        require(layers.isEmpty()) { MIXED_LAYERS }
+        require(!hasStyle) { "One style is allowed per layer. Put each style in its own layer { style(...) } block." }
+        hasStyle = true; currentStyle = style
+    }
     fun stroke(color: TrailColor = TrailColor.Blue, width: Double = 6.0) = style(TrailStyles.solid(color, width))
-    fun animation(spec: TrailAnimationSpec) { require(!hasAnimation) { "Use layer { } for independent animations" }; hasAnimation = true; currentAnimation = spec }
+    fun animation(spec: TrailAnimationSpec) {
+        require(layers.isEmpty()) { MIXED_LAYERS }
+        require(!hasAnimation) {
+            "One animation is allowed per layer. Use sequence { reveal(...); erase(...) } for ordered steps, or separate layer { } blocks for simultaneous animations."
+        }
+        hasAnimation = true; currentAnimation = spec
+    }
     fun reveal(duration: Duration = 2.seconds, repeat: Boolean = false) = animation(TrailAnimations.reveal(duration, repeat))
-    fun layer(block: TrailEffectScope.() -> Unit) { layers.addAll(TrailEffectScope().apply(block).build().layers) }
+    fun erase(duration: Duration = 2.seconds, repeat: Boolean = false) = animation(TrailAnimations.erase(duration, repeat))
+    fun sequence(repeat: Boolean = false, block: TrailSequenceScope.() -> Unit) = animation(TrailSequenceScope().apply(block).build(repeat))
+    fun layer(block: TrailEffectScope.() -> Unit) {
+        require(!hasStyle && !hasAnimation) { MIXED_LAYERS }
+        layers.addAll(TrailEffectScope().apply(block).build().layers)
+    }
     internal fun build(): TrailEffect {
         if (layers.isEmpty() || hasStyle || hasAnimation) layers.add(0, TrailLayer(currentStyle, currentAnimation))
         return TrailEffect(layers)
+    }
+    private companion object {
+        const val MIXED_LAYERS = "Do not mix top-level style/animation declarations with layer { }. Put every style and animation inside an explicit layer { } block."
     }
 }
 fun trailEffect(block: TrailEffectScope.() -> Unit): TrailEffect = TrailEffectScope().apply(block).build()

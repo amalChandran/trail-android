@@ -47,19 +47,20 @@ import TrailCore
         #endif
         GeometryReader { geometry in
             let measured = geometryCache.resolve(path, size: geometry.size, fit: fit)
+            let animating = active && phase == .active && !reduced && playback.isPlaying && measured.length > 0
             Canvas { context, _ in
                 context.withCGContext { cg in TrailRenderer.draw(path: measured, effect: player.effect, in: cg) { player.frame(layer: $0, reducedMotion: reduced) } }
             }
             .allowsHitTesting(false)
             #if canImport(UIKit)
-            .background(TrailDisplayDriver(playback: playback, active: active && visible && phase == .active && !reduced && playback.isPlaying))
+            .background(TrailDisplayDriver(playback: playback, active: animating && visible))
             .onGeometryChange(for: Bool.self) { proxy in
                 let frame = proxy.frame(in: .global)
                 return frame.width > 0 && frame.height > 0 && frame.intersects(screenBounds)
             } action: { visible = $0 }
             #else
-            .task(id: active && phase == .active && !reduced && playback.isPlaying) {
-                guard active && phase == .active && !reduced && playback.isPlaying else { return }
+            .task(id: animating) {
+                guard animating else { return }
                 let clock = ContinuousClock(); var previous = clock.now
                 while !Task.isCancelled && playback.isPlaying {
                     do { try await Task.sleep(for: .milliseconds(16)) } catch { return }

@@ -32,6 +32,7 @@ private let mapRoute = try! TrailRoute(id: "san-francisco", coordinates: [
     @State private var reduced = false
     @State private var plugin = false
     @State private var showMap = false
+    @State private var showExamples = false
     @State private var playback = TrailPlayback(effect: TrailMotionPreset.reveal.effect(style: TrailStylePreset.cased.style()))
     private var configuration: String { "\(style.rawValue)|\(motion.rawValue)|\(duration)|\(repeats)|\(plugin)" }
 
@@ -45,6 +46,7 @@ private let mapRoute = try! TrailRoute(id: "san-francisco", coordinates: [
                 }
                 Text("A little motion.\nA clear direction.").font(.system(size: 29, weight: .medium)).lineSpacing(1)
                 Text("Native Swift · public plugins · live preview").font(.system(size: 12)).foregroundStyle(muted)
+                Button("API examples →") { showExamples = true }.accessibilityIdentifier("openExamples")
                 preview
                 PlaybackControls(playback: playback)
                 HStack {
@@ -73,19 +75,30 @@ private let mapRoute = try! TrailRoute(id: "san-francisco", coordinates: [
                 }
                 VStack(alignment: .leading, spacing: 12) {
                     eyebrow("MAKE IT YOURS").foregroundStyle(mint)
-                    Text(plugin ? "TrailCanvas(path: path,\n    effect: .metro())" : "TrailCanvas(path: path) {\n    Stroke(.mint, width: 6)\n    Reveal(duration: .seconds(3))\n}")
+                    Text(effectSource)
                         .font(.system(size: 12, design: .monospaced)).lineSpacing(5).textSelection(.enabled)
                 }.frame(maxWidth: .infinity, alignment: .leading).padding(18).background(panel, in: RoundedRectangle(cornerRadius: 16))
                 Text("Built for your next route.  /  alpha 01").font(.system(size: 11)).foregroundStyle(muted)
             }.padding(24)
         }
         .background(ink).foregroundStyle(Color(red: 0.89, green: 0.94, blue: 0.95)).tint(mint).preferredColorScheme(.dark)
+        .sheet(isPresented: $showExamples) { ExamplesBrowser() }
         .onChange(of: configuration) { _, _ in
             let effect = plugin
-                ? TrailEffect(style: MetroStyle(), animation: TrailAnimations.custom(QuadraticReveal(), duration: .seconds(duration), repeats: repeats))
+                ? TrailEffect { Style(MetroStyle()); Animate(TrailAnimations.custom(QuadraticReveal(), duration: .seconds(duration), repeats: repeats)) }
                 : motion.effect(style: style.style(), duration: .seconds(duration), repeats: repeats)
             playback.configure(effect, reset: true)
         }
+    }
+
+    private var effectSource: String {
+        let stroke = plugin ? "Style(MetroStyle())" : "Style(TrailStylePreset.\(String(describing: style)).style())"
+        let animation = plugin ? "Animate(TrailAnimations.custom(QuadraticReveal(), duration: .seconds(\(duration)), repeats: \(repeats)))"
+            : "Animate(TrailMotionPreset.\(String(describing: motion)).animation(duration: .seconds(\(duration)), repeats: \(repeats)))"
+        let body = !plugin && motion == .spotlight
+            ? "    Layer { Stroke(TrailColor(0xFF344D5B), width: 6) }\n    Layer {\n        \(stroke)\n        \(animation)\n    }"
+            : "    \(stroke)\n    \(animation)"
+        return "let effect = TrailEffect {\n\(body)\n}\nTrailCanvas(path: path, effect: effect)"
     }
 
     private var preview: some View {

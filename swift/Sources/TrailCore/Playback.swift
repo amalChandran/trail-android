@@ -7,8 +7,9 @@ public struct TrailPlayer: Sendable {
     public private(set) var elapsedSeconds = 0.0
     public private(set) var status: TrailPlaybackStatus
     private var seekEndpoint = false
+    private var playRequested: Bool
     public init(effect: TrailEffect = TrailEffect(), autoPlay: Bool = true) {
-        self.effect = effect; self.status = autoPlay && effect.durationSeconds > 0 ? .playing : .paused
+        self.effect = effect; self.playRequested = autoPlay; self.status = autoPlay && effect.durationSeconds > 0 ? .playing : .paused
     }
     public var progress: Double {
         guard effect.durationSeconds > 0 else { return 1 }
@@ -16,12 +17,13 @@ public struct TrailPlayer: Sendable {
         return effect.repeats && !seekEndpoint ? cycles - floor(cycles) : min(1, max(0, cycles))
     }
     public mutating func play() {
+        playRequested = true
         guard effect.durationSeconds > 0 else { return }
         seekEndpoint = false; if status == .finished { elapsedSeconds = 0 }; status = .playing
     }
-    public mutating func pause() { if status == .playing { status = .paused } }
-    public mutating func replay() { elapsedSeconds = 0; seekEndpoint = false; status = effect.durationSeconds > 0 ? .playing : .paused }
-    public mutating func seek(to fraction: Double) { fractionCheck(fraction); seekEndpoint = fraction == 1; elapsedSeconds = fraction * effect.durationSeconds; status = .paused }
+    public mutating func pause() { playRequested = false; if status == .playing { status = .paused } }
+    public mutating func replay() { playRequested = true; elapsedSeconds = 0; seekEndpoint = false; status = effect.durationSeconds > 0 ? .playing : .paused }
+    public mutating func seek(to fraction: Double) { fractionCheck(fraction); playRequested = false; seekEndpoint = fraction == 1; elapsedSeconds = fraction * effect.durationSeconds; status = .paused }
     public mutating func advance(by seconds: Double) {
         precondition(seconds.isFinite && seconds >= 0)
         guard status == .playing else { return }
@@ -30,11 +32,13 @@ public struct TrailPlayer: Sendable {
         if !effect.repeats && elapsedSeconds >= effect.durationSeconds { status = .finished }
     }
     public mutating func configure(_ effect: TrailEffect, reset: Bool = false) {
-        let normalized = self.effect.durationSeconds == 0 ? 0 : elapsedSeconds / self.effect.durationSeconds
+        let normalized = self.effect.durationSeconds == 0 ? 0 : progress
         self.effect = effect
-        if reset { seekEndpoint = false }
+        if reset { seekEndpoint = false; playRequested = true }
         elapsedSeconds = reset ? 0 : normalized * effect.durationSeconds
-        if effect.durationSeconds == 0 { status = .paused } else if reset { status = .playing }
+        if effect.durationSeconds == 0 || !playRequested { status = .paused }
+        else if !effect.repeats && elapsedSeconds >= effect.durationSeconds { status = .finished }
+        else { status = .playing }
     }
     public func frame(layer: Int, reducedMotion: Bool = false) -> TrailVisualState {
         if !reducedMotion, seekEndpoint, let spec = effect.layers[layer].animation, elapsedSeconds == spec.durationSeconds {

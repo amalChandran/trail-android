@@ -1,0 +1,35 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+let deliveryTrail = TrailEffect {
+    Stroke(.blue, width: 6)
+    Reveal(duration: .seconds(2))
+}
+
+#if canImport(UIKit)
+@MainActor final class ExistingMapController: UIViewController, MKMapViewDelegate {
+    private let map = MKMapView()
+    private let playback = TrailPlayback(effect: deliveryTrail)
+    private var attachment: TrailMapAttachment?
+
+    override func loadView() { view = map }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        map.delegate = self // Your screen continues to own its delegate.
+        map.setRegion(MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 37.783, longitude: -122.417),
+            span: MKCoordinateSpan(latitudeDelta: 0.015, longitudeDelta: 0.015)
+        ), animated: false)
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // This fixed route is supported; handle a thrown validation error for external routes.
+        attachment = try! TrailMapAttachment(mapView: map, parent: self, route: ExampleGeometry.route, playback: playback)
+    }
+    func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) { attachment?.updateProjection() }
+    override func viewDidLayoutSubviews() { super.viewDidLayoutSubviews(); attachment?.updateProjection() }
+    override func viewDidDisappear(_ animated: Bool) {
+        attachment?.detach(); attachment = nil
+        super.viewDidDisappear(animated)
+    }
+}
+#endif

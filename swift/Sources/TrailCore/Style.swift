@@ -67,12 +67,18 @@ public struct TrailLayer: Sendable {
 }
 
 public struct TrailEffect: Sendable {
-    public let id = UUID()
+    public let id: UUID
     public let layers: [TrailLayer]
+    public let durationSeconds: Double
+    public let repeats: Bool
     public init(style: any TrailLineStyle = TrailStyles.solid(), animation: TrailAnimationSpec? = nil) { self.init(layers: [TrailLayer(style: style, animation: animation)]) }
-    public init(layers: [TrailLayer]) { precondition((1...16).contains(layers.count)); self.layers = layers }
-    public var durationSeconds: Double { layers.map { $0.animation?.durationSeconds ?? 0 }.max() ?? 0 }
-    public var repeats: Bool { layers.contains { $0.animation?.repeats == true } }
+    public init(layers: [TrailLayer]) {
+        precondition((1...16).contains(layers.count))
+        self.id = UUID()
+        self.layers = layers
+        self.durationSeconds = layers.map { $0.animation?.durationSeconds ?? 0 }.max() ?? 0
+        self.repeats = layers.contains { $0.animation?.repeats == true }
+    }
     public func sample(layer: Int, elapsed: Double, reducedMotion: Bool = false) -> TrailVisualState {
         precondition(elapsed.isFinite && elapsed >= 0)
         guard let spec = layers[layer].animation else { return .full }
@@ -83,23 +89,54 @@ public struct TrailEffect: Sendable {
                                                 elapsedSeconds: spec.repeats ? progress * spec.durationSeconds : min(elapsed, spec.durationSeconds)))
     }
     public init(@TrailEffectBuilder _ content: () -> [TrailEffectPart]) {
+        do { self = try Self(parts: content()) }
+        catch { preconditionFailure(String(describing: error)) }
+    }
+    /// Use when structural DSL errors need recovery, such as a configurable preset editor.
+    public static func validating(@TrailEffectBuilder _ content: () -> [TrailEffectPart]) throws -> Self {
+        try Self(parts: content())
+    }
+    private init(parts: [TrailEffectPart]) throws {
         var style: any TrailLineStyle = TrailStyles.solid()
         var animation: TrailAnimationSpec?
         var layers: [TrailLayer] = []
         var hasStyle = false, hasAnimation = false
-        for part in content() {
+        for part in parts {
             switch part {
-            case .style(let value): precondition(!hasStyle, "Use Layer for multiple styles"); hasStyle = true; style = value
-            case .animation(let value): precondition(!hasAnimation, "Use Layer for independent animations"); hasAnimation = true; animation = value
+            case .style(let value):
+                guard !hasStyle else { throw TrailConfigurationError.duplicateStyle }
+                hasStyle = true; style = value
+            case .animation(let value):
+                guard !hasAnimation else { throw TrailConfigurationError.duplicateAnimation }
+                hasAnimation = true; animation = value
             case .layer(let value): layers.append(value)
+            case .group(let parts): layers.append(contentsOf: try Self(parts: parts).layers)
+            case .sequence(let parts, let repeats):
+                guard !hasAnimation else { throw TrailConfigurationError.duplicateAnimation }
+                hasAnimation = true; animation = try Self.sequence(parts, repeats: repeats)
             }
         }
-        if layers.isEmpty || hasStyle || hasAnimation { layers.insert(TrailLayer(style: style, animation: animation), at: 0) }
+        guard layers.isEmpty || (!hasStyle && !hasAnimation) else { throw TrailConfigurationError.mixedLayers }
+        if layers.isEmpty { layers.append(TrailLayer(style: style, animation: animation)) }
+        guard layers.count <= 16 else { throw TrailConfigurationError.layerCount }
         self.init(layers: layers)
+    }
+    private static func sequence(_ parts: [TrailEffectPart], repeats: Bool) throws -> TrailAnimationSpec {
+        let clips = try parts.map { part -> TrailAnimationSpec in
+            switch part {
+            case .animation(let spec): return spec
+            case .sequence(let nested, let loops): return try sequence(nested, repeats: loops)
+            default: throw TrailConfigurationError.nonAnimationSequenceStep
+            }
+        }
+        return try TrailAnimations.sequence(clips, repeats: repeats)
     }
 }
 
-public enum TrailEffectPart: Sendable { case style(any TrailLineStyle), animation(TrailAnimationSpec), layer(TrailLayer) }
+public enum TrailEffectPart: Sendable {
+    case style(any TrailLineStyle), animation(TrailAnimationSpec), layer(TrailLayer)
+    case group([TrailEffectPart]), sequence([TrailEffectPart], repeats: Bool)
+}
 @resultBuilder public enum TrailEffectBuilder {
     public static func buildExpression(_ part: TrailEffectPart) -> [TrailEffectPart] { [part] }
     public static func buildBlock(_ parts: [TrailEffectPart]...) -> [TrailEffectPart] { parts.flatMap { $0 } }
@@ -110,6 +147,9 @@ public enum TrailEffectPart: Sendable { case style(any TrailLineStyle), animatio
 }
 public func Stroke(_ color: TrailColor = .blue, width: Double = 6) -> TrailEffectPart { .style(TrailStyles.solid(color, width: width)) }
 public func Reveal(duration: Duration = .seconds(2), repeats: Bool = false) -> TrailEffectPart { .animation(TrailAnimations.reveal(duration: duration, repeats: repeats)) }
+public func Erase(duration: Duration = .seconds(2), repeats: Bool = false) -> TrailEffectPart { .animation(TrailAnimations.erase(duration: duration, repeats: repeats)) }
 public func Style(_ style: any TrailLineStyle) -> TrailEffectPart { .style(style) }
 public func Animate(_ spec: TrailAnimationSpec) -> TrailEffectPart { .animation(spec) }
 public func Layer(style: any TrailLineStyle, animation: TrailAnimationSpec? = nil) -> TrailEffectPart { .layer(TrailLayer(style: style, animation: animation)) }
+public func Layer(@TrailEffectBuilder _ content: () -> [TrailEffectPart]) -> TrailEffectPart { .group(content()) }
+public func Sequence(repeats: Bool = false, @TrailEffectBuilder _ content: () -> [TrailEffectPart]) -> TrailEffectPart { .sequence(content(), repeats: repeats) }

@@ -29,7 +29,8 @@ public enum TrailStylePreset: String, CaseIterable, Sendable {
 public enum TrailMotionPreset: String, CaseIterable, Sendable {
     case reveal = "Reveal", erase = "Erase", pingPong = "Ping pong", comet = "Comet", multiComet = "Multi comet", dashFlow = "Dash flow"
     case pulse = "Pulse", breathe = "Breathe", spotlight = "Spotlight", segmentedChase = "Segment chase", revealThenFlow = "Reveal + flow", drawAndErase = "Draw + erase"
-    public func effect(style: any TrailLineStyle = TrailStyles.solid(), duration: Duration = .seconds(3), repeats: Bool = true) -> TrailEffect {
+    /// Use in Animate(...). Spotlight's static base belongs in a separate layer.
+    public func animation(duration: Duration = .seconds(3), repeats: Bool = true) -> TrailAnimationSpec {
         let sampler = TrailSampler { time in
             let p = time.progress
             switch self {
@@ -47,9 +48,16 @@ public enum TrailMotionPreset: String, CaseIterable, Sendable {
             case .drawAndErase: return p < 0.5 ? .reveal(to: p * 2) : TrailVisualState(windows: [TrailWindow((p - 0.5) * 2, 1)])
             }
         }
-        let animation = TrailAnimations.custom(sampler, duration: duration, repeats: repeats, reducedMotion: self == .erase || self == .drawAndErase ? .hidden : .full)
-        if self == .spotlight { return TrailEffect(layers: [TrailLayer(style: TrailStyles.solid(TrailColor(0xFF344D5B))), TrailLayer(style: style, animation: animation)]) }
-        return TrailEffect(style: style, animation: animation)
+        return TrailAnimations.custom(sampler, duration: duration, repeats: repeats, reducedMotion: self == .erase || self == .drawAndErase ? .hidden : .full)
+    }
+    public func effect(style: any TrailLineStyle = TrailStyles.solid(), duration: Duration = .seconds(3), repeats: Bool = true) -> TrailEffect {
+        let spec = animation(duration: duration, repeats: repeats)
+        return TrailEffect {
+            if self == .spotlight {
+                Layer { Stroke(TrailColor(0xFF344D5B), width: 6) }
+                Layer { Style(style); Animate(spec) }
+            } else { Style(style); Animate(spec) }
+        }
     }
 }
 
