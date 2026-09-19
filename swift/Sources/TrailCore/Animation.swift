@@ -16,15 +16,19 @@ public struct TrailVisualState: Sendable, Equatable {
     public let widthScale: Double
     public let dashPhase: Double
     public let head: Double?
-    public init(windows: [TrailWindow] = [TrailWindow(0, 1)], opacity: Double = 1, widthScale: Double = 1, dashPhase: Double = 0, head: Double? = nil) {
+    public let headDirection: TrailDirection
+    public init(windows: [TrailWindow] = [TrailWindow(0, 1)], opacity: Double = 1, widthScale: Double = 1, dashPhase: Double = 0, head: Double? = nil, headDirection: TrailDirection = .forward) {
         precondition(windows.count <= 256); fractionCheck(opacity); fractionCheck(dashPhase)
         precondition(widthScale.isFinite && (0...16).contains(widthScale))
         if let head { fractionCheck(head) }
         self.windows = windows; self.opacity = opacity; self.widthScale = widthScale; self.dashPhase = dashPhase; self.head = head
+        self.headDirection = headDirection
     }
     public static let full = TrailVisualState()
     public static let hidden = TrailVisualState(windows: [])
-    public static func reveal(to fraction: Double) -> Self { Self(windows: [TrailWindow(0, fraction)], head: fraction) }
+    public static func reveal(to fraction: Double, direction: TrailDirection = .forward) -> Self {
+        Self(windows: [TrailWindow(0, fraction)], head: fraction, headDirection: direction)
+    }
 }
 
 public struct TrailTime: Sendable {

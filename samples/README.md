@@ -7,3 +7,5 @@
 - **Ferry:** 13 original, hand-authored waypoints from Circular Quay to Manly around Sydney Harbor headlands. Endpoint context: [Transport for NSW F1](https://transportnsw.info/routes/details/sydney-ferries/f1/090F1). This is an illustration, not an official operator sailing track, navigational chart or timetable. The waypoints are distributed under this repository's license.
 
 Map tiles, labels and imagery are supplied by the active provider under its own terms. The sample retains the native map attribution. Test fixtures contain no user location history or API credentials.
+
+`vehicles.json` contains original generic top-down vehicle artwork under this repository's license. It depicts no vehicle brand or operator. Regenerate it with `scripts/generate-vehicle-artwork.py`, then run `scripts/sync-fixtures.py`. Both apps consume the same vector paths; no downloaded artwork or additional image package is required. See [vehicle movement and customization](../docs/VEHICLES.md).

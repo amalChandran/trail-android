@@ -77,6 +77,14 @@ public struct TrailPathSlice: Sendable {
     public let distanceFromStart: Double
 }
 
+public enum TrailDirection: Sendable, Equatable { case forward, reverse }
+/// Radians clockwise from local +x. Up-facing artwork needs a +pi/2 drawing offset.
+public struct TrailPose: Sendable, Equatable {
+    public let point: TrailPoint
+    public let headingRadians: Double
+    public let contourIndex: Int
+}
+
 /// Immutable, measured local geometry. Logical units are points on Apple platforms.
 public struct TrailPath: Sendable, Equatable {
     public let identity = UUID()
@@ -120,6 +128,41 @@ public struct TrailPath: Sendable, Equatable {
         while end > 1 && distances[end] == distances[end-1] { end -= 1 }
         let start = end - 1
         return atan2(points[end].y - points[start].y, points[end].x - points[start].x)
+    }
+    /// Exact route position and a distance-smoothed heading, independent of clocks/sampling order.
+    /// The logical-unit heading window is clipped to the current contour. Zero uses its tangent.
+    /// Position never cuts corners or bridges gaps, including after seeking or camera changes.
+    public func pose(at fraction: Double, headingWindow: Double = 16,
+                     direction: TrailDirection = .forward) -> TrailPose? {
+        precondition(headingWindow.isFinite && headingWindow >= 0, "Heading window must be finite and nonnegative")
+        guard let point = point(at: fraction) else { return nil }
+        let distance = length * fraction
+        let anchor = length == 0 || fraction == 0 ? 0 : fraction == 1 ? points.count-1 : max(0, upperBound(distance)-1)
+        var low = 0, high = contours.count
+        while low < high { let mid = (low+high)/2; if contours[mid].lowerBound <= anchor { low = mid+1 } else { high = mid } }
+        let contour = max(0,low-1), range = contours[contour]
+        var heading = 0.0
+        if distances[range.upperBound] > distances[range.lowerBound] {
+            let before = pointInContour(max(distances[range.lowerBound],distance-headingWindow/2),range)
+            let after = pointInContour(min(distances[range.upperBound],distance+headingWindow/2),range)
+            var dx = after.x-before.x, dy = after.y-before.y
+            if hypot(dx,dy) < 1e-9 {
+                var end = max(range.lowerBound+1,min(range.upperBound,upperBound(distance)))
+                while end > range.lowerBound+1 && distances[end] == distances[end-1] { end -= 1 }
+                dx = points[end].x-points[end-1].x; dy = points[end].y-points[end-1].y
+            }
+            heading = atan2(dy,dx)
+        }
+        if direction == .reverse { heading += .pi }
+        return TrailPose(point: point,headingRadians: atan2(sin(heading),cos(heading)),contourIndex: contour)
+    }
+    private func pointInContour(_ distance: Double, _ range: ClosedRange<Int>) -> TrailPoint {
+        if distance <= distances[range.lowerBound] { return points[range.lowerBound] }
+        if distance >= distances[range.upperBound] { return points[range.upperBound] }
+        let end = max(range.lowerBound+1,min(range.upperBound,upperBound(distance)))
+        let t = (distance-distances[end-1])/(distances[end]-distances[end-1])
+        return TrailPoint(points[end-1].x+(points[end].x-points[end-1].x)*t,
+                          points[end-1].y+(points[end].y-points[end-1].y)*t)
     }
     public func slice(from start: Double, to end: Double) -> [TrailPoint] {
         precondition(breakBefore.isEmpty, "Use slices() for a path with disconnected contours")

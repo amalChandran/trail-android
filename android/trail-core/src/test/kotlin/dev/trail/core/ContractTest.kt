@@ -31,6 +31,21 @@ class ContractTest(private val case: ContractCase) {
 
     @Test fun contract() {
         when (case.family) {
+            "poses" -> {
+                val path=path(); val fraction=c["fraction"].asDouble
+                val direction=if(c["reverse"].asBoolean) TrailDirection.Reverse else TrailDirection.Forward
+                val pose=path.poseAt(fraction,c["window"].asDouble,direction)
+                if(c["expected"].isJsonNull) assertNull(pose) else {
+                    assertNotNull(pose); val expected=c["expected"].asJsonArray
+                    close(expected[0].asDouble,pose.point.x); close(expected[1].asDouble,pose.point.y)
+                    close(cos(c["heading"].asDouble),cos(pose.headingRadians))
+                    close(sin(c["heading"].asDouble),sin(pose.headingRadians))
+                    assertEquals(c["contour"].asInt,pose.contourIndex)
+                    assertEquals(path.pointAt(fraction),pose.point)
+                    path.poseAt(1-fraction) // Scrubbing in another order cannot change a pose.
+                    assertEquals(pose,path.poseAt(fraction,c["window"].asDouble,direction))
+                }
+            }
             "pathSamples" -> {
                 val path = path(); val fraction = c["fraction"].asDouble
                 close(c["length"].asDouble,path.length)

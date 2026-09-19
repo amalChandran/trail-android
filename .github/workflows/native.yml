@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: python3 ../scripts/sync-examples.py --check
       - run: python3 ../scripts/generate-contract-fixtures.py --check
+      - run: python3 ../scripts/generate-vehicle-artwork.py --check
       - run: python3 ../scripts/sync-fixtures.py --check
       - uses: actions/setup-java@v4
         with:
@@ -46,6 +47,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: python3 scripts/sync-examples.py --check
       - run: python3 scripts/generate-contract-fixtures.py --check
+      - run: python3 scripts/generate-vehicle-artwork.py --check
       - run: python3 scripts/sync-fixtures.py --check
       - run: ./scripts/test-swift.sh
       - run: ./scripts/test-ios.sh

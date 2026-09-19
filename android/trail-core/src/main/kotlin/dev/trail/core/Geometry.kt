@@ -52,6 +52,11 @@ data class TrailRouteKey(val id: String, val revision: Long)
 fun interface TrailProjection { fun project(coordinate: TrailCoordinate): TrailPoint? }
 data class TrailPathSlice internal constructor(val points: List<TrailPoint>, val distanceFromStart: Double)
 
+enum class TrailDirection { Forward, Reverse }
+
+/** Heading is radians clockwise from local +x. Artwork pointing up needs a +PI/2 offset. */
+data class TrailPose(val point: TrailPoint, val headingRadians: Double, val contourIndex: Int)
+
 /** Immutable measured polyline. Empty, singleton and repeated-point paths are safe. */
 class TrailPath(points: List<TrailPoint>, breakBefore: Set<Int> = emptySet()) {
     val points: List<TrailPoint> = java.util.Collections.unmodifiableList(points.toList())
@@ -90,6 +95,45 @@ class TrailPath(points: List<TrailPoint>, breakBefore: Set<Int> = emptySet()) {
         while (end > 1 && distances[end] == distances[end - 1]) end--
         val start = end - 1
         return atan2(points[end].y - points[start].y, points[end].x - points[start].x)
+    }
+    /**
+     * Exact route position with a distance-smoothed heading. No clock or animation state:
+     * seeking, replay and camera changes produce the same pose as ordinary playback.
+     * headingWindow is in local logical units; 0 uses the segment tangent. The window
+     * never crosses a disconnected contour. Position never cuts a corner or bridges a gap.
+     */
+    fun poseAt(fraction: Double, headingWindow: Double = 16.0,
+               direction: TrailDirection = TrailDirection.Forward): TrailPose? {
+        require(headingWindow.isFinite() && headingWindow >= 0) { "Heading window must be finite and nonnegative" }
+        val point = pointAt(fraction) ?: return null
+        val distance = length * fraction
+        val anchor = if (length == 0.0) 0 else when (fraction) { 0.0 -> 0; 1.0 -> points.lastIndex; else -> (upperBound(distance) - 1).coerceAtLeast(0) }
+        var low = 0; var high = contours.size
+        while (low < high) { val mid = (low + high) ushr 1; if (contours[mid].first <= anchor) low = mid + 1 else high = mid }
+        val contour = (low - 1).coerceAtLeast(0); val range = contours[contour]
+        var heading = 0.0
+        if (distances[range.last] > distances[range.first]) {
+            val before = pointInContour(max(distances[range.first], distance - headingWindow / 2), range)
+            val after = pointInContour(min(distances[range.last], distance + headingWindow / 2), range)
+            var dx = after.x - before.x; var dy = after.y - before.y
+            // Zero window, or an exact folded-back chord: use a nonzero local edge.
+            if (hypot(dx, dy) < 1e-9) {
+                var end = upperBound(distance).coerceIn(range.first + 1, range.last)
+                while (end > range.first + 1 && distances[end] == distances[end - 1]) end--
+                dx = points[end].x - points[end - 1].x; dy = points[end].y - points[end - 1].y
+            }
+            heading = atan2(dy, dx)
+        }
+        if (direction == TrailDirection.Reverse) heading += PI
+        return TrailPose(point, atan2(sin(heading), cos(heading)), contour)
+    }
+    private fun pointInContour(distance: Double, range: IntRange): TrailPoint {
+        if (distance <= distances[range.first]) return points[range.first]
+        if (distance >= distances[range.last]) return points[range.last]
+        val end = upperBound(distance).coerceIn(range.first + 1, range.last)
+        val t = (distance - distances[end - 1]) / (distances[end] - distances[end - 1])
+        return TrailPoint(points[end - 1].x + (points[end].x - points[end - 1].x) * t,
+            points[end - 1].y + (points[end].y - points[end - 1].y) * t)
     }
     /** Emits just the requested arc-length range, retaining original intermediate vertices. */
     fun slice(start: Double, end: Double): List<TrailPoint> {

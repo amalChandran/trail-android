@@ -125,6 +125,31 @@ for name,points in projectionRoutes:
             for ready in [True,False]:
                 cases['projections'].append(dict(id=f'projection/{name}/b{bearing}/d{density}/ready-{ready}',coordinates=points,bearing=bearing,density=density,ready=ready))
 
+# Analytic vehicle-heading anchors, independent of the SDK's binary-search implementation.
+cases['poses']=[]
+def pose_case(name, points, fraction, expected, heading, reverse=False, breaks=None, contour=0, window=20):
+    cases['poses'].append(dict(id='pose/'+name,points=points,breaks=breaks or [],fraction=fraction,
+        expected=expected,heading=heading+(math.pi if reverse else 0),reverse=reverse,contour=contour,window=window))
+for degrees in range(0,360,45):
+    angle=math.radians(degrees)
+    def rotate(p): return [30+p[0]*math.cos(angle)-p[1]*math.sin(angle),50+p[0]*math.sin(angle)+p[1]*math.cos(angle)]
+    for reverse in [False,True]:
+        for p in [0,.2,.5,.8,1]:
+            pose_case(f'straight/{degrees}/{reverse}/{p}',[rotate([0,0]),rotate([100,0])],p,rotate([100*p,0]),angle,reverse)
+    for turn in [-1,1]:
+        for p,heading in [(.4,0),(.475,math.atan2(5,15)),(.5,math.pi/4),(.525,math.atan2(15,5)),(.6,math.pi/2)]:
+            point=[200*p,0] if p<=.5 else [100,(200*p-100)*turn]
+            pose_case(f'corner/{degrees}/{turn}/{p}',[rotate([0,0]),rotate([100,0]),rotate([100,100*turn])],p,rotate(point),angle+heading*turn)
+for reverse in [False,True]:
+    for p,point,angle,contour in [(.49,[98,0],0,0),(.5,[1000,0],math.pi/2,1),(.51,[1000,2],math.pi/2,1)]:
+        pose_case(f'seam/{reverse}/{p}',[[0,0],[100,0],[1000,0],[1000,100]],p,point,angle,reverse,[2],contour,1000)
+    for name,points,expected in [('empty',[],None),('single',[[7,8]],[7,8]),('duplicates',[[7,8],[7,8]],[7,8])]:
+        pose_case(f'{name}/{reverse}',points,.5,expected,0,reverse)
+pose_case('zero-first-contour',[[1,2],[1,2],[90,0],[100,0]],0,[1,2],0,breaks=[2])
+pose_case('zero-last-contour',[[0,0],[10,0],[50,60],[50,60]],1,[50,60],0,breaks=[2],contour=1)
+pose_case('exact-hairpin',[[0,0],[100,0],[0,0]],.5,[100,0],math.pi)
+pose_case('zero-window',[[0,0],[100,0],[100,100]],.5,[100,0],math.pi/2,window=0)
+
 output=ROOT/'spec/fixtures/contracts.json'
 expected=json.dumps(dict(schema=1,**cases),indent=2)+'\n'
 parser=argparse.ArgumentParser(); parser.add_argument('--check',action='store_true'); args=parser.parse_args()

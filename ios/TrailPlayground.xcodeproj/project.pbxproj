@@ -10,6 +10,7 @@
 		048E7E193D6158951AE4BFEF /* example-plugin.txt in Resources */ = {isa = PBXBuildFile; fileRef = 342643551534168017302DAE /* example-plugin.txt */; };
 		0708C865516A8DF8DD214E2A /* TrailCore in Frameworks */ = {isa = PBXBuildFile; productRef = A8767A355C705A9D73BE8EC4 /* TrailCore */; };
 		0E2C9F1F3E332360226E6804 /* JourneyExamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3789B16DF3F6F21BFE9D7A8B /* JourneyExamples.swift */; };
+		147A99040F1FA97DBB0A77BF /* VehicleArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC90EE8341346C3D4C73FAB4 /* VehicleArtwork.swift */; };
 		1881B41C38701AE79924BACA /* example-runtime-color.txt in Resources */ = {isa = PBXBuildFile; fileRef = 66F016EC6E5C81A2019C2605 /* example-runtime-color.txt */; };
 		18DBBC0A8E31EC3B284766B4 /* MapKitContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BCEA833FE19E04FC019EB02 /* MapKitContractTests.swift */; };
 		2CA1B93EB466AC667C27F648 /* PlaygroundTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE448F6C04130D21FE408C3 /* PlaygroundTests.swift */; };
@@ -19,12 +20,14 @@
 		3EB693CD867A48C8DFF155CC /* example-mapkit.txt in Resources */ = {isa = PBXBuildFile; fileRef = C2CF29F89164AA82AFA5203C /* example-mapkit.txt */; };
 		4A03EA6CBD72027404FD29B2 /* TrailPlaygroundApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79B4B42B4BD84936CD111CD3 /* TrailPlaygroundApp.swift */; };
 		5124FD8F23CC18C06DD1A325 /* example-layers.txt in Resources */ = {isa = PBXBuildFile; fileRef = 65256349DE236FD7C8BD726E /* example-layers.txt */; };
+		5D175B1B02B207DE62484823 /* VehicleArtworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC05AF00D3499A62F569F9DE /* VehicleArtworkTests.swift */; };
 		644B50E5A54C620DAD33D992 /* ExamplesBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825987E3DF6F107ABDEDB00F /* ExamplesBrowser.swift */; };
 		708D4A867DEC99D4A3581765 /* TrailEffects in Frameworks */ = {isa = PBXBuildFile; productRef = 1369EBDA6461B2C6AA77F663 /* TrailEffects */; };
 		79EDF14B3011537B83A33C5A /* IntegrationExamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F77675DA0A96699A297818 /* IntegrationExamples.swift */; };
 		7AAF25CD89241A158D92A573 /* example-existing-swiftui-map.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9B00C22EE92A57B74D1BE293 /* example-existing-swiftui-map.txt */; };
 		7B0E98E27F822CB21340228F /* journeys.json in Resources */ = {isa = PBXBuildFile; fileRef = DB2B5203731DA6C765BC5E48 /* journeys.json */; };
 		9EB738B398B6222740B05A6C /* example-sequence.txt in Resources */ = {isa = PBXBuildFile; fileRef = A686114511A31A2B5450C3DB /* example-sequence.txt */; };
+		B6671A2F13462166C058A840 /* vehicles.json in Resources */ = {isa = PBXBuildFile; fileRef = 324F4CF586A71FBC3C19BDAB /* vehicles.json */; };
 		CAC1467DCB886B3028C8E8C9 /* TrailUI in Frameworks */ = {isa = PBXBuildFile; productRef = 298F92BCC1CFEDDBBBEEA9E6 /* TrailUI */; };
 		DBA2915ED4E4804F92BF3453 /* TrailMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 39D4F25FFFE99EA87F19E6C0 /* TrailMapKit */; };
 		E479C823494B2F1690E1FECF /* TrailSamplePlugin in Frameworks */ = {isa = PBXBuildFile; productRef = 3796C7EF07562E47D5EB44C1 /* TrailSamplePlugin */; };
@@ -51,6 +54,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		324F4CF586A71FBC3C19BDAB /* vehicles.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = vehicles.json; sourceTree = "<group>"; };
 		342643551534168017302DAE /* example-plugin.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-plugin.txt"; sourceTree = "<group>"; };
 		3789B16DF3F6F21BFE9D7A8B /* JourneyExamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JourneyExamples.swift; sourceTree = "<group>"; };
 		3BCEA833FE19E04FC019EB02 /* MapKitContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapKitContractTests.swift; sourceTree = "<group>"; };
@@ -68,9 +72,11 @@
 		96F77675DA0A96699A297818 /* IntegrationExamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationExamples.swift; sourceTree = "<group>"; };
 		9B00C22EE92A57B74D1BE293 /* example-existing-swiftui-map.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-existing-swiftui-map.txt"; sourceTree = "<group>"; };
 		A686114511A31A2B5450C3DB /* example-sequence.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-sequence.txt"; sourceTree = "<group>"; };
+		BC05AF00D3499A62F569F9DE /* VehicleArtworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleArtworkTests.swift; sourceTree = "<group>"; };
 		C2CF29F89164AA82AFA5203C /* example-mapkit.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "example-mapkit.txt"; sourceTree = "<group>"; };
 		CCE448F6C04130D21FE408C3 /* PlaygroundTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaygroundTests.swift; sourceTree = "<group>"; };
 		DB2B5203731DA6C765BC5E48 /* journeys.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = journeys.json; sourceTree = "<group>"; };
+		EC90EE8341346C3D4C73FAB4 /* VehicleArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleArtwork.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +147,7 @@
 				66F016EC6E5C81A2019C2605 /* example-runtime-color.txt */,
 				A686114511A31A2B5450C3DB /* example-sequence.txt */,
 				DB2B5203731DA6C765BC5E48 /* journeys.json */,
+				324F4CF586A71FBC3C19BDAB /* vehicles.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -160,6 +167,7 @@
 				96F77675DA0A96699A297818 /* IntegrationExamples.swift */,
 				3789B16DF3F6F21BFE9D7A8B /* JourneyExamples.swift */,
 				79B4B42B4BD84936CD111CD3 /* TrailPlaygroundApp.swift */,
+				EC90EE8341346C3D4C73FAB4 /* VehicleArtwork.swift */,
 				702481D43282C50517A04AB2 /* Resources */,
 			);
 			path = TrailPlayground;
@@ -169,6 +177,7 @@
 			isa = PBXGroup;
 			children = (
 				3BCEA833FE19E04FC019EB02 /* MapKitContractTests.swift */,
+				BC05AF00D3499A62F569F9DE /* VehicleArtworkTests.swift */,
 			);
 			path = TrailMapKitTests;
 			sourceTree = "<group>";
@@ -303,6 +312,7 @@
 				1881B41C38701AE79924BACA /* example-runtime-color.txt in Resources */,
 				9EB738B398B6222740B05A6C /* example-sequence.txt in Resources */,
 				7B0E98E27F822CB21340228F /* journeys.json in Resources */,
+				B6671A2F13462166C058A840 /* vehicles.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,6 +327,7 @@
 				79EDF14B3011537B83A33C5A /* IntegrationExamples.swift in Sources */,
 				0E2C9F1F3E332360226E6804 /* JourneyExamples.swift in Sources */,
 				4A03EA6CBD72027404FD29B2 /* TrailPlaygroundApp.swift in Sources */,
+				147A99040F1FA97DBB0A77BF /* VehicleArtwork.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,6 +344,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				18DBBC0A8E31EC3B284766B4 /* MapKitContractTests.swift in Sources */,
+				5D175B1B02B207DE62484823 /* VehicleArtworkTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

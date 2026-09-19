@@ -26,9 +26,14 @@ private struct PlaybackCase: FixtureCase {
 private struct ProjectionCase: FixtureCase {
     let id: String, coordinates: [[Double]], bearing: Double, density: Double, ready: Bool
 }
+private struct PoseCase: FixtureCase {
+    let id: String, points: [[Double]], breaks: [Int], fraction: Double, expected: [Double]?
+    let heading: Double, reverse: Bool, contour: Int, window: Double
+}
 private struct Contracts: Decodable, Sendable {
     let pathSamples: [PathSample], pathSlices: [PathSlice], routes: [RouteCase], bounds: [BoundsCase]
     let polylines: [PolylineCase], playback: [PlaybackCase], projections: [ProjectionCase]
+    let poses: [PoseCase]
     static let shared: Contracts = {
         let url = Bundle.module.url(forResource: "contracts", withExtension: "json", subdirectory: "Fixtures")!
         return try! JSONDecoder().decode(Self.self, from: Data(contentsOf: url))
@@ -142,4 +147,18 @@ private func providersOnlyProjectAndNeverOwnPlayback(_ c: ProjectionCase) throws
         _ = route.projectIfReady(TrailProjection { TrailPoint($0.longitude*2,$0.latitude*2) })
         #expect(close(0.37,player.progress)); #expect(player.status == .paused)
     }
+}
+
+@Test(arguments: Contracts.shared.poses)
+private func vehiclePosesMatchAnalyticHeadingsAndNeverCutCorners(_ c: PoseCase) throws {
+    let path=path(c.points,c.breaks), direction: TrailDirection = c.reverse ? .reverse : .forward
+    let pose=path.pose(at: c.fraction,headingWindow: c.window,direction: direction)
+    if let expected=c.expected {
+        let pose=try #require(pose)
+        #expect(close(expected[0],pose.point.x)); #expect(close(expected[1],pose.point.y))
+        #expect(close(cos(c.heading),cos(pose.headingRadians))); #expect(close(sin(c.heading),sin(pose.headingRadians)))
+        #expect(pose.contourIndex == c.contour); #expect(pose.point == path.point(at: c.fraction))
+        _ = path.pose(at: 1-c.fraction)
+        #expect(pose == path.pose(at: c.fraction,headingWindow: c.window,direction: direction))
+    } else { #expect(pose == nil) }
 }

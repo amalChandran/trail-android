@@ -36,7 +36,7 @@ public enum TrailMotionPreset: String, CaseIterable, Sendable {
             switch self {
             case .reveal: return .reveal(to: p)
             case .erase: return TrailVisualState(windows: [TrailWindow(p, 1)])
-            case .pingPong: return .reveal(to: 1 - abs(2 * p - 1))
+            case .pingPong: return .reveal(to: 1 - abs(2 * p - 1), direction: p < 0.5 ? .forward : .reverse)
             case .comet, .spotlight: return cometFrame(p, length: 0.25)
             case .multiComet: return TrailVisualState(windows: (0..<3).flatMap { cometFrame((p + Double($0) / 3).truncatingRemainder(dividingBy: 1), length: 0.15).windows })
             case .dashFlow: return TrailVisualState(dashPhase: p)
@@ -44,8 +44,8 @@ public enum TrailMotionPreset: String, CaseIterable, Sendable {
             case .breathe: return TrailVisualState(widthScale: 1 + 0.18 * sin(2 * .pi * p))
             case .segmentedChase:
                 let index = min(7, floor(p * 8)); return TrailVisualState(windows: [TrailWindow(index / 8, (index + 0.8) / 8)])
-            case .revealThenFlow: return p < 0.4 ? .reveal(to: p / 0.4) : TrailVisualState(dashPhase: (p - 0.4) / 0.6)
-            case .drawAndErase: return p < 0.5 ? .reveal(to: p * 2) : TrailVisualState(windows: [TrailWindow((p - 0.5) * 2, 1)])
+            case .revealThenFlow: return p < 0.4 ? .reveal(to: p / 0.4) : TrailVisualState(dashPhase: (p - 0.4) / 0.6, head: 1)
+            case .drawAndErase: return p < 0.5 ? .reveal(to: p * 2) : TrailVisualState(windows: [TrailWindow((p - 0.5) * 2, 1)], head: 1)
             }
         }
         return TrailAnimations.custom(sampler, duration: duration, repeats: repeats, reducedMotion: self == .erase || self == .drawAndErase ? .hidden : .full)

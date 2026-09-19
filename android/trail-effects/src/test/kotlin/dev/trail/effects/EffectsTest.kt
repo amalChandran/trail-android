@@ -5,6 +5,15 @@ import kotlin.test.*
 import kotlin.time.Duration.Companion.seconds
 
 class EffectsTest {
+    @Test fun movingHeadsReportReverseTravelAndStayAtArrivalDuringTrailingEffects() {
+        val ping=TrailMotionPreset.PingPong.animation(1.seconds,repeat=false)
+        val forward=ping.sampler.sample(TrailTime(.25)); val reverse=ping.sampler.sample(TrailTime(.75))
+        assertEquals(forward.head,reverse.head)
+        assertEquals(TrailDirection.Forward,forward.headDirection); assertEquals(TrailDirection.Reverse,reverse.headDirection)
+        for(motion in listOf(TrailMotionPreset.RevealThenFlow,TrailMotionPreset.DrawAndErase)) {
+            for(p in listOf(.5,.75,1.0)) assertEquals(1.0,motion.animation().sampler.sample(TrailTime(p)).head)
+        }
+    }
     @Test fun everyPresetIsBoundedAndSupportsSeekingInAnyOrder() {
         for (style in TrailStylePreset.entries) for (motion in TrailMotionPreset.entries) {
             val effect = motion.effect(style.style(), 1.seconds, repeat = false)

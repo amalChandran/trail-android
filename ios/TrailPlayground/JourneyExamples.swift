@@ -41,9 +41,10 @@ private struct JourneyFixtures: Decodable {
     @State private var reduced = false
     @State private var playback = TrailPlayback()
     private var journey: Journey { JourneyFixtures.shared.journeys[selected] }
+    private var vehicle: VehicleArtwork { VehicleArtwork.fleet[journey.id]! }
     private var effect: TrailEffect { TrailEffect {
         Layer { Stroke(journey.color.opacity(0.22),width: 6) }
-        Layer { Style(style.style(color: journey.color)); Animate(motion.animation(duration: .seconds(8),repeats: true)) }
+        Layer { Style(style.style(color: journey.color)); Animate(vehicle.animation(motion)) }
     } }
     private var effectKey: String { "\(selected)/\(style.rawValue)/\(motion.rawValue)" }
 
@@ -61,7 +62,7 @@ private struct JourneyFixtures: Decodable {
                     }
                     Text(journey.title).font(.headline).accessibilityIdentifier("journeyTitle")
                     Text(journey.description).font(.caption).foregroundStyle(.secondary)
-                    AppleJourneyMap(route: route,origin: journey.origin,destination: journey.destination,symbol: journey.symbol,
+                    AppleJourneyMap(route: route,origin: journey.origin,destination: journey.destination,vehicle: vehicle,
                                     playback: playback,reduced: reduced || systemReducedMotion)
                         .frame(height: 330).clipShape(RoundedRectangle(cornerRadius: 20))
                     Text("\(mode.title) · \(route.coordinates.count) points · \(route.distanceMeters/1000,specifier: "%.1f") km")
@@ -90,7 +91,8 @@ private struct JourneyFixtures: Decodable {
 
 @MainActor private struct AppleJourneyMap: View {
     let route: TrailRoute
-    let origin: String, destination: String, symbol: String
+    let origin: String, destination: String
+    let vehicle: VehicleArtwork
     let playback: TrailPlayback
     let reduced: Bool
     @State private var position = MapCameraPosition.automatic
@@ -109,7 +111,7 @@ private struct JourneyFixtures: Decodable {
             .overlay {
                 TrailMapOverlay(route: route,map: proxy,cameraRevision: cameraRevision,playback: playback,reducedMotion: reduced,onProjected: { if projected != $0 { projected=$0 } })
             }
-            .overlay { if let projected { JourneyVehicle(path: projected,symbol: symbol,playback: playback,reduced: reduced) } }
+            .overlay { if let projected { JourneyVehicle(path: projected,artwork: vehicle,playback: playback,reduced: reduced) } }
             .overlay(alignment: .topLeading) {
                 Text(projected == nil ? "Projecting route…" : "Apple Maps · ready").font(.system(size: 10)).padding(5)
                     .background(.black.opacity(0.75),in: RoundedRectangle(cornerRadius: 5)).padding(10).accessibilityIdentifier("journeyMapStatus")
@@ -120,19 +122,6 @@ private struct JourneyFixtures: Decodable {
             guard let bounds=route.bounds else { return }
             position = .region(MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: bounds.center.latitude,longitude: bounds.center.longitude),
                 span: MKCoordinateSpan(latitudeDelta: max(0.005,min(170,bounds.latitudeSpan*1.5)),longitudeDelta: max(0.005,min(359,bounds.longitudeSpan*1.5)))))
-        }
-    }
-}
-
-@MainActor private struct JourneyVehicle: View {
-    let path: TrailPath, symbol: String, playback: TrailPlayback, reduced: Bool
-    var body: some View {
-        let layer=playback.player.effect.layers.count-1
-        let fraction=reduced ? 1 : playback.frame(layer: layer).head ?? playback.progress
-        if let point=path.point(at: fraction) {
-            Text(symbol).font(.system(size: 20)).rotationEffect(symbol == "✈" ? .radians(path.tangent(at: fraction)) : .zero)
-                .frame(width: 32,height: 32).background(.black.opacity(0.85),in: Circle()).position(x: point.x,y: point.y)
-                .allowsHitTesting(false).accessibilityHidden(true)
         }
     }
 }

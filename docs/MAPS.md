@@ -29,6 +29,8 @@ Run `./scripts/run-ios.sh` or `./scripts/run-android.sh`, then open **Map journe
 
 Each sample has endpoint markers, camera fitting, distance, playback, a moving vehicle, eight line styles, twelve motions and reduced motion. Journey coordinates are bundled, so no directions account is needed. Basemap imagery still comes from the map provider. The ferry waypoints illustrate a harbor journey; they are not an official sailing trace. Flight connections are illustrative, not operational flight tracks. See [data provenance](../samples/README.md).
 
+Moving markers now use top-down vehicle vectors, with eased departure/arrival and smooth route-following headings. The [vehicle guide](VEHICLES.md) explains the provider-neutral pose API and how to supply your own artwork.
+
 The Google journey screen sets `MapProperties(minZoomPreference = 0f)` so a long flight can fit both endpoints; Maps Compose's default minimum of 3 can clip them in a small viewport. Camera fitting remains sample/host-app behavior, separate from the Trail adapter. Live Google and Apple checks and their limits are recorded in [VERIFICATION.md](VERIFICATION.md).
 
 Google Maps requires your own configured key. Put `MAPS_API_KEY=...` in the ignored `android/local.properties` and rebuild; do not put it in source. Enable Maps SDK for Android and follow Google's [account, API and key setup](https://developers.google.com/maps/documentation/android-sdk/get-api-key). Restrict the key to the sample package `dev.trail.playground` and its signing certificate; `./gradlew :playground:signingReport` prints the certificate fingerprint. The live Google SDK test is reported as skipped when no key is present.

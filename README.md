@@ -21,6 +21,8 @@ The Canvas playground works offline with no credentials. Google Maps is enabled 
 
 **Google and Apple Maps first:** open **Map journeys** for JFK → Heathrow, a 119-point Times Square → Grand Central cab route, and a Circular Quay → Manly ferry illustration. Compare Full route, Two points, Arc and Great circle, then change styles/motions and scrub the moving vehicle. Read the [map architecture and adapter contract](docs/MAPS.md) and [fixture provenance](samples/README.md).
 
+The journeys now have top-down vehicles with smooth steering, shadows, and eased departure/arrival. [Use the same provider-neutral pose API with your own artwork](docs/VEHICLES.md).
+
 ## Try this flow
 
 1. Pause, scrub the progress slider, play, and replay.
@@ -95,7 +97,7 @@ Add the local `swift` directory as a Swift package in Xcode and select only the 
 python3 scripts/sync-examples.py --check
 ```
 
-In Xcode use Product > Test for MapKit contracts and UI flows. Both languages consume 544 named shared fixtures, plus preset/plugin tests and a 144-case native pixel matrix per renderer. UI and lifecycle tests exercise controls and real bindings. Counts distinguish parameterized cases from test functions; see [verification notes](docs/VERIFICATION.md) for executed results. Regenerate documentation with `python3 scripts/sync-examples.py` and fixture copies with `python3 scripts/sync-fixtures.py`.
+In Xcode use Product > Test for MapKit contracts and UI flows. Both languages consume 720 named shared fixtures, plus preset/plugin tests, a 144-case native line pixel matrix and a 24-case vehicle raster matrix per platform. UI and lifecycle tests exercise controls and real bindings. Counts distinguish parameterized cases from test functions; see [verification notes](docs/VERIFICATION.md) for executed results. Regenerate documentation with `python3 scripts/sync-examples.py` and fixture copies with `python3 scripts/sync-fixtures.py`.
 
 ## Alpha boundaries
 

@@ -39,7 +39,7 @@ enum class TrailMotionPreset(val label: String) {
             when (this) {
                 Reveal -> TrailVisualState.reveal(p)
                 Erase -> TrailVisualState(listOf(TrailWindow(p, 1.0)))
-                PingPong -> TrailVisualState.reveal(1 - abs(2 * p - 1))
+                PingPong -> TrailVisualState.reveal(1 - abs(2 * p - 1), if (p < .5) TrailDirection.Forward else TrailDirection.Reverse)
                 Comet, Spotlight -> comet(p, 0.25)
                 MultiComet -> TrailVisualState((0 until 3).flatMap { comet((p + it / 3.0) % 1, 0.15).windows })
                 DashFlow -> TrailVisualState(dashPhase = p)
@@ -49,8 +49,8 @@ enum class TrailMotionPreset(val label: String) {
                     val index = floor(p * 8).toInt().coerceAtMost(7)
                     TrailVisualState(listOf(TrailWindow(index / 8.0, (index + 0.8) / 8.0)))
                 }
-                RevealThenFlow -> if (p < 0.4) TrailVisualState.reveal(p / 0.4) else TrailVisualState(dashPhase = (p - 0.4) / 0.6)
-                DrawAndErase -> if (p < 0.5) TrailVisualState.reveal(p * 2) else TrailVisualState(listOf(TrailWindow((p - 0.5) * 2, 1.0)))
+                RevealThenFlow -> if (p < 0.4) TrailVisualState.reveal(p / 0.4) else TrailVisualState(dashPhase = (p - 0.4) / 0.6, head = 1.0)
+                DrawAndErase -> if (p < 0.5) TrailVisualState.reveal(p * 2) else TrailVisualState(listOf(TrailWindow((p - 0.5) * 2, 1.0)), head = 1.0)
             }
         }
         return TrailAnimations.custom(sampler, duration, repeat, if (this == Erase || this == DrawAndErase) TrailVisualState.Hidden else TrailVisualState.Full)

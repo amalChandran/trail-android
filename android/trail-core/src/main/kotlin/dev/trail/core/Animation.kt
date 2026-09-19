@@ -14,6 +14,7 @@ class TrailVisualState(
     val widthScale: Double = 1.0,
     val dashPhase: Double = 0.0,
     val head: Double? = null,
+    val headDirection: TrailDirection = TrailDirection.Forward,
 ) {
     val windows: List<TrailWindow> = java.util.Collections.unmodifiableList(windows.toList())
     init {
@@ -25,7 +26,8 @@ class TrailVisualState(
     companion object {
         val Full = TrailVisualState()
         val Hidden = TrailVisualState(emptyList())
-        fun reveal(to: Double) = TrailVisualState(listOf(TrailWindow(0.0, to)), head = to)
+        fun reveal(to: Double, direction: TrailDirection = TrailDirection.Forward) =
+            TrailVisualState(listOf(TrailWindow(0.0, to)), head = to, headDirection = direction)
     }
 }
 

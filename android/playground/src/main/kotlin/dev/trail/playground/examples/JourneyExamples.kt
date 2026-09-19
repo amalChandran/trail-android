@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -28,7 +27,6 @@ import dev.trail.core.*
 import dev.trail.effects.*
 import dev.trail.googlemaps.GoogleMapsTrailOverlay
 import org.json.JSONObject
-import kotlin.time.Duration.Companion.seconds
 
 internal data class Journey(
     val id: String, val title: String, val origin: String, val destination: String,
@@ -62,16 +60,18 @@ private val drawingModes=linkedMapOf("route" to "Full route", "direct" to "Two p
 @Composable fun JourneyExamples(mapsEnabled: Boolean, onBack: () -> Unit) {
     val context=LocalContext.current
     val journeys=remember { loadJourneys(context) }
+    val fleet=remember(context) { loadVehicleArtwork(context) }
     var selected by remember { mutableIntStateOf(0) }
     var mode by remember { mutableStateOf("arc") }
     var style by remember { mutableStateOf(TrailStylePreset.Cased) }
     var motion by remember { mutableStateOf(TrailMotionPreset.Reveal) }
     var reduced by remember { mutableStateOf(false) }
     val journey=journeys[selected]
+    val vehicle=fleet.getValue(journey.id)
     val route=remember(journey,mode) { journey.route(mode) }
     val effect=remember(journey,style,motion) { trailEffect {
         layer { stroke(journey.color.withOpacity(.22),6.0) }
-        layer { style(style.style(journey.color)); animation(motion.animation(8.seconds,repeat=true)) }
+        layer { style(style.style(journey.color)); animation(vehicle.animation(motion)) }
     } }
     val playback=rememberTrailPlayback(effect,route.key)
     val reducedMotion=reduced || rememberSystemReducedMotion()
@@ -88,7 +88,7 @@ private val drawingModes=linkedMapOf("route" to "Full route", "direct" to "Two p
                 Text(journey.title,fontSize=18.sp,fontWeight=FontWeight.Medium,modifier=Modifier.testTag("journeyTitle"))
                 Text(journey.description,color=Color(0xFF93A9B4),fontSize=12.sp)
                 Surface(shape=RoundedCornerShape(20.dp),color=Color(0xFF162C37),modifier=Modifier.fillMaxWidth().height(330.dp).testTag("journeyMap")) {
-                    if (mapsEnabled) GoogleJourneyMap(route,journey,effect,playback,reducedMotion)
+                    if (mapsEnabled) GoogleJourneyMap(route,journey,effect,playback,reducedMotion,vehicle=vehicle)
                     else Column(Modifier.padding(24.dp),verticalArrangement=Arrangement.Center) {
                         Text("Google Maps is ready to configure",fontSize=18.sp)
                         Text("Add MAPS_API_KEY to android/local.properties and rebuild to see these coordinates on the map.",fontSize=13.sp)
@@ -118,6 +118,7 @@ private val drawingModes=linkedMapOf("route" to "Full route", "direct" to "Two p
         val center=checkNotNull(route.bounds).center
         position=CameraPosition.fromLatLngZoom(LatLng(center.latitude,center.longitude),3f)
     },
+    vehicle: VehicleArtwork = rememberVehicleArtwork(journey.id),
 ) {
     val bounds=checkNotNull(route.bounds)
     var loaded by remember { mutableStateOf(false) }
@@ -137,16 +138,8 @@ private val drawingModes=linkedMapOf("route" to "Full route", "direct" to "Two p
             Marker(state=rememberUpdatedMarkerState(LatLng(route.coordinates.last().latitude,route.coordinates.last().longitude)),title=journey.destination)
         }
         GoogleMapsTrailOverlay(route,camera,Modifier.matchParentSize(),effect,playback,reduced,onProjected={ projected=it })
-        if (projected != null) JourneyVehicle(projected!!,journey.symbol,playback,effect.layers.lastIndex,reduced)
+        if (projected != null) JourneyVehicle(projected!!,vehicle,playback,effect.layers.lastIndex,reduced)
         Text(if (loaded) "Google Maps · ready" else "Loading Google Maps…",Modifier.align(Alignment.TopStart).padding(10.dp).background(Color(0xCC0C1921)).padding(5.dp).testTag("journeyMapStatus"),fontSize=10.sp,color=Color.White)
-    }
-}
-
-@Composable private fun JourneyVehicle(path: TrailPath, symbol: String, playback: TrailPlayback, layer: Int, reduced: Boolean) {
-    val fraction=if (reduced) 1.0 else playback.frame(layer).head ?: playback.progress
-    val point=path.pointAt(fraction) ?: return
-    Box(Modifier.offset(x=(point.x-16).dp,y=(point.y-16).dp).size(32.dp).background(Color(0xFF0C1921),RoundedCornerShape(16.dp)),contentAlignment=Alignment.Center) {
-        Text(symbol,fontSize=20.sp,modifier=Modifier.graphicsLayer { if (symbol=="✈") rotationZ=Math.toDegrees(path.tangentAt(fraction)).toFloat() })
     }
 }
 

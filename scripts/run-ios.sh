@@ -7,6 +7,6 @@ if [[ -z "$TRAIL_SIM" ]]; then echo "Install an iOS simulator runtime in Xcode S
 if ! xcrun simctl list devices booted | grep -q "$TRAIL_SIM"; then xcrun simctl boot "$TRAIL_SIM"; fi
 open -a Simulator
 xcrun simctl bootstatus "$TRAIL_SIM" -b
-xcodebuild -project TrailPlayground.xcodeproj -scheme TrailPlayground -destination "platform=iOS Simulator,id=$TRAIL_SIM" -derivedDataPath build CODE_SIGNING_ALLOWED=NO build -quiet
-xcrun simctl install "$TRAIL_SIM" build/Build/Products/Debug-iphonesimulator/TrailPlayground.app
+xcodebuild -project TrailPlayground.xcodeproj -scheme TrailPlayground -destination "platform=iOS Simulator,id=$TRAIL_SIM" -derivedDataPath build/native CODE_SIGNING_ALLOWED=NO build -quiet
+xcrun simctl install "$TRAIL_SIM" build/native/Build/Products/Debug-iphonesimulator/TrailPlayground.app
 xcrun simctl launch "$TRAIL_SIM" dev.trail.playground
