@@ -14,7 +14,8 @@ import com.google.maps.android.compose.*
 import dev.trail.android.TrailView
 import dev.trail.compose.*
 import dev.trail.core.*
-import dev.trail.googlemaps.GoogleMapsTrailOverlay
+import dev.trail.googlemaps.GoogleMapsTrail
+import kotlinx.coroutines.CancellationException
 import dev.trail.plugin.MetroStyle
 import dev.trail.plugin.QuadraticReveal
 import kotlin.time.Duration.Companion.seconds
@@ -132,14 +133,8 @@ val highlightedRoute = trailEffect {
     val camera = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(37.783, -122.417), 14f)
     }
-    Box(Modifier.fillMaxSize()) {
-        GoogleMap(Modifier.matchParentSize(), cameraPositionState = camera)
-        GoogleMapsTrailOverlay(
-            route = exampleRoute,
-            cameraPositionState = camera,
-            modifier = Modifier.matchParentSize(),
-            effect = deliveryTrail,
-        )
+    GoogleMap(Modifier.fillMaxSize(), cameraPositionState = camera) {
+        GoogleMapsTrail(exampleRoute, camera, effect = deliveryTrail)
     }
 }
 // example:end google-maps
@@ -163,3 +158,31 @@ fun createTrailView(context: Context): TrailView = TrailView(context).apply {
 @Composable fun AndroidViewExample() {
     AndroidView(factory = ::createTrailView, modifier = Modifier.fillMaxSize())
 }
+
+// example:start loading-route
+@Composable fun DirectionsLoadingExample(
+    from: TrailCoordinate, to: TrailCoordinate, fetchRoute: suspend () -> TrailRoute,
+) {
+    val transition = rememberTrailRouteTransition(from, to)
+    val camera = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(LatLng(from.latitude, from.longitude), 14f)
+    }
+    val effect = remember(transition.phase) { trailEffect {
+        stroke(TrailColor.Blue, 6.0)
+        when (transition.phase) {
+            TrailRoutePhase.Loading -> animation(TrailAnimations.loading())
+            TrailRoutePhase.Ready -> reveal(2.seconds)
+            else -> Unit // Full line while morphing; static arc on failure/cancellation.
+        }
+    } }
+    LaunchedEffect(transition) {
+        val request = transition.request
+        try { transition.resolve(request, fetchRoute()) }
+        catch (cancelled: CancellationException) { transition.cancel(request); throw cancelled }
+        catch (failure: Exception) { transition.fail(request) } // App presents its error/retry UI.
+    }
+    GoogleMap(Modifier.fillMaxSize(), cameraPositionState = camera) {
+        GoogleMapsTrail(transition.route, camera, effect = effect)
+    }
+}
+// example:end loading-route

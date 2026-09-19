@@ -7,9 +7,9 @@ import re
 ROOT = Path(__file__).resolve().parent.parent
 SOURCES = {
     "Android": ("kotlin", ROOT / "android/playground/src/main/kotlin/dev/trail/playground/examples/IntegrationExamples.kt"),
-    "iOS": ("swift", ROOT / "ios/TrailPlayground/IntegrationExamples.swift"),
 }
 TITLES = {
+    "loading-route": "Loading arc to directions route",
     "setup": "Demo geometry", "preset": "Named preset", "basic": "Render a preset",
     "runtime-color": "Runtime color", "plugin": "Custom style and animation", "playback": "Playback controls",
     "sequence": "Ordered animation steps", "layers": "Independent layers", "google-maps": "Google Maps Compose",
@@ -40,7 +40,7 @@ def outputs():
                 continue
             code = parts["preset"] + "\n" + content if name in ("basic", "playback", "google-maps", "android-view", "mapkit", "existing-swiftui-map", "existing-mkmapview") else content
             note = "// Shared demo geometry and imports: see the compiled IntegrationExamples source.\n\n"
-            output = ROOT / (f"android/playground/src/main/assets/examples/{name}.txt" if platform == "Android" else f"ios/TrailPlayground/Resources/example-{name}.txt")
+            output = ROOT / f"android/playground/src/main/assets/examples/{name}.txt"
             yield output, note + code
         yield ROOT / f"docs/examples/{platform}.md", document.rstrip() + "\n"
 

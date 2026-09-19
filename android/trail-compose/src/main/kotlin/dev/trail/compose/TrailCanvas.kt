@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.collectLatest
     // Observed only while drawing, so configuration invalidates pixels without a composition loop.
     internal var renderingEffect by mutableStateOf(effect); private set
     internal var tick by mutableLongStateOf(0); private set
+    val effect: TrailEffect get() = renderingEffect
     val progress: Double get() { tick; return player.progress }
     val isPlaying: Boolean get() { tick; return player.status == TrailPlaybackStatus.Playing }
     val status: TrailPlaybackStatus get() { tick; return player.status }
@@ -38,7 +39,8 @@ import kotlinx.coroutines.flow.collectLatest
     /** Read-only visual state for decorations that follow the same animation clock. */
     fun frame(layer: Int = 0, reducedMotion: Boolean = false): TrailVisualState { tick; return player.frame(layer, reducedMotion) }
     internal fun changed() { tick++ }
-    internal fun configure(effect: TrailEffect) {
+    /** Update configuration while preserving normalized progress and play/pause intent. */
+    fun configure(effect: TrailEffect) {
         if (player.effect === effect) return
         val previousStatus = player.status
         player.configure(effect)
@@ -46,6 +48,26 @@ import kotlinx.coroutines.flow.collectLatest
         // Inline DSL construction may produce a new value on recomposition. Only notify a
         // changed playback state, avoiding an effect-construction/recomposition feedback loop.
         if (player.status != previousStatus) changed()
+    }
+}
+
+/** One lifecycle-aware frame driver for native map content. Do not also bind this player to a Canvas. */
+@Composable fun TrailPlaybackClock(playback: TrailPlayback, active: Boolean = true,
+                                   reducedMotion: Boolean = rememberSystemReducedMotion()) {
+    val owner = LocalLifecycleOwner.current
+    LaunchedEffect(playback, owner, active, reducedMotion) {
+        if (!active || reducedMotion) return@LaunchedEffect
+        owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            snapshotFlow { playback.isPlaying }.collectLatest { playing ->
+                if (playing) {
+                    var previous: Long? = null
+                    while (playback.isPlaying) withFrameNanos { frame ->
+                        previous?.let { playback.player.advance((frame - it) / 1_000_000_000.0); playback.changed() }
+                        previous = frame
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-name: Native libraries
+name: Native Android
 on: [push, pull_request]
 permissions:
   contents: read
@@ -41,20 +41,3 @@ jobs:
           path: |
             android/**/build/reports
             artifacts/android-instrumentation.*
-  swift:
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-      - run: python3 scripts/sync-examples.py --check
-      - run: python3 scripts/generate-contract-fixtures.py --check
-      - run: python3 scripts/generate-vehicle-artwork.py --check
-      - run: python3 scripts/sync-fixtures.py --check
-      - run: ./scripts/test-swift.sh
-      - run: ./scripts/test-ios.sh
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: swift-native-reports
-          path: |
-            artifacts/*tests.*
-            ios/build/*.xcresult

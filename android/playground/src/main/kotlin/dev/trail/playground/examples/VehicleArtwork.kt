@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas as NativeCanvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -25,6 +26,12 @@ internal class VehicleArtwork(
     val size: Double, val headingWindow: Double, val duration: Double,
     private val layers: List<VehicleLayer>,
 ) {
+    fun bitmap(density: Double): Bitmap {
+        val extent = (size * 1.8 * density).toInt().coerceAtLeast(1)
+        return Bitmap.createBitmap(extent, extent, Bitmap.Config.ARGB_8888).also { bitmap ->
+            draw(NativeCanvas(bitmap), TrailPose(TrailPoint(extent / density / 2, extent / density / 2), -PI/2, 0), density)
+        }
+    }
     /** Cached paths/paints; draw with a transform, without rebuilding artwork each frame. */
     fun draw(canvas: NativeCanvas, pose: TrailPose, density: Double = 1.0) {
         val saved=canvas.save()

@@ -16,6 +16,23 @@ import org.junit.Test
 
 class PlaygroundTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+    @Test fun loadingArcSettlesIntoTheExactRouteAndReducedMotionSkipsTheMorph() {
+        compose.mainClock.autoAdvance=false
+        compose.mainClock.advanceTimeBy(300)
+        compose.onNodeWithTag("openJourneys").performClick(); compose.mainClock.advanceTimeBy(300)
+        fun click(tag: String) { compose.onNodeWithTag(tag).performSemanticsAction(SemanticsActions.OnClick) { it() } }
+        click("journey-cab"); compose.mainClock.advanceTimeBy(100)
+        click("journeyLoadRoute"); compose.mainClock.advanceTimeBy(100)
+        compose.onNodeWithTag("journeyRoutePhase").assertTextEquals("Finding a route…")
+        compose.mainClock.advanceTimeBy(2400)
+        compose.onNodeWithTag("journeyRoutePhase").assertTextContains("settling onto the route",substring=true)
+        compose.mainClock.advanceTimeBy(800)
+        compose.onNodeWithTag("journeyRoutePhase").assertTextEquals("Route ready")
+        compose.onNodeWithTag("journeyGeometry").assertTextContains("119 points",substring=true)
+        click("journeyReduced"); compose.mainClock.advanceTimeBy(100)
+        click("journeyLoadRoute"); compose.mainClock.advanceTimeBy(2500)
+        compose.onNodeWithTag("journeyRoutePhase").assertTextEquals("Route ready")
+    }
     @Test fun journeysUseRealCoordinatesAndSwitchBetweenRouteDirectArcAndGreatCircle() {
         compose.mainClock.autoAdvance=false
         compose.mainClock.advanceTimeBy(300)

@@ -9,13 +9,7 @@ val deliveryTrail = trailEffect {
     val camera = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(37.783, -122.417), 14f)
     }
-    Box(Modifier.fillMaxSize()) {
-        GoogleMap(Modifier.matchParentSize(), cameraPositionState = camera)
-        GoogleMapsTrailOverlay(
-            route = exampleRoute,
-            cameraPositionState = camera,
-            modifier = Modifier.matchParentSize(),
-            effect = deliveryTrail,
-        )
+    GoogleMap(Modifier.fillMaxSize(), cameraPositionState = camera) {
+        GoogleMapsTrail(exampleRoute, camera, effect = deliveryTrail)
     }
 }

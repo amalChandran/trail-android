@@ -50,6 +50,13 @@ class TrailAnimationSpec(
 private val DurationUnitSeconds = kotlin.time.DurationUnit.SECONDS
 
 object TrailAnimations {
+    /** Seamless travelling window for a loading arc; reduced motion shows the whole connection. */
+    fun loading(duration: Duration = 1.2.seconds): TrailAnimationSpec = custom(TrailAnimation { time ->
+        val p = time.progress
+        val windows = if (p < .22) listOf(TrailWindow(1+p-.22,1.0),TrailWindow(0.0,p))
+            else listOf(TrailWindow(p-.22,p))
+        TrailVisualState(windows, head=p)
+    },duration,repeat=true)
     fun custom(sampler: TrailAnimation, duration: Duration = 2.seconds, repeat: Boolean = false,
                reducedMotion: TrailVisualState = TrailVisualState.Full) = TrailAnimationSpec(sampler, duration, repeat, reducedMotion)
     fun reveal(duration: Duration = 2.seconds, repeat: Boolean = false) = custom(TrailAnimation { TrailVisualState.reveal(it.progress) }, duration, repeat)

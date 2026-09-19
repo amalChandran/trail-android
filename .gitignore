@@ -11,3 +11,10 @@
 *.xcuserstate
 artifacts/
 *.hprof
+
+# Local signing and registry material
+*.jks
+*.keystore
+*.p12
+.env
+.env.*

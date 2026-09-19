@@ -11,6 +11,16 @@ class CatalogContractTest(private val style: TrailStylePreset, private val motio
     companion object {
         @JvmStatic @Parameterized.Parameters(name="{0}/{1}") fun cases() = TrailStylePreset.entries.flatMap { s -> TrailMotionPreset.entries.map { m -> arrayOf(s,m) } }
     }
+    @Test fun nativeMapPrimitivesPreserveFiniteGeometryForEveryStyleAndMotion() {
+        val route=TrailRoute("road",listOf(TrailCoordinate(40.0,-73.0),TrailCoordinate(40.002,-73.0),TrailCoordinate(40.002,-72.998),TrailCoordinate(40.004,-72.998)))
+        val geometry=TrailMapGeometry(route)
+        val effect=motion.effect(style.style(),2.seconds,repeat=true)
+        for(p in listOf(0.0,.2,.8,1.0)) {
+            val strokes=geometry.strokes(effect.layers[0],effect.sample(0,p*effect.durationSeconds),2.0)
+            assertTrue(strokes.size<=8192)
+            assertTrue(strokes.all { it.width.isFinite() && it.width>0 && it.coordinates.size>=2 && it.dashPhase.isFinite() })
+        }
+    }
     @Test fun seekRepeatReducedMotionAndRecordedCommandsAreStable() {
         val effect=motion.effect(style.style(),2.seconds,repeat=true)
         for (index in effect.layers.indices) {

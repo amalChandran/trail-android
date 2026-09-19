@@ -1,85 +1,30 @@
-# Local verification — 20 September 2026
+# Executed release-candidate verification
 
-Google Maps Android and Apple MapKit are the first map adapters. The typed DSL / Swift result-builder API, provider-neutral binding and flight/cab/ferry playground are implemented locally on `trail-2-native`. No release or remote push has been made.
+Local results, 2026-09-20; no remote CI run or SDK publication is implied.
 
-## Executed results
-
-Counts below are **executed cases**, including named parameterized cases; they are not hundreds of duplicated test functions. Both implementations consume the same 720 fixture IDs. The case dimensions exercise different geometry, malformed inputs, timing, camera transforms and raster output.
-
-| Suite | Passed cases | Evidence |
+| Suite | Passing cases | Scope |
 | --- | ---: | --- |
-| Kotlin core | 745 | JUnit XML: 720 shared cases + 25 geometry/DSL/budget/steering regressions |
-| Kotlin optional effects | 100 | 96 style/motion combinations + 4 catalog/head-direction tests |
-| Kotlin external plugin consumer | 1 | Separately compiled consumer, public contracts only |
-| Android instrumentation | 153 | 144 native Canvas pixel cases, seam clipping, 4 binding/lifecycle/API tests and 4 app/consumer flows |
-| Android vehicle artwork | 24 | Three vectors × four headings × two densities; front-facing color probes, route anchors and shared-clock behavior |
-| Live Google SDK contracts | 2 | Loaded real maps; 12 camera configurations, density conversion, preserved playback, date-line contours, and full-geometry camera fitting for flight/cab/ferry |
-| Swift package | 983 | 33 Swift Testing functions, expanded into named cases; includes 720 shared cases, 96 catalog combinations, 144 native Core Graphics line raster cases and 23 other regressions |
-| Native MapKit | 33 | 4 Swift Testing functions; 30 real camera conversions + readiness/lifetime, attachment and date-line tests |
-| iOS vehicle artwork | 24 | One parameterized function; same vehicle/orientation/density raster probes as Android |
-| iOS app UI | 3 | Geographic journeys, compiled integration examples, gallery playback/plugins |
-| Android build and lintDebug | Passed | Debug application and instrumentation APK compile; lint passes |
-| Example/fixture synchronization | Passed | Generated documentation and both apps match their compiled source and canonical JSON |
-| Script syntax and Git whitespace | Passed | Bash parsing, Python execution and `git diff --check` |
+| Kotlin core | 937 | Shared fixtures, geometry, playback, native geographic poses, 100k-point static paths, morphs and request lifecycle |
+| Kotlin effects | 196 | Catalog contracts and native map primitives for 8 × 12 combinations |
+| Separate Kotlin plugin | 1 | Public consumer extension contract |
+| Android instrumentation | 181 | Native raster/vehicle probes, real Google SDK projection/camera fit/snapshot pixels, UI including loading/reduced motion |
+| Swift package | 1,269 | 40 test functions with parameterized contract/catalog cases and request/native geometry checks |
+| iOS native host | 57 | MapKit and top-down artwork rendering |
+| iOS UI | 4 | API examples, journeys, playback/plugins, loading morph and rapid gestures |
+| **Total** | **2,645** | **No failures or skipped cases in the passing runs** |
 
-**Totals: Android 1,025 passed, 0 skipped; Swift/iOS 1,043 passed — 2,068 passing cases.** Swift's package runner reports 33 test functions; the report script counts each function's actually executed parameter cases from its passing output. Android instrumentation reports `OK (179 tests)`: 153 existing non-Google cases, 24 vehicle raster cases and two live Google SDK tests. The 12 camera combinations, three journey fits and 1,001 samples in the continuous-steering regression are assertions within their tests, not additional counted cases. The report parser removes the previous JSON report before validating a new log, so failed validation cannot leave a stale green summary.
+Counts come from Kotlin JUnit XML and native test logs, not numbers of assertions or source methods. The 720 shared language-neutral fixture IDs run independently in Kotlin and Swift. A 1001-sample sweep counts as one test, not 1001.
 
-Android used the Pixel 9 Pro XL AVD on `emulator-5554` (API 36). No APK was installed on the connected physical phone. Apple used Xcode 26.2 / Swift 6.2.3, the iPhone 17 Pro simulator with iOS 26.2, and macOS for package/raster tests. Android uses Java 17 and the source-pinned Gradle, AGP, Kotlin and Compose versions.
+Before repository separation, `./scripts/check.sh` passed example/fixture synchronization, Kotlin suites, debug build/lint and Swift package tests. After separation this script runs Android checks; Swift checks live in `trail-ios`. SDK preparation additionally ran optimized APK creation, release lint and Maven staging. A separate Android consumer app compiled with only staged public Maven coordinates plus its platform dependency. Swift package consumption and repository-export checks are recorded with the independent Swift checkout.
 
-## What the tests prove
+Android used emulator-5554 with a configured local Maps key. The Google native-snapshot regression verified magenta route and cyan vehicle pixels at expected geographic anchors under 12 camera configurations; route points and the marker are real map SDK content. Existing projection tests remain coverage for the explicitly advanced screen overlays.
 
-| Area | Coverage |
-| --- | --- |
-| Shared geometry | 182 samples and 112 slices: empty/singleton/repeated points, unequal segment lengths, endpoints, disconnected contours, no gap interpolation; independent slow linear reference |
-| Geographic construction | 51 route cases, 12 wrapped bounds cases and 51 polyline cases: direct/arc/great-circle endpoints, poles, antipodes, ±180° crossings, precision 5/6, seeded valid data, truncated/invalid/overflowing encodings |
-| Limits and distance | Known spherical distance anchors, invalid bend/sampling/identity/revision values, maximum 100,000-point input and rejected over-budget data, defensive/value copies |
-| Playback | 64 shared command sequences plus explicit sequence/layer/preset regressions: pause, seek, replay, repeat/terminal boundaries, independent players, preserved intent after effect replacement |
-| Vehicle poses and motion | 176 shared analytic cases cover eight orientations, forward/reverse travel, corner approach/apex/exit, seam isolation, zero windows and degenerate routes. Separate regressions verify continuous steering without cutting corners, deterministic seeking and head direction/arrival state. Vehicle and line use one eased clock |
-| Vehicle artwork | Each platform renders three vehicles at four headings and two densities. Independent colored probes on their fronts catch wrong rotation offsets/pivots; alpha checks verify the route anchor and transparent surroundings. Reviewed on live Google and Apple maps; a recorded Android cab loop shows street-corner turns |
-| Provider boundary | 72 shared projection cases: rotations, densities, missing middle point, empty routes and seams. These are boundary tests, not a substitute for native SDK tests |
-| Native pixels | Each renderer: 3 widths × 3 colors × 2 opacities × 2 motions × 4 seek positions = 144 cases. Independent pixel assertions verify interiors, clipping, width, alpha, color and empty windows. Separate seam tests reject a stroke across disconnected contours |
-| Android binding | Missing projection, reduced motion, background/return and disposal freeze/resume the clock; camera/route updates preserve external pause/seek state; projected drawing is clipped to the map viewport; controller-only integration preserves and updates its effect while paused |
-| Google SDK | Live basemap readiness; zoom 14/16 × bearing 0°/45°/180° × tilt 0°/40°; screen-pixel to dp alignment within 1 dp, retained external pause/seek state, and short separated date-line contours. All coordinates in each flight/cab/ferry route fit inside 44 dp insets, with at least one dimension filling the available viewport |
-| Apple SDK | 5 geographic centers × 3 headings × 2 spans = 30 real MKMapView conversion/round-trip checks. Also verifies nil for detached/zero-size/released maps, weak capture, retained app delegate/callbacks, explicit route reset policy, idempotent detach, and short separated date-line contours |
-| User flows | Flight/cab/ferry switching; 119-point road route vs 2-point/direct and 129-point curves; playback, seeking, styles, motions, reduced motion; Apple map pan/zoom; compiled API, plugin and runtime-color examples |
+iOS used the iPhone 17 Pro / iOS 26.2 simulator, Xcode 26.2. The initial incremental build after adding Canvas state crashed in generated TrailCanvas destruction code; its failed result bundle is retained. A clean DerivedData build passed all 57 native and four UI cases. Use a clean build when testing package ABI/layout changes; do not treat an old built app as current source verification. Final passing bundle: `ios/build/TrailTests-20260920-041325.xcresult` (local, ignored).
 
-The Google contracts ran with a key configured only in ignored `android/local.properties`. Tests wait for native camera callbacks as well as Compose recomposition; advancing Compose's virtual clock alone does not settle the map. Without a configured key, both Google tests still report explicit assumption skips. See [MAPS.md](MAPS.md) to reproduce with your own credentials.
+Native GIFs are actual recordings, with map attribution preserved. They illustrate appearance and behavior; they are not frame-time benchmarks.
 
-Live screenshot review exposed clipped flight endpoints: Maps Compose defaults to minimum zoom 3. The journey map now permits zoom 0 so fitting a transatlantic route can zoom out sufficiently. The camera-fit regression uses the actual sample map composable, checks every waypoint and rejects an unfitted world overview. Android build, lint and all 179 instrumentation cases passed with the vehicle update.
+Remaining SDK acceptance includes physical-device performance and accessibility, and fresh remote consumer resolution after publication. The sample apps are local examples; store release, store signing and store metadata are out of scope.
 
-The new iOS sprite raster tests initially used a raw CGContext's y-up coordinates; the test surface now matches SwiftUI Canvas's y-down coordinates. A subsequent UI run missed existing gallery/menu gestures. Restarting the simulator and rerunning the unchanged UI assertions resolved that run. These failed runs were retained locally and were not counted as passes. The [vehicle guide](VEHICLES.md) documents the heading API, exact-path guarantees, timing and measured asset size.
+The independent `trail-ios` checkout then passed its 1,269 package cases and all 61 native/UI cases after a fresh rebuild against the root package. Its final local result is `Examples/build/TrailTests-20260920-043032.xcresult`.
 
-The pixel suite exposed an implicit Apple color-space dependency; ARGB now explicitly means sRGB. Final API review also found that a supplied Android controller could be overwritten by a default effect; omitted effect arguments now use the controller, with a pixel regression for color replacement while paused. Screenshot review confirmed the flight connection across the Atlantic, the Manhattan route following streets, and the illustrative ferry line remaining in the harbor. A stalled Android emulator required a cold boot. Xcode initially reused stale package modules; a fresh derived-data directory fixed that build. UI test failures from a sheet-dismiss gesture and partially/offscreen switches were corrected and rerun. These failures were not removed or counted as passes.
-
-## Reproduce and inspect
-
-```sh
-./scripts/check.sh                 # contracts, sync, Kotlin, Android lint/build, Swift
-./scripts/test-android-ui.sh       # selected emulator; Google test skips without a key
-./scripts/test-ios.sh              # MapKit and all iOS UI tests
-```
-
-Set `TRAIL_ANDROID_SERIAL` or `TRAIL_IOS_SIMULATOR` to select a test device. Use `TRAIL_IOS_TEST_ONLY=TrailMapKitTests ./scripts/test-ios.sh` for a targeted native-map run. Each test script propagates failures.
-
-Local artifacts are ignored by Git:
-
-- `android/*/build/test-results/test/TEST-*.xml`: individual JUnit results.
-- `android/trail-core/build/reports/tests/test` and `build/reports/jacoco`: core reports.
-- `android/playground/build/reports/lint-results-debug.html`: lint.
-- `artifacts/android-instrumentation.log` and `.json`: individual native test statuses and actual pass/skip counts.
-- `artifacts/swift-tests.log` and `.json`: Swift function and expanded-case counts; no nonexistent Swift xUnit file is advertised.
-- `artifacts/ios-tests.log` and `.json`; `ios/build/TrailTests-*.xcresult`: native MapKit/UI results.
-- `artifacts/ios-flight.png`, `ios-cab.png`, `ios-ferry.png`: reviewed journey screenshots.
-- `artifacts/android-flight.png`, `android-cab.png`, `android-ferry.png`: live Google Maps journey screenshots.
-- `artifacts/android-*-vehicle.png`, `ios-*-vehicle.png`: top-down vehicle screenshots on the native maps.
-- `artifacts/android-cab-turns.mp4`: recorded cab loop with eased travel and route-following turns.
-- `android/playground/build/outputs/apk/debug/playground-debug.apk`: runnable Android sample.
-- `swift/.build/arm64-apple-macosx/debug/codecov`: Swift package coverage data.
-
-The provided GitHub workflow includes fixture checks, core/lint builds, emulator/simulator runs and artifact uploads. It has not run remotely. CI also skips the Google live-map contract when credentials are absent.
-
-## Remaining release evidence
-
-This is a tested native alpha, not proof of universal map compatibility or a stable release. Remaining work includes minimum-supported-OS and real-device coverage, more extreme pitch/globe/world-copy and inset/resize stress, larger teardown/leak stress, image goldens for complex dashes/gradients/joins, external published-artifact consumers, ABI checks and provenance review. The ferry is a hand-authored illustration; see [data provenance](../samples/README.md).
-
-No minimum-APK-size, zero-allocation, 60/120-fps, battery or production-readiness claim is made. Release-host size deltas and physical-device profiles are still required. Swift extracts partial path points per stroke; Android dash-phase changes allocate path effects; gradient/comet combinations can issue many strokes. The [relaunch plan](DESIGN.md) keeps those measurements separate from correctness tests. Xcode also emits a package dependency-scan warning despite the explicit Core→UI dependency in the manifest; native linking and all executed tests succeed.
+The final optimized local example APK (`dev.trail.playground`, 1,434,079 bytes) passed APK Signature Scheme v2 verification, installed successfully on emulator-5554 and launched successfully. It uses the standard local debug certificate and is provided only as an example app.

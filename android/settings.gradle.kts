@@ -5,3 +5,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Trail"
 include(":trail-core", ":trail-effects", ":trail-android", ":trail-compose", ":trail-google-maps", ":sample-plugin", ":playground")
+include(":size-probe")

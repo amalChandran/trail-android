@@ -24,9 +24,9 @@ These declarations come from the compiled integration examples. See [Android exa
 
 ## Local adoption
 
-No Trail 2 artifacts are published yet. The Android playground consumes Gradle project modules; open `android/` to run or adapt it. A Compose consumer uses `trail-compose`, which includes the core and Canvas adapter transitively. A View consumer uses `trail-android` and sets `TrailView.path` and `TrailView.effect`. Add `trail-effects` for the larger preset catalog or `trail-google-maps` for that provider. Material and the gallery belong to the sample app.
+Trail 2 artifacts are staged locally; public publication is pending. See [distribution](DISTRIBUTION.md) for the verified Maven consumer flow and independent Swift package. The Android playground consumes Gradle project modules; open `android/` to run or adapt it. A Compose consumer uses `trail-compose`, which includes the core and Canvas adapter transitively. A View consumer uses `trail-android` and sets `TrailView.path` and `TrailView.effect`. Add `trail-effects` for the larger preset catalog or `trail-google-maps` for that provider. Material and the gallery belong to the sample app.
 
-For Swift, add the repository's `swift/` directory as a local Swift package in Xcode. Select `TrailUI` for a SwiftUI Canvas or `TrailMapKit` for maps; `TrailEffects` is optional. A plugin needs only `TrailCore`. `TrailSamplePlugin` demonstrates an independent consumer and is not required by the engine.
+For Swift, use the independent `trail-ios` root package (the local sibling checkout until remote publication). Select `TrailUI` for a SwiftUI Canvas or `TrailMapKit` for maps; `TrailEffects` is optional. A plugin needs only `TrailCore`. `TrailSamplePlugin` demonstrates an independent consumer and is not required by the engine.
 
 Widths, dash lengths and chevron sizes are logical units: Android dp, iOS points, represented by `Double`. `TrailColor` contains sRGB ARGB. `TrailPath` is local Cartesian geometry, fitted into the surface by default. `TrailRoute` is validated geographic geometry for map adapters, with a stable ID and revision.
 
@@ -50,7 +50,7 @@ Kotlin reports structural mistakes with `IllegalArgumentException` and an action
 
 The simple effect overload owns its controller. Create an explicit controller only for controls: `rememberTrailPlayback(effect)` on Android, or `@State private var playback = TrailPlayback(effect: ...)` in SwiftUI. The compiled playback examples show the binding and slider code. `TrailPlayer` is the deterministic core for tests and custom hosts.
 
-With an explicit controller, Kotlin can omit the effect argument: `TrailCanvas(path, playback = playback)` and `GoogleMapsTrailOverlay(route, camera, playback = playback)` use the controller's configured effect. Supplying an effect explicitly updates that controller. Swift's playback overload likewise uses the controller's effect.
+With an explicit controller, Kotlin can omit the effect argument: `TrailCanvas(path, playback = playback)` and `GoogleMapsTrail(route, camera, playback = playback)` use the controller's configured effect. Supplying an effect explicitly updates that controller. Swift's playback overload likewise uses the controller's effect.
 
 - `play` resumes; a completed one-shot starts again. `pause` holds position. `replay` starts at zero.
 - `seek` accepts 0 through 1 and pauses. For a single animation or sequence, explicit seek to 1 displays its terminal frame even when repeating. Independent layers retain their own time domains. Ordinary loop boundaries begin the next cycle at zero.
@@ -64,7 +64,7 @@ With an explicit controller, Kotlin can omit the effect argument: `TrailCanvas(p
 
 Implement `TrailLineStyle.draw` to record strokes or chevrons. Implement `TrailAnimation.sample` to return visual state for the supplied `TrailTime`. Both are ordinary public interfaces/protocols; there is no registration, manifest or build processor.
 
-The separate [Kotlin plugin](../android/sample-plugin/src/main/kotlin/dev/trail/plugin/MetroStyle.kt) and [Swift plugin](../swift/Sources/TrailSamplePlugin/MetroStyle.swift) contain complete small implementations: a white casing, colored stroke, chevrons, and a quadratic reveal. Their sample consumers use `style(MetroStyle(...))` / `Style(MetroStyle(...))` and `TrailAnimations.custom(QuadraticReveal(), ...)` inside the canonical builder.
+The separate [Kotlin plugin](../android/sample-plugin/src/main/kotlin/dev/trail/plugin/MetroStyle.kt) and [Swift plugin](https://github.com/amalChandran/trail-ios/blob/main/Sources/TrailSamplePlugin/MetroStyle.swift) contain complete small implementations: a white casing, colored stroke, chevrons, and a quadratic reveal. Their sample consumers use `style(MetroStyle(...))` / `Style(MetroStyle(...))` and `TrailAnimations.custom(QuadraticReveal(), ...)` inside the canonical builder.
 
 Styles run during effect preparation. Drawing order is call order. Kotlin rejects retaining and reusing a closed draw context; Swift's context is a scoped value. Capture immutable configuration. Samplers must be deterministic and independent of call order: seeking directly to 80% must produce the same state as normal playback at 80%. Do not start a timer, fetch a map or retain a view in a sampler. Swift plugins conform to `Sendable`.
 
@@ -72,10 +72,14 @@ Visual state supplies visible windows, opacity, width scale, dash phase and an o
 
 ## Attach to maps
 
-Android: place `GoogleMapsTrailOverlay` in the same `Box` as the existing `GoogleMap`, with matching bounds and its `cameraPositionState`. The [compiled example](examples/Android.md) includes normal map setup. A Maps key is necessary to run it.
+Use native map content by default. Android places `GoogleMapsTrail(route, camera, effect = effect)` inside `GoogleMap { }`. Swift offers `TrailMap(route:effect:)`; existing maps use `TrailMapContent(geometry:playback:)` inside `Map { }` plus `.trailPlayback(playback)`. These geographic objects move with the map renderer rather than a separate screen projection clock.
 
-iOS: use `TrailMap(route:effect:)` for a convenience host. For an existing SwiftUI map, use `MapReader` and `TrailMapOverlay`, advancing `cameraRevision` from continuous camera callbacks. For an existing `MKMapView`, use `TrailMapAttachment`, forward camera/layout changes to `updateProjection()`, and call `detach()` on teardown. Your screen continues to own the map delegate. All three have [compiled examples](examples/iOS.md).
+Supply an app-owned up-facing bitmap to `GoogleMapsTrailVehicle` on Android. SwiftUI hosts use a native `Annotation` at `TrailMapGeometry.pose(at:)`; the compiled journey sample demonstrates artwork, heading and camera rotation.
 
-Use `TrailRoute` for complete waypoints, or its `direct`, `arc`, `greatCircle` and `encodedPolyline` factories. The flight/cab/ferry playground demonstrates their different meanings using real coordinates. A complete guide to geometry, provider swapping, projection units, ownership and current limits is in [MAPS.md](MAPS.md).
+`TrailRoute` preserves full geographic geometry. Its `direct`, `arc`, `greatCircle` and `encodedPolyline` factories have explicit meanings and do not fetch directions. A complete guide to geography, loading transitions, native provider capabilities and the advanced screen-space overlay APIs is in [MAPS.md](MAPS.md).
 
-`TrailProjection` is the SDK boundary; `TrailProjectedOverlay` owns shared readiness and camera/layout invalidation. Neither plugins nor core geometry know the map provider. Date-line crossings become separate contours. These overlays draw above map content and cannot interleave with native labels. See [executed verification and remaining limits](VERIFICATION.md).
+## Loading directions
+
+Create `rememberTrailRouteTransition(from,to)` in Compose or a `TrailRouteTransitionState` in SwiftUI. Capture its `request` token before awaiting your directions service. Call `resolve(request,route)` on success, `fail` on failure and `cancel` on cancellation. Use the state's `route` in the native map binding. While `Loading`, use `TrailAnimations.loading()`; while `Morphing`, show a full stroke; on `Ready`, use your chosen reveal preset. The full compiling examples include exception handling and clocks.
+
+The app owns networking and retry UI. Stale, duplicate and foreign tokens return false. Invalid routes throw without changing loading state. Requests require matching endpoints within 150 meters for road snapping. The default morph is 650 ms, retains target corners, unwraps world seams, stops in the background and settles immediately with reduced motion. Do not run your own second timer over this binding.

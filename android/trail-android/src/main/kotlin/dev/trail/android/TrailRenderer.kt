@@ -17,6 +17,7 @@ class TrailRenderer(val path: TrailPath) {
     private val segment = Path()
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeJoin = Paint.Join.ROUND }
     private val dashCache = HashMap<TrailStroke, Pair<Double, DashPathEffect>>()
+    private val dashIntervals = HashMap<TrailStroke, FloatArray>()
 
     /** Canvas coordinates and all dimensions are logical units; density is applied by the host. */
     fun draw(canvas: Canvas, effect: TrailEffect, frame: (Int) -> TrailVisualState) {
@@ -46,8 +47,8 @@ class TrailRenderer(val path: TrailPath) {
                 paint.pathEffect = if (cycle == 0.0) null else {
                     val phase = (a - state.dashPhase * cycle) % cycle
                     val cached = dashCache[stroke]
-                    if (cached?.first == phase) cached.second else DashPathEffect(stroke.dash.map { it.toFloat() }.toFloatArray(), phase.toFloat()).also {
-                        if (dashCache.size > 512) dashCache.clear()
+                    if (cached?.first == phase) cached.second else DashPathEffect(dashIntervals.getOrPut(stroke) { stroke.dash.map { it.toFloat() }.toFloatArray() }, phase.toFloat()).also {
+                        if (dashCache.size > 512) { dashCache.clear(); dashIntervals.clear() }
                         dashCache[stroke] = phase to it
                     }
                 }

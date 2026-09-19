@@ -6,14 +6,24 @@ android {
     namespace = "dev.trail.playground"; compileSdk = 36
     defaultConfig {
         applicationId = "dev.trail.playground"; minSdk = 24; targetSdk = 36
-        versionCode = 1; versionName = "2.0.0-alpha01"
+        // Local sample build counter; unrelated to any store release.
+        versionCode = 6
+        versionName = project.version.toString()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val mapsKey = providers.gradleProperty("MAPS_API_KEY").orNull ?: localSettings.getProperty("MAPS_API_KEY", "")
         manifestPlaceholders["MAPS_API_KEY"] = mapsKey
         buildConfigField("boolean", "HAS_MAPS_KEY", mapsKey.isNotBlank().toString())
     }
     buildFeatures { compose = true; buildConfig = true }
-    buildTypes { release { isMinifyEnabled = true; isShrinkResources = true; proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt")) } }
+    buildTypes {
+        debug { }
+        release {
+            isMinifyEnabled = true; isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            // Install the optimized example locally with the standard debug certificate.
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
 }

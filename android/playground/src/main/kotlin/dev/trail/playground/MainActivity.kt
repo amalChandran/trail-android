@@ -23,14 +23,14 @@ import com.google.maps.android.compose.*
 import dev.trail.compose.*
 import dev.trail.core.*
 import dev.trail.effects.*
-import dev.trail.googlemaps.GoogleMapsTrailOverlay
+import dev.trail.googlemaps.GoogleMapsTrail
 import dev.trail.plugin.*
 import dev.trail.playground.examples.ExamplesScreen
 import dev.trail.playground.examples.JourneyExamples
 import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState); setContent { TrailStudio() } }
+    override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState); setContent { TrailStudio(if(BuildConfig.DEBUG) intent.getStringExtra("trail-journey") else null) } }
 }
 
 private val Ink = Color(0xFF0C1921)
@@ -46,11 +46,11 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
     TrailCoordinate(37.783, -122.412), TrailCoordinate(37.787, -122.412), TrailCoordinate(37.790, -122.405),
 ))
 
-@Composable fun TrailStudio() {
+@Composable fun TrailStudio(initialJourney: String? = null) {
     var showExamples by remember { mutableStateOf(false) }
-    var showJourneys by remember { mutableStateOf(false) }
+    var showJourneys by remember { mutableStateOf(initialJourney != null) }
     if (showJourneys) {
-        JourneyExamples(BuildConfig.HAS_MAPS_KEY,onBack={ showJourneys=false })
+        JourneyExamples(BuildConfig.HAS_MAPS_KEY,initialJourney=initialJourney,onBack={ showJourneys=false })
         return
     }
     if (showExamples) {
@@ -88,8 +88,9 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
                 Box(Modifier.fillMaxWidth().height(235.dp).testTag("preview")) {
                     if (showMap && BuildConfig.HAS_MAPS_KEY) {
                         val camera = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(LatLng(37.784, -122.414), 13.5f) }
-                        GoogleMap(Modifier.matchParentSize(), cameraPositionState = camera)
-                        GoogleMapsTrailOverlay(MapRoute, camera, Modifier.matchParentSize(), effect, playback, reducedMotion)
+                        GoogleMap(Modifier.matchParentSize(), cameraPositionState = camera) {
+                            GoogleMapsTrail(MapRoute, camera, effect, playback, reducedMotion = reducedMotion)
+                        }
                     } else {
                         Canvas(Modifier.matchParentSize()) {
                             val step = 22.dp.toPx()

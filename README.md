@@ -1,108 +1,117 @@
-# Trail 2.0 — native playgrounds
+# Trail for Android
 
-Local alpha prototype for the Kotlin / Swift relaunch of [trail-android](https://github.com/amalChandran/trail-android). The original Java project is preserved in [`legacy/android`](legacy/android/README.md). Work is on branch `trail-2-native`; nothing has been published.
+**Routes with character. Small Kotlin APIs. Native map anchoring.**
 
-**Selected API: typed Kotlin DSL / Swift result builder with named presets.** Read the [API guide](docs/API_GUIDE.md), or start from the compiler-checked [Android](docs/examples/Android.md) and [iOS](docs/examples/iOS.md) integration examples. [Decision record](docs/API_CHOICES.md).
+Trail draws and animates lines on Android Canvas, Compose and Google Maps. Describe an effect with a typed DSL, reuse it as a named preset, and extend it with ordinary Kotlin interfaces. No annotation processor, reflection or plugin registry.
 
-## Run the playgrounds
+**2.0.0-alpha02 is a local release candidate.** Maven Central publication is pending. The playground is an example app for local testing. [Install locally / distribution](docs/DISTRIBUTION.md) · [Compiled examples](docs/examples/Android.md) · [API rules](docs/API_GUIDE.md) · [Verification](docs/VERIFICATION.md)
 
-From this repository:
+The independently native Swift implementation is being released from **trail-ios**. It has its own root Swift package; Android consumers do not download Swift sources or an iOS runtime.
 
-```sh
-./scripts/run-android.sh
-./scripts/run-ios.sh
-```
+## See it on real maps
 
-Android needs Java 17, Android SDK 36, and an emulator. The script selects an emulator, or boots the first configured AVD. A physical device is used only if you explicitly set `TRAIL_ANDROID_SERIAL`. Open the `android` directory in Android Studio and run `playground` if you prefer the IDE.
+These GIFs are recordings of the native playground, with provider attribution retained—not a browser simulation or a design mockup.
 
-iOS needs Xcode with an iOS simulator runtime. Open [`ios/TrailPlayground.xcodeproj`](ios/TrailPlayground.xcodeproj) and run `TrailPlayground`, or use the script. The Xcode project is checked in; XcodeGen is only needed when changing `ios/project.yml`. Set `TRAIL_IOS_SIMULATOR` to choose a simulator UDID.
+| Flight · JFK → Heathrow | Cab · Times Square → Grand Central | Ferry · Circular Quay → Manly |
+| --- | --- | --- |
+| <img src="docs/media/android-flight.gif" width="260" alt="Top-down aircraft follows an animated arc over the Atlantic on Google Maps"> | <img src="docs/media/android-cab.gif" width="260" alt="Cab follows all street-route vertices and turns through Manhattan on Google Maps"> | <img src="docs/media/android-ferry.gif" width="260" alt="Top-down ferry follows an illustrative Sydney harbour path on Google Maps"> |
 
-The Canvas playground works offline with no credentials. Google Maps is enabled by adding `MAPS_API_KEY=your-key` to `android/local.properties`, alongside `sdk.dir=...`, then rebuilding. MapKit is available in the iOS playground without a key. No location permission is requested; journeys use bundled coordinates.
+The cab uses a complete 119-point road-route snapshot. Flight and ferry paths are illustrative connections, not navigation or official service tracks. Try **Full route**, **Two points**, **Arc** and **Great circle** in the app. [Geometry and sample provenance](docs/MAPS.md) · [Recording provenance](docs/media/README.md)
 
-**Google and Apple Maps first:** open **Map journeys** for JFK → Heathrow, a 119-point Times Square → Grand Central cab route, and a Circular Quay → Manly ferry illustration. Compare Full route, Two points, Arc and Great circle, then change styles/motions and scrub the moving vehicle. Read the [map architecture and adapter contract](docs/MAPS.md) and [fixture provenance](samples/README.md).
-
-The journeys now have top-down vehicles with smooth steering, shadows, and eased departure/arrival. [Use the same provider-neutral pose API with your own artwork](docs/VEHICLES.md).
-
-## Try this flow
-
-1. Pause, scrub the progress slider, play, and replay.
-2. Select a line style and an animation. Change duration and looping.
-3. Enable **Use my Metro plugin** to exercise a separately compiled plugin.
-4. Enable **Reduced motion**. System Reduce Motion / disabled Android animations are also respected.
-5. On iOS enable **MapKit preview**, then pan and zoom. Android's equivalent requires a Maps key.
-6. Background and return to the app. Playback holds while inactive.
-7. Open **API examples**. Try named presets, runtime color, custom plugins, playback controls, sequences, layers, and native adapters. The visible code is extracted from the same source files the apps compile.
-
-Eight styles: solid, cased, dashed, dotted, along-route gradient, layered glow, chevrons, tapered. Twelve motion presets: reveal, erase, ping pong, comet, multi-comet, dash flow, pulse, breathe, spotlight, segment chase, reveal + flow, draw + erase. Dash flow is visually meaningful on dashed, dotted, and chevron styles.
-
-## Project layout
-
-| Module | Responsibility |
-| --- | --- |
-| `android/trail-core` | Geometry, pure samplers, playback, public plugins, DSL; Kotlin/JVM only |
-| `android/trail-effects` | Optional expressive preset catalog |
-| `android/trail-android` | Canvas executor and lifecycle-aware `TrailView`; no Compose |
-| `android/trail-compose` | Compose surface and observable playback adapter |
-| `android/trail-google-maps` | Explicit Google Maps projection adapter |
-| `android/sample-plugin` | Independent public-API consumer |
-| `android/playground` | Interactive Android sample and UI tests |
-| `swift` | Swift 6 package: Core, Effects, UI, MapKit, SamplePlugin products |
-| `ios` | Native SwiftUI playground and XCTest UI flow |
-
-Rendering uses Android Canvas / Core Graphics. Compose and SwiftUI host the drawing surface and controls. Neither runtime loads plugin classes by reflection. Styles record validated bounded commands during effect construction; each animation is a deterministic sampler. Reusing an effect does not reuse its playback position. Expressive effects, map adapters, sample code and UI frameworks are separate dependencies.
-
-### Small Kotlin integration
+## One effect, one line to render
 
 ```kotlin
-import dev.trail.core.*
-import dev.trail.compose.TrailCanvas
-import kotlin.time.Duration.Companion.seconds
-
-// Keep immutable geometry and reusable effects outside per-frame work.
 val deliveryTrail = trailEffect {
     stroke(TrailColor.Blue, width = 6.0)
-    reveal(duration = 2.seconds)
+    reveal(2.seconds)
 }
-// Inside Compose:
+
 TrailCanvas(path, effect = deliveryTrail)
 ```
 
-For an existing Google Maps Compose map, place `GoogleMapsTrailOverlay(route, cameraPositionState, effect = deliveryTrail)` above `GoogleMap` in a `Box`, with identical bounds. Keep map controls and attribution unobscured. Route ID/revision controls replacement; projection comes from the map SDK. This surface draws over map content and cannot interleave with native map labels.
+On an existing Google Map, put Trail **inside the map content**:
 
-### Small Swift integration
-
-```swift
-import TrailCore
-import TrailUI
-
-let deliveryTrail = TrailEffect {
-    Stroke(.blue, width: 6)
-    Reveal(duration: .seconds(2))
+```kotlin
+GoogleMap(cameraPositionState = camera) {
+    GoogleMapsTrail(route, camera, effect = deliveryTrail)
 }
-// Inside a SwiftUI View:
-TrailCanvas(path: path, effect: deliveryTrail)
 ```
 
-Add the local `swift` directory as a Swift package in Xcode and select only the products your app needs. `TrailMap(route:effect:)` is the MapKit convenience host. `TrailMapOverlay(route:map:cameraRevision:effect:)` attaches to an existing SwiftUI `MapReader`/`Map`; increment `cameraRevision` in `onMapCameraChange(frequency: .continuous)`. Both offer controller overloads. `TrailMapAttachment` attaches to an existing `MKMapView` without replacing its delegate: forward camera/layout changes to `updateProjection()` and call `detach()` on teardown.
+The route and optional vehicle are native geographic map objects. The map engine transforms them during pan, zoom, bearing and tilt, avoiding the separate-screen-overlay feedback that caused sway. An SDK snapshot regression checks their actual pixels at geographic anchors. [Map integration](docs/MAPS.md)
 
-## Verify
+```kotlin
+GoogleMapsTrail(
+    route, camera, effect = deliveryTrail,
+    vehicle = GoogleMapsTrailVehicle(icon = cabIcon)
+)
+```
+
+Supply a cached, up-facing bitmap descriptor; Trail centers it, follows the route head and turns it with the route. The sample's tiny top-down vector fleet is app-only, so every SDK consumer does not pay for artwork they do not use. [Vehicles](docs/VEHICLES.md)
+
+## Loading arc → directions route
+
+Show a travelling arc while your service loads directions; morph it onto every road corner when the response arrives. It handles stale responses, cancellation, failure, retries, reduced motion and backgrounding.
+
+| Google Maps / Kotlin | Apple Maps / Swift |
+| --- | --- |
+| <img src="docs/media/android-loading-route.gif" width="350" alt="A travelling loading arc morphs into a complete road route on native Google Maps"> | <img src="docs/media/ios-loading-route.gif" width="350" alt="The same loading arc settles into a complete road route on native Apple Maps"> |
+
+```kotlin
+val transition = rememberTrailRouteTransition(origin, destination)
+LaunchedEffect(transition) {
+    val request = transition.request
+    try { transition.resolve(request, directions.fetchRoute()) }
+    catch (cancelled: CancellationException) {
+        transition.cancel(request)
+        throw cancelled
+    }
+    catch (failure: Exception) { transition.fail(request) }
+}
+```
+
+Bind `transition.route`, using `TrailAnimations.loading()` during `Loading` and your reveal preset during `Ready`. Networking and error/retry UI belong to your app. The [complete compiling example](docs/examples/Android.md#loading-arc-to-directions-route) supplies the map, effect, imports and controller wiring. The playground uses a delayed bundled response, so you can try it without a directions account.
+
+## Add your own style or motion
+
+```kotlin
+class MyRouteStyle(private val color: TrailColor) : TrailLineStyle {
+    override fun draw(context: TrailDrawContext) {
+        context.stroke(TrailColor.White, width = 10.0)
+        context.stroke(color, width = 6.0)
+        context.chevrons(color, size = 8.0, spacing = 28.0)
+    }
+}
+
+val branded = trailEffect {
+    style(MyRouteStyle(TrailColor.Mint))
+    reveal(2.seconds)
+}
+```
+
+A motion plugin implements `TrailAnimation.sample(TrailTime)` and returns bounded visual state. Seeking must give the same frame as normal playback. The [independently compiled plugin](android/sample-plugin/src/main/kotlin/dev/trail/plugin/MetroStyle.kt) demonstrates both contracts.
+
+One style and one animation per layer. Use explicit `layer { }` for simultaneous effects or `sequence { }` for ordered clips. Ambiguous duplicates give actionable errors. The optional catalog contains **8 styles × 12 motions**; Canvas and native map content consume the same prepared commands.
+
+## Keep the integration small
+
+Pick `trail-android` for Views, `trail-compose` for Compose, or `trail-google-maps` for Google Maps. Add `trail-effects` only for the larger catalog. The core has no UI, map, networking or reflection dependency.
+
+The release probes compare the same View and Google Maps hosts with and without a two-point Trail reveal. See the measured artifact bytes, R8 deltas, test conditions and limits in [PERFORMANCE.md](docs/PERFORMANCE.md). They are not whole-app download-size promises.
+
+## Run it
+
+[Step-by-step example flows](docs/LOCAL_TESTING.md)
 
 ```sh
+./scripts/run-android.sh
 ./scripts/check.sh
-# Android UI flows, after starting an emulator:
-./scripts/test-android-ui.sh
-# MapKit contracts and native iOS UI flows:
-./scripts/test-ios.sh
-# Verify documentation and in-app code panels match compiled sources:
-python3 scripts/sync-examples.py --check
+TRAIL_ANDROID_SERIAL=emulator-5554 ./scripts/test-android-ui.sh
+./scripts/release/prepare-android.sh
+./scripts/release/test-consumer.sh
 ```
 
-In Xcode use Product > Test for MapKit contracts and UI flows. Both languages consume 720 named shared fixtures, plus preset/plugin tests, a 144-case native line pixel matrix and a 24-case vehicle raster matrix per platform. UI and lifecycle tests exercise controls and real bindings. Counts distinguish parameterized cases from test functions; see [verification notes](docs/VERIFICATION.md) for executed results. Regenerate documentation with `python3 scripts/sync-examples.py` and fixture copies with `python3 scripts/sync-fixtures.py`.
+Java 17, Android SDK 36, Kotlin 2.3.20; minimum Android API 24. Put your restricted Maps key in ignored `android/local.properties` as `MAPS_API_KEY=...`. A missing key is an explicit skipped live-map test, not a passing substitute. No directions service is needed for the bundled journeys.
 
-## Alpha boundaries
+[LLM integration contract](llms.txt) · [Legacy Java migration](docs/MIGRATION.md) · [MIT license](license.md)
 
-This is a working foundation for testing the approved integration API, not a production-release claim. [The relaunch plan](docs/DESIGN.md) lists consumer testing, additional camera/world-copy stress, visual goldens, device profiling, application-size measurements and compatibility/publishing gates. Date-line splitting and discontinuous rendering are implemented; provider-specific globe/extreme-pitch behavior still needs acceptance testing. Large-route simplification and expensive gradient/comet combinations need profiling. Swift offers recoverable structural builder validation; numeric/plugin programmer errors still use preconditions. External geographic input uses throwing validation. Annotation/macro tooling is deferred.
-
-Build pins: Kotlin 2.3.20, AGP 8.13.2, Gradle 8.13, Compose BOM 2026.03.00; Swift tools 6.0, iOS 17+. These are working compatibility pins, not a claim that every dependency is the newest available release. Google Maps and Material are excluded from the lean core/Canvas products.
-
-The upstream MIT license and attribution are retained in [`license.md`](license.md). License metadata in the historical project differs; resolve provenance before publishing a coordinated release.
+The optimized example APK is `artifacts/release/trail-studio-example.apk`, signed with the standard local debug certificate. The example uses `dev.trail.playground`; there is no store release workflow.

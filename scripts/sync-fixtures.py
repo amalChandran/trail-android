@@ -7,11 +7,8 @@ import json
 ROOT=Path(__file__).resolve().parent.parent
 parser=argparse.ArgumentParser(); parser.add_argument('--check',action='store_true'); args=parser.parse_args()
 pairs=[
- ('spec/fixtures/contracts.json','swift/Tests/TrailCoreTests/Fixtures/contracts.json'),
  ('samples/journeys.json','android/playground/src/main/assets/journeys.json'),
- ('samples/journeys.json','ios/TrailPlayground/Resources/journeys.json'),
  ('samples/vehicles.json','android/playground/src/main/assets/vehicles.json'),
- ('samples/vehicles.json','ios/TrailPlayground/Resources/vehicles.json'),
 ]
 stale=[]
 for source,target in pairs:

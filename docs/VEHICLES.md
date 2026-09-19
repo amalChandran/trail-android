@@ -1,46 +1,27 @@
 # Vehicles that follow the route
 
-The Google Maps and Apple Maps journeys use original top-down car, aircraft and ferry vectors. Each has glazing, body details and a light contact shadow; the ferry also has a small wake. There is no emoji or circular badge on the moving map marker. Artwork is prepared once and drawn with translation and rotation, without a second animation timer.
+Trail supplies position and heading; your app supplies cached, up-facing artwork. The demo has original top-down car, aircraft and ferry vectors, with glazing, body details and a light contact shadow. Artwork is sample-only and adds no asset dependency to the SDK.
 
-The car takes 18 seconds, aircraft 16 seconds and ferry 20 seconds per demo loop. A quintic easing curve gives each trip a gentle departure and arrival. The same eased time reaches the selected line animation and its vehicle. Pause, scrub, replay and background suspension therefore remain synchronized. Reduced motion displays a stationary vehicle at the destination. These are illustrative journeys, not a GPS interpolation or navigation SDK.
+## Native map placement
 
-## Use your own artwork
+For Google Maps, pass `GoogleMapsTrailVehicle(icon = cachedBitmapDescriptor)` to `GoogleMapsTrail` inside `GoogleMap { }`. Trail creates a centered, flat native marker and rotates it with the route's north-relative bearing. The SDK moves the marker and route in the same map render pipeline during camera gestures.
 
-The reusable part lives in **TrailCore**, independently of map providers and UI frameworks:
+For Apple Maps, put a SwiftUI `Annotation` inside `Map { }`, using the coordinate from `TrailMapGeometry.pose(at:)`. The journey example caches its `UIImage` and applies `pose.bearing - cameraHeading`. SwiftUI annotations retain MapKit's billboard presentation; they do not gain Google's flat-marker perspective behavior.
 
-```kotlin
-val frame = playback.frame(layer = 1)
-val pose = projectedPath.poseAt(
-    fraction = frame.head ?: playback.progress,
-    headingWindow = 16.0,
-    direction = frame.headDirection,
-)
-// Draw your marker at pose.point; rotate it by pose.headingRadians.
-```
+`TrailMapGeometry.poseAt(fraction, headingWindow, direction)` in Kotlin and `pose(at:headingWindow:direction:)` in Swift return an exact route position and a bearing in degrees clockwise from north. Distance and heading windows use Mercator meters. Zero heading window uses the local segment tangent; the default is two percent of prepared path length. A short chord smooths **only the heading**: position retains every street corner. Date-line seams are unwrapped before evaluation.
 
-```swift
-let frame = playback.frame(layer: 1)
-let pose = projectedPath.pose(
-    at: frame.head ?? playback.progress,
-    headingWindow: 16,
-    direction: frame.headDirection
-)
-// Draw your marker at pose.point; rotate it by pose.headingRadians.
-```
+Use the animation frame's `head` when present, or playback progress otherwise; pass `headDirection` for reverse movement. Sampling is stateless, so seeking, frame cadence and pause do not accumulate drift. There is no independent marker tween or second timer.
 
-`poseAt` / `pose(at:)` returns the **exact distance-based position** on the route. It smooths only the heading, using a chord across a short distance window. A car stays on every supplied street segment; smoothing does not cut through a corner. The window is clipped to the current continuous contour, so date-line splits never contribute a false diagonal direction.
+The demo takes 18 seconds for a car, 16 for an aircraft and 20 for a ferry. Quintic easing gives each a gentle departure and arrival. The line and vehicle share the same eased progress. Reduced motion displays a stationary arrival state. These are illustrative journeys, not a GPS interpolation or navigation SDK.
 
-- Heading is radians clockwise from local +x in the map overlay's y-down coordinate system. Up-facing artwork needs **+π/2** when drawn. The sample renderers apply that offset.
-- `headingWindow` is in Android dp / Apple points. Zero uses the local segment tangent. The samples use 14 for cars, 24 for aircraft and 30 for ferries.
-- `headDirection` lets an animation/plugin identify forward or reverse travel. Ping pong reports reverse travel on its return leg. Effects that finish drawing and then animate the line keep their head at the destination.
-- Empty paths return no pose. Stationary paths return their position with a stable heading. Exact folded-back segments use their local tangent when the smoothing chord has no direction.
-- Sampling is stateless. Seeking in a different order, camera rotation, pause or frame cadence cannot accumulate steering drift. Heading is applied as a transform, without a tween that might take the long way around ±180°.
-- `contourIndex` identifies discontinuities for applications that need their own visibility policy. A discontinuity changes position immediately; it is never animated as a connection across the map.
+## Canvas decorations
 
-Use the projected path from the active adapter. Switching Google Maps for another provider changes the projection, while this pose API and the artwork renderer stay the same. Draw the vehicle in the map's clipped overlay, with matching bounds, and leave hit testing to the map.
+For an ordinary Canvas or an explicitly chosen screen overlay, use `TrailPath.poseAt` / `pose(at:)`. That API returns a local point and radians clockwise from +x; up-facing artwork needs an extra π/2. Its heading window uses local logical units (Android dp / Apple points). Do not mix those units or rotation conventions with native map poses.
+
+Screen overlays have separate camera-projection and drawing clocks; use native geographic content for tightly anchored map routes. See [map integration and provider limits](MAPS.md).
 
 ## Artwork and verification
 
-`scripts/generate-vehicle-artwork.py` owns the original vector geometry. It generates `samples/vehicles.json`; `scripts/sync-fixtures.py` copies identical data into both sample apps. The three vectors total 10,521 bytes of JSON, stored as a 3,314-byte compressed entry in the current debug APK. This measures that asset only, not total SDK overhead. The artwork and its loader belong to the playground apps; consumers of TrailCore do not acquire these assets or a rendering dependency.
+`scripts/generate-vehicle-artwork.py` owns the original vector geometry and emits `samples/vehicles.json`. Each repository synchronizes it into its own example app. The three vectors total 10,521 bytes of JSON; the SDK packages none of them. Cache raster icons instead of decoding and rasterizing on every animation frame.
 
-The shared contracts include 176 analytic pose cases: eight orientations, both travel directions, corner approach/apex/exit, seam boundaries, repeated/empty paths and zero heading windows. Each platform also runs 24 native artwork raster cases: three vehicles × four headings × two densities, with front-facing color probes to catch wrong pivots or axis offsets. Smooth-corner and animation-head regressions cover continuity, exact route positions, reverse motion and arrival state. See [VERIFICATION.md](VERIFICATION.md) for executed results.
+Each language runs 176 local-path analytic pose cases and 144 native geographic pose cases. Native artwork probes cover three vehicles × four headings × two densities. Android also checks actual native SDK route/marker pixels across 12 camera configurations; iOS exercises loading, seeking and rapid alternating map gestures. [Executed verification](VERIFICATION.md)

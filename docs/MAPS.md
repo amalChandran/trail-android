@@ -1,72 +1,63 @@
-# Maps: Google and Apple first
+# Native maps, Google and Apple first
 
-Trail's route data, effects, plugins and playback do not import either map SDK. The first adapters are Google Maps Compose on Android and Apple MapKit on iOS. Additional providers are deferred until these integrations have been exercised in consumer apps.
+`TrailRoute`, effects, animation plugins, geometry morphs and playback are provider-neutral. Google Maps Android and Apple MapKit are the first adapters. Maps and tiles remain owned by the application/provider.
 
 ```mermaid
-flowchart TD
-    D[App or directions service] --> R[TrailRoute: coordinates + ID + revision]
-    R --> P[TrailProjection: coordinate to local point]
-    G[Google Maps Android] --> P
-    A[Apple MapKit] --> P
-    N[Future provider adapter] -.-> P
-    P --> B[TrailProjectedOverlay: readiness + camera/layout invalidation]
-    E[Effect + public style/animation plugins] --> C[Canvas / Core Graphics renderer]
-    B --> C
-    T[One playback controller and frame driver] --> C
+flowchart LR
+    D[App or directions service] --> R[TrailRoute]
+    R --> G[TrailMapGeometry]
+    E[Effect and plugin commands] --> G
+    P[Playback visual state] --> G
+    G --> N[Geographic strokes and vehicle pose]
+    N --> A[Google native polylines and flat marker]
+    N --> I[MapKit native MapContent and annotation]
+    N -.-> F[Future native provider adapter]
 ```
 
-Changing providers means replacing the **map view and its thin adapter**. The same route, effect, plugin and playback code can be reused. Camera configuration, native markers, map credentials and attribution remain responsibilities of the host app/provider. Trail does not pretend their SDK APIs are interchangeable.
+## Default: render inside the map
 
-## Start with the sample
+Android: `GoogleMapsTrail(route, camera, effect = effect)` **inside** `GoogleMap { }`. It uses native polylines and a centered flat marker, not a sibling Compose Canvas. Reuse one controller per binding; passing `active = false` freezes a retained offscreen map. If your screen waits for `onMapLoaded`, pass that readiness as `active` so animation does not keep the initial map continuously changing.
 
-Run `./scripts/run-ios.sh` or `./scripts/run-android.sh`, then open **Map journeys**.
+iOS: `TrailMap(route:effect:)` is a native MapKit convenience host. An existing map uses `TrailMapContent(geometry:playback:unitsPerPoint:)` inside `Map { }` and `.trailPlayback(playback)` on the Map. For patterned styles, supply Mercator meters per point from the visible map rect divided by view width; the journey sample contains the full conversion. Solid strokes and a basic reveal do not need a scale estimate. Vehicle artwork is an app-owned native `Annotation`, at `TrailMapGeometry.pose(at:)`.
 
-| Journey | Coordinates | Default drawing | What to try |
-| --- | --- | --- | --- |
-| Flight | JFK, New York → Heathrow, London | Decorative arc, sampled into 129 points | Compare Arc, Two points and Great circle; scrub the aircraft along the line |
-| Cab | Times Square → Grand Central, Manhattan | Complete 119-point road-route snapshot | Full route follows every intermediate point; Two points deliberately removes turns |
-| Ferry | Circular Quay → Manly Wharf, Sydney | 13 hand-authored harbor waypoints | Compare the harbor path with a simple connection; try dashed/comet styles |
+The provider applies camera transformations to geographic objects in its renderer. Pan/zoom cannot leave an independently projected screen route behind. On Android, a native SDK snapshot regression checks route and vehicle pixels under 12 camera configurations. iOS UI checks exercise six rapid alternating swipes while paused. These are emulator/simulator observations; physical-device frame pacing and extreme pitch still need release acceptance.
 
-Each sample has endpoint markers, camera fitting, distance, playback, a moving vehicle, eight line styles, twelve motions and reduced motion. Journey coordinates are bundled, so no directions account is needed. Basemap imagery still comes from the map provider. The ferry waypoints illustrate a harbor journey; they are not an official sailing trace. Flight connections are illustrative, not operational flight tracks. See [data provenance](../samples/README.md).
+The map may still be downloading tiles when route content is available. “Ready” in the sample describes its map binding, not a network SLA. The Google sample fits bounds from `MapEffect` once the SDK and viewport exist, before waiting for tiles, and starts playback after `onMapLoaded`. Long flights allow minimum zoom 0. It does not fetch a world overview and then wait to choose the actual journey.
 
-Moving markers now use top-down vehicle vectors, with eased departure/arrival and smooth route-following headings. The [vehicle guide](VEHICLES.md) explains the provider-neutral pose API and how to supply your own artwork.
+## Choose the geography explicitly
 
-The Google journey screen sets `MapProperties(minZoomPreference = 0f)` so a long flight can fit both endpoints; Maps Compose's default minimum of 3 can clip them in a small viewport. Camera fitting remains sample/host-app behavior, separate from the Trail adapter. Live Google and Apple checks and their limits are recorded in [VERIFICATION.md](VERIFICATION.md).
-
-Google Maps requires your own configured key. Put `MAPS_API_KEY=...` in the ignored `android/local.properties` and rebuild; do not put it in source. Enable Maps SDK for Android and follow Google's [account, API and key setup](https://developers.google.com/maps/documentation/android-sdk/get-api-key). Restrict the key to the sample package `dev.trail.playground` and its signing certificate; `./gradlew :playground:signingReport` prints the certificate fingerprint. The live Google SDK test is reported as skipped when no key is present.
-
-## Choose the geometry explicitly
-
-| Construction | Meaning |
+| Factory | Meaning |
 | --- | --- |
-| `TrailRoute(id, coordinates, revision)` / `TrailRoute(id:coordinates:revision:)` | Preserve a complete route in the supplied order; never connect just its endpoints by accident |
-| `TrailRoute.direct` | Two endpoints joined in the map's projected coordinate space |
-| `TrailRoute.arc` | Decorative quadratic curve in unwrapped Mercator space; signed `bend` controls direction/amount |
-| `TrailRoute.greatCircle` | Sampled shortest spherical connection; useful for flight visualizations |
-| `TrailRoute.encodedPolyline` | Decode a directions response at precision 5 or 6 into the same route model |
+| `TrailRoute(id, coordinates, revision)` | Preserve a complete ordered route, including every intermediate road turn |
+| `direct` | A two-point projected connection; no road routing |
+| `arc` | Decorative quadratic connection in unwrapped Mercator space |
+| `greatCircle` | Sampled shortest spherical connection, useful for flights |
+| `encodedPolyline` | Decode an already-fetched directions response, precision 5 or 6 |
 
-The [Android](examples/Android.md) and [Swift](examples/iOS.md) examples compile all five forms. Route constructors validate geographic input; Kotlin throws `IllegalArgumentException`, Swift throws `TrailError`. Empty/singleton/repeated coordinates are safe. IDs must be nonblank, revisions nonnegative, and input is limited to 100,000 coordinates. Generated curves accept 2–2,048 intervals; the default 128 intervals yield 129 points. Arc bend is finite and in −1…1. Arc endpoints must be within ±85.051129° latitude. Exact antipodal great-circle endpoints require an intermediate waypoint because their shortest connection is not unique.
+JFK → Heathrow uses a 129-point decorative arc. Times Square → Grand Central uses all 119 points of a captured road route. Circular Quay → Manly uses 13 illustrative harbor waypoints. See [source and licensing](../samples/README.md).
 
-`distanceMeters` is a spherical approximation using a mean Earth radius of 6,371,008.8 m. It is the length of the chosen sampled geometry, not a travel-time estimate. Bounds choose the smallest enclosing longitude interval. Crossing ±180° produces separate contours with no drawn bridge or added animation distance across the seam. Very high latitudes, world copies, globe modes and extreme pitch still require each provider's own acceptance tests; splitting alone does not make every projection correct.
+Inputs validate latitude/longitude, nonblank IDs, nonnegative revisions, a 100,000-coordinate budget, generated-curve sampling limits and ambiguous antipodes. Native geometry uses Mercator distance for visual progress; `distanceMeters` remains an approximate spherical distance. Date-line crossings split into separate contours, preventing a stroke across the wrong side of the world. High latitudes clamp to the Mercator limit for native drawing.
 
-## The provider contract
+## Loading and route replacement
 
-1. Project geographic coordinates through the **live map SDK** into the overlay's local coordinate system. Return Android dp / Apple points. Google returns local physical pixels, so its adapter divides by density exactly once. Apple's conversion already returns points. [Google projection contract](https://developers.google.com/android/reference/com/google/android/gms/maps/Projection), [Apple MapProxy](https://developer.apple.com/documentation/mapkit/mapproxy).
-2. Return `null`/`nil` until conversion is available. If any route point is unavailable, Trail withholds the whole path. Skipping a middle point would draw a false connection.
-3. Notify `TrailProjectedOverlay` when the camera, padding/insets or projection changes. Compose accepts a revision value; SwiftUI uses an incrementing integer. Layout changes are observed by the shared binding. Match the map's exact bounds; do not apply `fit` to geographic coordinates.
-4. Keep the route ID stable and increment its revision when replacing its geometry. Camera movement only reprojects; it must not rebuild the effect or reset playback.
-5. Preserve gesture handling, app-owned map callbacks and attribution. Dispose the binding when its host disappears. UIKit consumers retain `TrailMapAttachment`, forward camera/layout changes and explicitly call `detach()`.
+`TrailRouteTransition` is a deterministic core state machine. `rememberTrailRouteTransition` and `TrailRouteTransitionState` bind it to each UI framework.
 
-An adapter is a projection closure plus camera/layout/lifecycle wiring, not a second animation engine. The compiler-checked **Provider-neutral overlay contract** example shows the minimal wrapper for another map SDK. Porting to Google Maps iOS or a chosen OpenStreetMap renderer should require no changes to either core. An OpenStreetMap integration still needs a concrete renderer and tile-provider policy; OpenStreetMap data itself is not a UI SDK.
+1. `begin(from,to)` returns a request token and an arc; retain the token before starting async work.
+2. `resolve(request,route)` accepts only the current loading request. The resolved endpoints must be within 150 m of the requested endpoints, allowing road snapping. Malformed/mismatched responses throw without corrupting the loading state.
+3. The default 650 ms morph uses smooth departure/arrival easing. It preserves target vertices and uses unwrapped coordinates through the date line. The final frame is the original route, not a permanently resampled approximation.
+4. Late, duplicate, cancelled or foreign responses return false. `fail` and `cancel` stop loading without drawing a made-up road. The app owns its error text and retry action.
+5. Reduced motion settles immediately; background/inactive bindings freeze elapsed animation time.
 
-## Ownership and extension rules
+Core states are `Loading`, `Morphing`, `Ready`, `Failed`, `Cancelled` (lowercase cases in Swift). A retry creates a new token. Changing requests during a morph discards the previous morph. Loading is visual feedback, not a hidden directions client. The compiled example and app demonstrate the complete flow.
 
-Effects and routes are immutable configuration. A controller belongs to one visible binding. A style plugin records bounded drawing commands once; a motion plugin samples normalized time. Neither plugin knows about maps or owns a timer/network client. The shared Canvas host owns the sole frame driver and freezes it when paused, inactive, offscreen, unprojectable or reduced-motion.
+## Provider extensions and capability limits
 
-Effect-only bindings own playback and restart for a new route key. Supplying a controller means the app owns route replacement on **both platforms**; call `replay()` or construct a controller keyed by the route when desired. `TrailMapAttachment.updateRoute` preserves position by default; pass `replay: true` to restart when the key changes. Effect updates preserve progress and play/pause intent.
+A future provider adapter consumes geographic `TrailMapStroke` values and `TrailMapPose`, applying width/color/dash/caps and native coordinate anchors. It must own only its provider objects and clean them up with the screen. It must not replace an application's camera callbacks, start a second playback clock or register plugins globally. SDK credentials, camera policy, markers and attribution stay outside TrailCore.
 
-The overlays draw above native map content. They cannot place route strokes between a native road and its label, or behind individual native markers. Put app controls above the overlay, and keep provider attribution visible. A future native-map-layer backend would be a separate rendering capability, with its own tests; the current adapters do not promise it.
+Native stroke width is in dp / Apple points. Pattern spacing and chevron geometry use an approximate map scale; perspective affects apparent spacing at steep pitch. Google lacks a dash-offset property, so its adapter rotates the repeating pattern. MapKit supports dash phase directly. Native map z-order is provider-specific; neither adapter promises arbitrary interleaving with every basemap label. Google vehicle markers are flat on the map; SwiftUI annotations retain their provider's billboard presentation and rotate to the route heading.
 
-## Provider acceptance before adding the next map
+A layer is limited to 8,192 native primitives and chevrons to 2,048 placements. These are safety budgets, not performance targets. Dense gradient/comet combinations and animated 100k-point routes can be expensive. Measure the host app before shipping them. The full static route retains its original coordinate buffer and does not rebuild 100k vertices on each tick.
 
-Require tests for coordinate round trips, density, bearing/tilt/zoom, resize and safe-area offsets, date-line seams, missing projection, route replacement while paused, background/resume, hit testing, and repeated attach/detach. Reuse the shared geometry/raster fixtures; add real-SDK checks for the new provider. Do not accept a compiling adapter as proof of visual alignment. Current executed evidence and remaining gaps are recorded in [VERIFICATION.md](VERIFICATION.md).
+The older `GoogleMapsTrailOverlay`, `TrailMapOverlay`, `TrailMapAttachment` and `TrailProjectedOverlay` remain explicit **screen-space** tools for custom Canvas integrations. Their camera callbacks and UI frame clocks are separate from the map renderer. They are not the default solution for tightly anchored routes. `TrailProjection` remains useful for those adapters; use local dp/points, all-or-nothing readiness, matching viewport bounds, no auto-fit, and explicit camera/layout invalidation.
+
+Before adding another provider, verify live native pixels/coordinates, density, camera gestures, zoom/bearing/tilt, seams, readiness, lifecycle, pause/seek, route replacement, hit testing and teardown. OpenStreetMap requires a selected map renderer and tile policy; it is not itself a rendering SDK.
