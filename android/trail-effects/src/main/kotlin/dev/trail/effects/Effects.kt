@@ -55,7 +55,8 @@ enum class TrailMotionPreset(val label: String) {
         }
         return TrailAnimations.custom(sampler, duration, repeat, if (this == Erase || this == DrawAndErase) TrailVisualState.Hidden else TrailVisualState.Full)
     }
-    fun effect(style: TrailLineStyle = TrailStyles.solid(), duration: Duration = 3.seconds, repeat: Boolean = true): TrailEffect {
+    fun effect(style: TrailLineStyle = if (this == DashFlow || this == RevealThenFlow) TrailStyles.dashed() else TrailStyles.solid(),
+               duration: Duration = 3.seconds, repeat: Boolean = true): TrailEffect {
         val spec = animation(duration, repeat)
         return trailEffect {
             if (this@TrailMotionPreset == Spotlight) {

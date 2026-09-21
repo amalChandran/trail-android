@@ -66,7 +66,13 @@ internal fun nativeDashPattern(dash: List<Double>, phase: Double, density: Float
     while (offset >= dash[start] && start < dash.lastIndex) { offset -= dash[start]; start++ }
     val result = ArrayList<PatternItem>(dash.size + 1)
     fun add(index: Int, length: Double) {
-        if (length > 1e-9) result.add(if (index % 2 == 0) Dash((length * density).toFloat()) else Gap((length * density).toFloat()))
+        if (length > 1e-9) result.add(when {
+            index % 2 != 0 -> Gap((length * density).toFloat())
+            // RoundCap affects the polyline endpoints, not each dash. A tiny Dash renders
+            // as a hairline on Maps; use its native circular primitive for Trail's dots.
+            dash[index] <= .01 -> Dot()
+            else -> Dash((length * density).toFloat())
+        })
     }
     add(start, dash[start] - offset)
     for (step in 1 until dash.size) { val index = (start + step) % dash.size; add(index, dash[index]) }

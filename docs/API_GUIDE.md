@@ -30,6 +30,14 @@ For Swift, use the independent `trail-ios` root package from its public GitHub r
 
 Widths, dash lengths and chevron sizes are logical units: Android dp, iOS points, represented by `Double`. `TrailColor` contains sRGB ARGB. `TrailPath` is local Cartesian geometry, fitted into the surface by default. `TrailRoute` is validated geographic geometry for map adapters, with a stable ID and revision.
 
+## Android route presets
+
+`dev.trail.effects.TrailRoutePreset` supplies six complete effects: `MovingDots`, `MovingDashes`, `Loading`, `Comet`, `RouteSweep` and `DrawAndErase`. Call `.effect(color, width, baseColor, duration, repeat)` using named arguments for overrides. Every argument has a default. These effects work with the same Canvas, View and Google Maps bindings and retain a static base route. See the [animated options](../README.md#route-animation-options).
+
+Default periods are 0.75 s for dots, 1 s for dashes, 2 s for loading, and 3 s for comet, sweep and draw/erase. A pattern period advances one dot/dash spacing; a route period travels the route. `repeat = false` plays a single cycle, retaining the base. Reduced motion shows the complete foreground style, with no frame-clock work. A loading preset is a visual indicator; the app still owns directions requests and completion.
+
+The lower-level `TrailMotionPreset` remains available for custom combinations. `DashFlow.effect()` and `RevealThenFlow.effect()` default to a dashed line. When supplying your own style or using `.animation()`, pair phase-based flow with a patterned stroke or chevrons; a solid stroke has no pattern to move.
+
 ## Composition rules
 
 | Declaration | Meaning |

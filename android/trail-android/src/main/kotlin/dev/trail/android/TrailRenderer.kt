@@ -60,11 +60,16 @@ class TrailRenderer(val path: TrailPath) {
         }
     }
     private fun drawChevrons(canvas: Canvas, command: TrailChevrons, state: TrailVisualState) {
-        val count = min(2048, floor(path.length / command.spacing).toInt())
+        val count = min(2048.0, ceil(path.length / command.spacing) + 2).toInt()
+        val limit = min(path.length, (count - 1) * command.spacing)
         paint.pathEffect = null; paint.strokeCap = Paint.Cap.ROUND
         paint.strokeWidth = (command.size * 0.25 * state.widthScale).toFloat()
         for (i in 0 until count) {
-            val fraction = ((i + 0.5) * command.spacing / path.length + state.dashPhase * command.spacing / path.length) % 1.0
+            // Enter/leave at the route ends. Wrapping by route length leaves a missing
+            // chevron at each cycle boundary when the length is not a spacing multiple.
+            val distance = (i - .5 + state.dashPhase) * command.spacing
+            if (distance < 0.0 || distance > limit) continue
+            val fraction = distance / path.length
             val window = state.windows.firstOrNull { fraction >= it.start && fraction <= it.end } ?: continue
             val point = path.pointAt(fraction) ?: continue
             paint.color = command.color.withOpacity(state.opacity * window.opacity).argb

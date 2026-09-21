@@ -32,6 +32,8 @@ Or open `Examples/TrailPlayground.xcodeproj` and choose an iPhone simulator. The
 
 ## Flows to try
 
+In Android Studio's playground, use **ROUTE ANIMATION** below the progress slider to compare **Moving dots**, **Moving dashes**, **Loading**, **Comet**, **Route sweep**, and **Draw + erase**. Pause, scrub, replay, change duration, toggle reduced motion, and enable **Google Maps preview** for the native map. Choose **Custom** to return to individual styles and motions. Recreate the README's native Canvas previews with `./scripts/record-route-previews.sh`.
+
 1. Open **Map journeys →**. Switch between Flight, Cab and Ferry.
 2. Compare **Full route**, **Two points**, **Arc** and **Great circle**. The cab's full route preserves all 119 street points.
 3. Pause and scrub. Pan rapidly in alternating directions, then rotate/zoom the map; the route and vehicle should retain geographic anchors.

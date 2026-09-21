@@ -16,6 +16,28 @@ import org.junit.Test
 
 class PlaygroundTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+    @Test fun curatedRouteOptionsApplyCompatibleStylesAndReturnToCustom() {
+        compose.mainClock.autoAdvance = false
+        compose.mainClock.advanceTimeBy(300)
+        fun openOptions() {
+            compose.onNodeWithTag("ROUTE ANIMATION").performSemanticsAction(SemanticsActions.OnClick) { it() }
+            compose.mainClock.advanceTimeBy(300)
+        }
+        for (preset in dev.trail.effects.TrailRoutePreset.entries) {
+            openOptions()
+            compose.onAllNodesWithText(preset.label).onLast().performClick()
+            compose.mainClock.advanceTimeBy(100)
+            compose.onNodeWithText("TrailRoutePreset.${preset.name}", substring = true).assertExists()
+            compose.onNodeWithTag("LINE STYLE").assertDoesNotExist()
+        }
+        openOptions(); compose.onNodeWithText("Custom").performClick(); compose.mainClock.advanceTimeBy(100)
+        compose.onNodeWithTag("LINE STYLE").assertExists()
+        compose.onNodeWithTag("ANIMATION").performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.mainClock.advanceTimeBy(300)
+        compose.onNodeWithText("Dash flow").performClick(); compose.mainClock.advanceTimeBy(100)
+        compose.onNodeWithTag("LINE STYLE").assertTextContains("Dashed")
+    }
+
     @Test fun loadingArcSettlesIntoTheExactRouteAndReducedMotionSkipsTheMorph() {
         compose.mainClock.autoAdvance=false
         compose.mainClock.advanceTimeBy(300)

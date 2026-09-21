@@ -1,5 +1,15 @@
 # Executed release-candidate verification
 
+## Android route animations — 2026-09-22
+
+`./scripts/check.sh` passed with **938 core, 200 effects and 1 external-plugin tests**, plus example/fixture synchronization, the debug build and lint. The new cases cover six complete route presets, deterministic seeking, playback, reduced motion, compatible flow defaults, translucent comet colors and chevron loop boundaries (including the primitive budget).
+
+The full Android instrumentation run passed **191 cases**, including native Google Maps snapshots proving that the new dots are round and advance in the route direction, geographic anchoring through camera changes, and the preset picker. One capture-only case was intentionally skipped in this ordinary run. After the final comet-tail adjustment, the focused native Canvas/capture run passed **all five cases**, including a monotonic tail-brightness regression and all six presets' actual animated pixels. These counts overlap; they are not additive.
+
+Final logs: ignored `artifacts/route-animation-check.log`, `artifacts/route-animation-ui.log`, and `artifacts/route-previews/instrumentation.log`. The reproducible capture generated six individual GIFs and one combined comparison, each verified to contain multiple frames. See [capture provenance](media/README.md#route-animation-options). The previews are Android Canvas frames; the live Maps snapshots are separate validation. No physical-device performance claim is made by these checks.
+
+## Earlier release-candidate runs
+
 Local results from 2026-09-20, with Android instrumentation rerun on 2026-09-21 after the migration helpers and UI-clock fix. SDK publication remains pending.
 
 | Suite | Passing cases | Scope |

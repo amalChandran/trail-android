@@ -1,5 +1,21 @@
 # Native recording provenance
 
+## Route animation options
+
+The seven `android-route-*.gif` files were generated on 2026-09-22 from **real Android Canvas pixels** on `emulator-5554`. `RouteAnimationRenderingTest` calls the production `TrailRenderer` with each production `TrailRoutePreset`; no separate SVG, browser animation or approximation of the sampler is involved. These are local polyline previews, not Google Maps recordings or frame-rate benchmarks.
+
+Each individual preview is 420 × 236, 144 frames, six seconds at 24 fps. The combined `android-route-options.gif` puts the same six frame sequences in an 840 × 708 grid. Every default period divides six seconds, so the exported loop closes cleanly. Titles, grid, captions and endpoint dots are capture decorations; the base and animated route are drawn by the library. ffmpeg encodes the PNGs with a generated palette; GIF frame timing is quantized to hundredths of a second.
+
+Reproduce with an already-running emulator, Java 17, the Android SDK and ffmpeg:
+
+```sh
+TRAIL_ANDROID_SERIAL=emulator-5554 ./scripts/record-route-previews.sh
+```
+
+The script builds and installs the playground and test APKs, runs the pixel regressions, exports deterministic PNG frames to the app's external files directory, pulls them into ignored `artifacts/route-previews`, and encodes all seven GIFs. It stops on a failed pixel check. A Maps key is not required for these Canvas captures. The separate `NativeAnchoringTest` checks moving dots in real Google Maps snapshots when a key is configured.
+
+## Journey and loading recordings
+
 Recorded on 2026-09-20 from the actual updated apps, not generated visuals:
 
 - `android-flight.gif`: Google Maps SDK, JFK–Heathrow arc, top-down aircraft, 16-second reveal.

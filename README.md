@@ -10,6 +10,46 @@ Trail draws and animates lines on Android Canvas, Compose and Google Maps. Descr
 
 The independently native Swift implementation lives in [**trail-ios**](https://github.com/amalChandran/trail-ios). It has its own root Swift package; Android consumers do not download Swift sources or an iOS runtime.
 
+## Route animation options
+
+Choose a complete style-and-motion pairing with `TrailRoutePreset` from `trail-effects`. All six keep a base route visible while the foreground animates. These previews are frames from the **actual Android Canvas renderer**, sampled on the emulator at 24 fps. [Compare all six together](docs/media/android-route-options.gif) · [Capture details](docs/media/README.md#route-animation-options)
+
+| Moving dots | Moving dashes |
+| --- | --- |
+| <img src="docs/media/android-route-moving-dots.gif" width="420" alt="Round dots continuously move from the route origin toward the destination"> | <img src="docs/media/android-route-moving-dashes.gif" width="420" alt="Short dashed line segments flow along every corner of the route"> |
+| `TrailRoutePreset.MovingDots` · direction cues | `TrailRoutePreset.MovingDashes` · navigation |
+
+| Loading | Comet |
+| --- | --- |
+| <img src="docs/media/android-route-loading.gif" width="420" alt="A loading segment travels along the route while the base remains visible"> | <img src="docs/media/android-route-comet.gif" width="420" alt="A bright comet with a fading tail follows the polyline"> |
+| `TrailRoutePreset.Loading` · waiting for directions | `TrailRoutePreset.Comet` · route emphasis |
+
+| Route sweep | Draw + erase |
+| --- | --- |
+| <img src="docs/media/android-route-route-sweep.gif" width="420" alt="The foreground color draws over the base route, settles, then fades before repeating"> | <img src="docs/media/android-route-draw-and-erase.gif" width="420" alt="The route draws to its destination, then clears from the origin and repeats"> |
+| `TrailRoutePreset.RouteSweep` · Java-inspired two-color overlay | `TrailRoutePreset.DrawAndErase` · route discovery |
+
+```kotlin
+import dev.trail.core.TrailColor
+import dev.trail.effects.TrailRoutePreset
+
+val effect = TrailRoutePreset.MovingDots.effect(
+    color = TrailColor.Blue,
+    width = 6.0,
+)
+
+TrailCanvas(path, effect = effect)
+// Or inside an existing GoogleMap { }:
+// GoogleMapsTrail(route, camera, effect = effect)
+// Or on an Android View: trailView.effect = effect
+```
+
+Each preset supplies a suitable default duration. Override `duration = 2.seconds` (import `kotlin.time.Duration.Companion.seconds`) or `repeat = false` as needed. For dots and dashes, duration is one pattern step; for the other options, it is one route cycle. Reduced motion shows a static route. Pause, seek, replay and background handling use the existing playback controller.
+
+In the playground, open **ROUTE ANIMATION** below the progress slider. Choose **Custom** to mix individual styles and motions; selecting **Dash flow** or **Reveal + flow** automatically picks a compatible patterned style. Enable **Google Maps preview** to try the same preset on a native map.
+
+The old Java `AnimationRouteHelper` drew a foreground color over a persistent bottom layer. **Route sweep** preserves that visual idea with an eased draw and a smooth fade before repeating. Native Google Maps dots now use circular dot primitives, and flowing chevrons enter and leave at route endpoints without jumping at the loop boundary.
+
 ## See it on real maps
 
 These GIFs are recordings of the native playground, with provider attribution retained.

@@ -30,7 +30,15 @@ import dev.trail.playground.examples.JourneyExamples
 import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState); setContent { TrailStudio(if(BuildConfig.DEBUG) intent.getStringExtra("trail-journey") else null) } }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            TrailStudio(
+                if (BuildConfig.DEBUG) intent.getStringExtra("trail-journey") else null,
+                if (BuildConfig.DEBUG) TrailRoutePreset.entries.firstOrNull { it.name == intent.getStringExtra("trail-route-preset") } else null,
+            )
+        }
+    }
 }
 
 private val Ink = Color(0xFF0C1921)
@@ -46,7 +54,7 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
     TrailCoordinate(37.783, -122.412), TrailCoordinate(37.787, -122.412), TrailCoordinate(37.790, -122.405),
 ))
 
-@Composable fun TrailStudio(initialJourney: String? = null) {
+@Composable fun TrailStudio(initialJourney: String? = null, initialRoutePreset: TrailRoutePreset? = null) {
     var showExamples by remember { mutableStateOf(false) }
     var showJourneys by remember { mutableStateOf(initialJourney != null) }
     if (showJourneys) {
@@ -59,13 +67,15 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
     }
     var style by remember { mutableStateOf(TrailStylePreset.Cased) }
     var motion by remember { mutableStateOf(TrailMotionPreset.Reveal) }
-    var duration by remember { mutableFloatStateOf(3f) }
+    var routePreset by remember { mutableStateOf(initialRoutePreset) }
+    var duration by remember { mutableFloatStateOf(initialRoutePreset?.duration?.inWholeMilliseconds?.div(1000f) ?: 3f) }
     var plugin by remember { mutableStateOf(false) }
     var repeat by remember { mutableStateOf(true) }
     var reduced by remember { mutableStateOf(false) }
     var showMap by remember { mutableStateOf(false) }
-    val effect = remember(style, motion, duration, plugin, repeat) {
-        if (plugin) trailEffect { style(MetroStyle()); animation(TrailAnimations.custom(QuadraticReveal(), duration.toDouble().seconds, repeat)) }
+    val effect = remember(style, motion, duration, plugin, repeat, routePreset) {
+        if (routePreset != null) routePreset!!.effect(duration = duration.toDouble().seconds, repeat = repeat)
+        else if (plugin) trailEffect { style(MetroStyle()); animation(TrailAnimations.custom(QuadraticReveal(), duration.toDouble().seconds, repeat)) }
         else motion.effect(style.style(), duration.toDouble().seconds, repeat)
     }
     val playback = rememberTrailPlayback(effect)
@@ -101,7 +111,7 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
                         }
                         TrailCanvas(Route, Modifier.matchParentSize(), effect, playback, reducedMotion = reducedMotion)
                         Text(if (reducedMotion) "REDUCED MOTION" else "LIVE CANVAS", Modifier.align(Alignment.TopStart).padding(16.dp), color = Color(0xFF91AFBC), fontSize = 10.sp, letterSpacing = 2.sp)
-                        Text(if (plugin) "YOUR PLUGIN" else "${style.label.uppercase()} / ${motion.label.uppercase()}", Modifier.align(Alignment.BottomStart).padding(16.dp), color = Mint, fontSize = 10.sp)
+                        Text(routePreset?.label?.uppercase() ?: if (plugin) "YOUR PLUGIN" else "${style.label.uppercase()} / ${motion.label.uppercase()}", Modifier.align(Alignment.BottomStart).padding(16.dp), color = Mint, fontSize = 10.sp)
                     }
                 }
             }
@@ -118,22 +128,35 @@ private val MapRoute = TrailRoute("san-francisco", listOf(
                 }
                 Slider(value = playback.progress.toFloat(), onValueChange = { playback.seek(it.toDouble()) }, modifier = Modifier.testTag("progress"))
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Choice("LINE STYLE", style.label, TrailStylePreset.entries.map { it.label }, Modifier.weight(1f)) { style = TrailStylePreset.entries[it]; plugin = false }
-                Choice("ANIMATION", motion.label, TrailMotionPreset.entries.map { it.label }, Modifier.weight(1f)) { motion = TrailMotionPreset.entries[it]; plugin = false }
+            Choice("ROUTE ANIMATION", routePreset?.label ?: "Custom", listOf("Custom") + TrailRoutePreset.entries.map { it.label }, Modifier.fillMaxWidth()) {
+                routePreset = TrailRoutePreset.entries.getOrNull(it - 1)
+                routePreset?.let { preset -> duration = preset.duration.inWholeMilliseconds / 1000f }
+                plugin = false
             }
-            Text("Duration  ${"%.1f".format(duration)} s", fontSize = 13.sp)
-            Slider(duration, onValueChange = { duration = it }, valueRange = 1f..8f, steps = 13, modifier = Modifier.testTag("duration"))
+            routePreset?.let { Text(it.description, color = Mint, fontSize = 12.sp) }
+            if (routePreset == null) Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                val flow = motion == TrailMotionPreset.DashFlow || motion == TrailMotionPreset.RevealThenFlow
+                val styles = if (flow) listOf(TrailStylePreset.Dashed, TrailStylePreset.Dotted, TrailStylePreset.Chevrons) else TrailStylePreset.entries
+                Choice("LINE STYLE", style.label, styles.map { it.label }, Modifier.weight(1f)) { style = styles[it]; plugin = false }
+                Choice("ANIMATION", motion.label, TrailMotionPreset.entries.map { it.label }, Modifier.weight(1f)) {
+                    motion = TrailMotionPreset.entries[it]; plugin = false
+                    if ((motion == TrailMotionPreset.DashFlow || motion == TrailMotionPreset.RevealThenFlow) &&
+                        style !in listOf(TrailStylePreset.Dashed, TrailStylePreset.Dotted, TrailStylePreset.Chevrons)) style = TrailStylePreset.Dashed
+                }
+            }
+            Text("Duration  ${"%.2f".format(duration)} s", fontSize = 13.sp)
+            Slider(duration, onValueChange = { duration = it }, valueRange = .5f..8f, steps = 29, modifier = Modifier.testTag("duration"))
             Toggle("Loop animation", repeat) { repeat = it }
             Toggle("Reduced motion", reduced) { reduced = it }
-            Toggle("Use my Metro plugin", plugin) { plugin = it }
+            Toggle("Use my Metro plugin", plugin) { plugin = it; routePreset = null }
             if (BuildConfig.HAS_MAPS_KEY) Toggle("Google Maps preview", showMap) { showMap = it }
             else Text("Map preview: add MAPS_API_KEY in local.properties.\nThis canvas playground works completely offline.", color = Color(0xFF93A9B4), fontSize = 12.sp)
-            if (motion == TrailMotionPreset.DashFlow || motion == TrailMotionPreset.RevealThenFlow) Text("Flow is visible on Dashed, Dotted, and Chevrons.", color = Mint, fontSize = 12.sp)
             Surface(shape = RoundedCornerShape(16.dp), color = Surface) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("MAKE IT YOURS", color = Mint, fontSize = 10.sp, letterSpacing = 2.sp)
-                    Text(effectSource(style, motion, duration, repeat, plugin), fontSize = 12.sp, lineHeight = 19.sp, fontFamily = FontFamily.Monospace)
+                    val source = routePreset?.let { "val effect = TrailRoutePreset.${it.name}.effect(\n    duration = ${duration}.seconds,\n    repeat = $repeat\n)\nTrailCanvas(path, effect = effect)" }
+                        ?: effectSource(style, motion, duration, repeat, plugin)
+                    Text(source, fontSize = 12.sp, lineHeight = 19.sp, fontFamily = FontFamily.Monospace)
                 }
             }
             Text("Built for your next route.  /  alpha 01", color = Color(0xFF698591), fontSize = 11.sp)

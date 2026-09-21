@@ -7,6 +7,7 @@ Read docs/API_GUIDE.md, docs/MAPS.md, docs/DISTRIBUTION.md and docs/examples/And
 
 - Import dev.trail.core.*; durations use kotlin.time.Duration.Companion.seconds.
 - Canvas: TrailCanvas(path, effect = effect). Android View: TrailView.path and .effect.
+- Complete Android route effects: import dev.trail.effects.TrailRoutePreset; MovingDots, MovingDashes, Loading, Comet, RouteSweep and DrawAndErase each provide .effect(color, width, baseColor, duration, repeat), all with defaults. These pair compatible styles and motion over a persistent base. See README animation previews. Duration is one pattern step for dots/dashes, otherwise one route cycle.
 - Google Maps: GoogleMapsTrail(route, cameraPositionState, effect = effect) INSIDE GoogleMap { }. Native geographic layers are the default for anchored maps. GoogleMapsTrailOverlay is an advanced screen overlay with separate frame timing; do not use it to promise zero camera lag.
 - Controllers: rememberTrailPlayback(effect); one controller per visible binding. An explicit effect reconfigures preserving progress. play/pause/replay/seek are explicit operations.
 - Route data: TrailRoute(id, coordinates, revision). Direct/arc/greatCircle do not fetch navigable directions. encodedPolyline decodes already-fetched directions. Keep all intermediate road vertices.

@@ -69,6 +69,20 @@ val migratedRouteEffect = trailEffect {
 
 This example deliberately chooses a white casing and blue reveal. Use `TrailColor(oldArgbInt)` to retain your own colors. Widths are logical **dp**, not Android Canvas pixels; divide any old pixel measurement by the density before passing it through. Durations use Kotlin `Duration`, not an unlabelled millisecond number.
 
+For the Java helper's repeated foreground-over-background animation, use the optional catalog's ready-made route sweep:
+
+```kotlin
+import dev.trail.effects.TrailRoutePreset
+
+val sweepingRoute = TrailRoutePreset.RouteSweep.effect(
+    color = TrailColor.Blue,      // old topLayerColor
+    baseColor = TrailColor.White, // old bottomLayerColor
+    width = 6.0,
+)
+```
+
+It draws, settles and fades the foreground before repeating, while retaining the full base. It is inspired by the Java behavior rather than reproducing its hard color reset and animator restarts. `MovingDots`, `MovingDashes`, `Loading`, `Comet` and `DrawAndErase` provide other complete pairings, all compatible with Canvas, View and native Google Maps. See the [animated comparison](../README.md#route-animation-options).
+
 The full [compiled migration example](../android/playground/src/main/kotlin/dev/trail/playground/examples/MigrationExamples.kt) contains imports, conversion helpers, the preset and this map wrapper:
 
 ```kotlin

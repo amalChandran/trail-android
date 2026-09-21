@@ -55,9 +55,12 @@ class TrailMapGeometry(val route: TrailRoute) {
             }
             is TrailChevrons -> {
                 val spacing = command.spacing * unitsPerPoint
-                val count = min(2048.0, floor(path.length / spacing)).toInt()
+                val count = min(2048.0, ceil(path.length / spacing) + 2).toInt()
+                val limit = min(path.length, (count - 1) * spacing)
                 for (i in 0 until count) {
-                    val fraction = ((i + .5 + state.dashPhase) * spacing / path.length) % 1.0
+                    val distance = (i - .5 + state.dashPhase) * spacing
+                    if (distance < 0.0 || distance > limit) continue
+                    val fraction = distance / path.length
                     val window = state.windows.firstOrNull { fraction >= it.start && fraction <= it.end } ?: continue
                     val pose = path.poseAt(fraction, 0.0) ?: continue
                     val half = command.size * state.widthScale * unitsPerPoint / 2
