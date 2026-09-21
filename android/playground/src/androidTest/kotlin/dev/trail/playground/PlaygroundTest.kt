@@ -100,6 +100,13 @@ class PlaygroundTest {
         compose.onNodeWithTag("replay").performClick()
         compose.mainClock.advanceTimeBy(100)
         compose.onNodeWithText("Pause", useUnmergedTree = true).assertExists()
+        // ScrollTo waits for an animated scroll. A frozen clock can deadlock on
+        // smaller CI displays; an advancing clock cannot idle a repeating effect.
+        // Finish the playback assertions first, then make subsequent effects finite.
+        compose.onNodeWithTag("Loop animation").performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.mainClock.advanceTimeBy(100)
+        compose.mainClock.autoAdvance = true
+        compose.onNodeWithTag("Loop animation").assertIsOff()
         compose.onNodeWithTag("LINE STYLE").performScrollTo().performClick()
         compose.mainClock.advanceTimeBy(500)
         compose.onNodeWithText("Glow").performClick()
@@ -108,10 +115,7 @@ class PlaygroundTest {
         compose.mainClock.advanceTimeBy(500)
         compose.onNodeWithText("Comet").performClick()
         compose.mainClock.advanceTimeBy(500)
-        compose.onNodeWithTag("playPause").performClick()
-        compose.mainClock.advanceTimeBy(100)
-        // Scroll actions animate. Let their clock advance after route playback has paused.
-        compose.mainClock.autoAdvance = true
+        compose.onNodeWithText("Play", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("Reduced motion").performScrollTo().performClick()
         compose.onNodeWithTag("Reduced motion").assertIsOn()
         compose.onNodeWithTag("Use my Metro plugin").performScrollTo().performClick()
