@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Summarize observed passing test cases, not inferred test counts from source code."""
 import json
+from collections import Counter
 from pathlib import Path
 import re
 import sys
@@ -11,11 +12,26 @@ output = Path(filename).with_suffix(".json")
 output.unlink(missing_ok=True)
 log = Path(filename).read_text()
 if kind in ("swift", "ios"):
-    summary = re.search(r"✔ Test run with (\d+) tests in \d+ suites passed", log)
+    summary = re.search(r"✔ Test run with (\d+) tests(?: in \d+ suites)? passed", log)
     matches = re.findall(r"✔ Test (?!run )(.+?)(?: with (\d+) test cases)? passed after", log)
     if (kind == "swift" and not summary) or (summary and len(matches) != int(summary[1])):
         raise SystemExit("Missing or inconsistent passing Swift Testing summary.")
-    result = {"functions": len(matches), "cases_passed": sum(int(count or 1) for _, count in matches), "failures": 0}
+    # Older Swift Testing logs each argument invocation instead of a per-function case total.
+    invocations = Counter(re.findall(r"◇ Passing .* to ([^\r\n]+)", log))
+    cases = 0
+    for name, count in matches:
+        observed = invocations[name]
+        if count:
+            if observed and observed != int(count):
+                raise SystemExit("Inconsistent parameterized test case count.")
+            cases += int(count)
+        elif observed:
+            cases += observed
+        elif ":" in name:
+            raise SystemExit("Missing observed cases for parameterized test: " + name)
+        else:
+            cases += 1
+    result = {"functions": len(matches), "cases_passed": cases, "failures": 0}
     if kind == "ios":
         if "** TEST SUCCEEDED **" not in log:
             raise SystemExit("Xcode did not report a passing test run.")
