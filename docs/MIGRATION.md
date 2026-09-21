@@ -8,4 +8,4 @@ The original Java source remains under `legacy/android`. Version 2 is a new majo
 4. Supply a controller only when the screen needs pause/replay/seek. A controller belongs to one binding.
 5. Replace custom subclasses/global hooks with a `TrailLineStyle` or `TrailAnimation` implementation. Keep networking outside plugins.
 
-The Play **app** keeps package `com.amalbit.animationongooglemap` and the existing upload signing identity. Its development install remains `dev.trail.playground`. The public SDK package imports are `dev.trail.*`; proposed Maven coordinates are `io.github.amalchandran:*`.
+Trail Studio is a local example app using `dev.trail.playground`, separate from the archived legacy app. No store update or store signing workflow is part of this SDK migration. The public SDK package imports are `dev.trail.*`; proposed Maven coordinates are `io.github.amalchandran:*`.

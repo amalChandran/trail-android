@@ -6,7 +6,7 @@ Trail draws and animates lines on Android Canvas, Compose and Google Maps. Descr
 
 **2.0.0-alpha02 is a local release candidate.** Maven Central publication is pending. The playground is an example app for local testing. [Install locally / distribution](docs/DISTRIBUTION.md) · [Compiled examples](docs/examples/Android.md) · [API rules](docs/API_GUIDE.md) · [Verification](docs/VERIFICATION.md)
 
-The independently native Swift implementation is being released from **trail-ios**. It has its own root Swift package; Android consumers do not download Swift sources or an iOS runtime.
+The independently native Swift implementation lives in [**trail-ios**](https://github.com/amalChandran/trail-ios). It has its own root Swift package; Android consumers do not download Swift sources or an iOS runtime.
 
 ## See it on real maps
 
