@@ -1,0 +1,10 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+val deliveryTrail = trailEffect {
+    stroke(TrailColor.Blue, width = 6.0)
+    reveal(duration = 2.seconds)
+}
+
+@Composable fun BasicRouteExample() {
+    TrailCanvas(examplePath, Modifier.fillMaxSize(), effect = deliveryTrail)
+}

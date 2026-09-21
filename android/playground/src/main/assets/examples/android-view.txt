@@ -1,0 +1,12 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+val deliveryTrail = trailEffect {
+    stroke(TrailColor.Blue, width = 6.0)
+    reveal(duration = 2.seconds)
+}
+
+// In an existing Activity, use setContentView(createTrailView(this)).
+fun createTrailView(context: Context): TrailView = TrailView(context).apply {
+    path = examplePath
+    effect = deliveryTrail
+}

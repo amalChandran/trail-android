@@ -1,0 +1,18 @@
+# Trail Kotlin — integration contract
+
+Status: 2.0.0-alpha02 local release candidate; registry publication is pending.
+Canonical entry point: typed `trailEffect { }` DSL with named values. No code generation, Retrofit annotations, reflection, registration or alternative fluent builder.
+
+Read docs/API_GUIDE.md, docs/MAPS.md, docs/DISTRIBUTION.md and docs/examples/Android.md. The examples are generated from source compiled by the playground. Copy complete examples, including imports; do not invent convenience methods.
+
+- Import dev.trail.core.*; durations use kotlin.time.Duration.Companion.seconds.
+- Canvas: TrailCanvas(path, effect = effect). Android View: TrailView.path and .effect.
+- Google Maps: GoogleMapsTrail(route, cameraPositionState, effect = effect) INSIDE GoogleMap { }. Native geographic layers are the default for anchored maps. GoogleMapsTrailOverlay is an advanced screen overlay with separate frame timing; do not use it to promise zero camera lag.
+- Controllers: rememberTrailPlayback(effect); one controller per visible binding. An explicit effect reconfigures preserving progress. play/pause/replay/seek are explicit operations.
+- Route data: TrailRoute(id, coordinates, revision). Direct/arc/greatCircle do not fetch navigable directions. encodedPolyline decodes already-fetched directions. Keep all intermediate road vertices.
+- Loading: rememberTrailRouteTransition(from,to). Capture request; resolve(request,route), fail(request), cancel(request). Old tokens return false. The modifier owns the short geometry-morph clock. The app owns networking, errors, retries and cancellation.
+- Plugin: TrailLineStyle.draw records bounded stroke/chevron commands; TrailAnimation.sample is a pure function of TrailTime. Effects and plugins have no map SDK dependency.
+- Multiple styles/animations in one layer are errors. Use explicit layer { } and sequence { }. There is no last-write-wins rule.
+- Dimensions are dp. Geographic positions are latitude/longitude. Camera changes never change geographic progress. Native map content stays with the map's transforms.
+- Import only required artifacts. TrailEffects is optional; sample-plugin and vehicle assets are NOT runtime requirements.
+- SDK installation coordinates in distribution docs are not published until the stated release gate completes. Never imply the example directions are a routing/navigation service.

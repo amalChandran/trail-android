@@ -1,0 +1,27 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+@Composable fun DirectionsLoadingExample(
+    from: TrailCoordinate, to: TrailCoordinate, fetchRoute: suspend () -> TrailRoute,
+) {
+    val transition = rememberTrailRouteTransition(from, to)
+    val camera = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(LatLng(from.latitude, from.longitude), 14f)
+    }
+    val effect = remember(transition.phase) { trailEffect {
+        stroke(TrailColor.Blue, 6.0)
+        when (transition.phase) {
+            TrailRoutePhase.Loading -> animation(TrailAnimations.loading())
+            TrailRoutePhase.Ready -> reveal(2.seconds)
+            else -> Unit // Full line while morphing; static arc on failure/cancellation.
+        }
+    } }
+    LaunchedEffect(transition) {
+        val request = transition.request
+        try { transition.resolve(request, fetchRoute()) }
+        catch (cancelled: CancellationException) { transition.cancel(request); throw cancelled }
+        catch (failure: Exception) { transition.fail(request) } // App presents its error/retry UI.
+    }
+    GoogleMap(Modifier.fillMaxSize(), cameraPositionState = camera) {
+        GoogleMapsTrail(transition.route, camera, effect = effect)
+    }
+}

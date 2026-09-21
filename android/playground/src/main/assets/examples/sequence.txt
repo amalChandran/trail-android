@@ -1,0 +1,13 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+val revealThenErase = trailEffect {
+    stroke(TrailColor.Mint, width = 6.0)
+    sequence {
+        reveal(duration = 2.seconds)
+        erase(duration = 1.seconds)
+    }
+}
+
+@Composable fun SequenceExample() {
+    TrailCanvas(examplePath, Modifier.fillMaxSize(), effect = revealThenErase)
+}

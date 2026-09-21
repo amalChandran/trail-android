@@ -1,0 +1,11 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+@Composable fun RuntimeColorExample(brandColor: TrailColor) {
+    val effect = remember(brandColor) {
+        trailEffect {
+            stroke(brandColor, width = 6.0)
+            reveal(duration = 2.seconds)
+        }
+    }
+    TrailCanvas(examplePath, Modifier.fillMaxSize(), effect = effect)
+}

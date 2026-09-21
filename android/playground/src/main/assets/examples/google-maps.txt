@@ -1,0 +1,15 @@
+// Shared demo geometry and imports: see the compiled IntegrationExamples source.
+
+val deliveryTrail = trailEffect {
+    stroke(TrailColor.Blue, width = 6.0)
+    reveal(duration = 2.seconds)
+}
+
+@Composable fun GoogleMapsExample() {
+    val camera = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(LatLng(37.783, -122.417), 14f)
+    }
+    GoogleMap(Modifier.fillMaxSize(), cameraPositionState = camera) {
+        GoogleMapsTrail(exampleRoute, camera, effect = deliveryTrail)
+    }
+}

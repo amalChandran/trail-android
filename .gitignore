@@ -1,0 +1,20 @@
+.DS_Store
+.idea/
+**/.gradle/
+**/.kotlin/
+**/build/
+**/local.properties
+**/.build/
+**/.swiftpm/
+**/DerivedData/
+**/xcuserdata/
+*.xcuserstate
+artifacts/
+*.hprof
+
+# Local signing and registry material
+*.jks
+*.keystore
+*.p12
+.env
+.env.*
