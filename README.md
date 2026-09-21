@@ -2,19 +2,29 @@
 
 **Routes with character. Small Kotlin APIs. Native map anchoring.**
 
+**Platforms:** **Android / Kotlin** · [iOS / Swift](https://github.com/amalChandran/trail-ios)
+
 Trail draws and animates lines on Android Canvas, Compose and Google Maps. Describe an effect with a typed DSL, reuse it as a named preset, and extend it with ordinary Kotlin interfaces. No annotation processor, reflection or plugin registry.
 
-**2.0.0-alpha02 is a local release candidate.** Maven Central publication is pending. The playground is an example app for local testing. [Install locally / distribution](docs/DISTRIBUTION.md) · [Compiled examples](docs/examples/Android.md) · [API rules](docs/API_GUIDE.md) · [Verification](docs/VERIFICATION.md)
+**2.0.0-alpha02 is a local release candidate.** Maven Central publication is pending. The playground is an example app for local testing. [Java → Kotlin migration](docs/MIGRATION.md) · [Install locally / distribution](docs/DISTRIBUTION.md) · [Compiled examples](docs/examples/Android.md) · [API rules](docs/API_GUIDE.md) · [Verification](docs/VERIFICATION.md)
 
 The independently native Swift implementation lives in [**trail-ios**](https://github.com/amalChandran/trail-ios). It has its own root Swift package; Android consumers do not download Swift sources or an iOS runtime.
 
 ## See it on real maps
 
-These GIFs are recordings of the native playground, with provider attribution retained—not a browser simulation or a design mockup.
+These GIFs are recordings of the native playground, with provider attribution retained.
 
-| Flight · JFK → Heathrow | Cab · Times Square → Grand Central | Ferry · Circular Quay → Manly |
-| --- | --- | --- |
-| <img src="docs/media/android-flight.gif" width="260" alt="Top-down aircraft follows an animated arc over the Atlantic on Google Maps"> | <img src="docs/media/android-cab.gif" width="260" alt="Cab follows all street-route vertices and turns through Manhattan on Google Maps"> | <img src="docs/media/android-ferry.gif" width="260" alt="Top-down ferry follows an illustrative Sydney harbour path on Google Maps"> |
+### Cab · Times Square → Grand Central
+
+<img src="docs/media/android-cab.gif" width="520" alt="Actual Google Maps recording: a top-down cab follows the complete street route and turns at each corner">
+
+### Ferry · Circular Quay → Manly
+
+<img src="docs/media/android-ferry.gif" width="520" alt="Actual Google Maps recording: a top-down ferry moves and turns along the Sydney harbour example">
+
+### Flight · JFK → Heathrow
+
+<img src="docs/media/android-flight.gif" width="520" alt="Actual Google Maps recording: a top-down aircraft follows the curved connection from New York to London">
 
 The cab uses a complete 119-point road-route snapshot. Flight and ferry paths are illustrative connections, not navigation or official service tracks. Try **Full route**, **Two points**, **Arc** and **Great circle** in the app. [Geometry and sample provenance](docs/MAPS.md) · [Recording provenance](docs/media/README.md)
 

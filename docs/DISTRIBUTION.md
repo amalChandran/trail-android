@@ -52,7 +52,7 @@ SPM builds source for the caller's architecture; it does not bundle Android code
 
 1. Run local unit, raster, live map and UI suites, then build the independent package consumers.
 2. Stage Maven artifacts, sources, API documentation, POMs and checksums. `central-bundle.py --unsigned-preview` creates a clearly labelled review ZIP. Set `TRAIL_SIGNING_KEY` and `TRAIL_SIGNING_PASSWORD` locally, restage, then run without the preview flag for a signed bundle. [Central requirements](https://central.sonatype.org/publish/requirements/), [Portal upload](https://central.sonatype.org/publish/publish-portal-upload/).
-3. Review the published `trail-ios` main branch and Android `trail-2-native` feature branch before merging/tagging. Tag both platforms only after final consumer verification. Keep the shared fixture schema/version identical across repositories.
+3. Review the published `trail-ios` main branch and Android `master` branch before tagging. Tag both platforms only after final consumer verification. Keep the shared fixture schema/version identical across repositories.
 4. Validate the signed Central bundle in the Portal before publishing. Add the Swift tag and verify clean-clone SPM resolution.
 5. Keep Trail Studio as an example app. `prepare-android.sh` produces an optimized APK signed with the standard local debug certificate for direct installation, plus the Maven staging directory. The iOS example runs from Xcode or `scripts/run-ios.sh` in `trail-ios`. No store listing, upload key or store version-code confirmation is needed.
 
